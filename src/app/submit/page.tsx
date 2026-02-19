@@ -118,6 +118,7 @@ export default function SubmitPage() {
   const [pasteText, setPasteText] = useState('');
   const [error, setError] = useState('');
   const [duplicates, setDuplicates] = useState<DuplicateEvent[]>([]);
+  const [successType, setSuccessType] = useState<'submitted' | 'amended'>('submitted');
   const [geocodeStatus, setGeocodeStatus] = useState<'idle' | 'loading' | 'found' | 'not_found'>('idle');
   const [nearbyMosques, setNearbyMosques] = useState<Mosque[]>([]);
 
@@ -266,6 +267,7 @@ export default function SubmitPage() {
       }
 
       if (!res.ok) throw new Error('Failed to submit event');
+      setSuccessType('submitted');
       setStep('success');
     } catch {
       setError('Failed to submit event. Please try again.');
@@ -296,6 +298,7 @@ export default function SubmitPage() {
         }),
       });
       if (!res.ok) throw new Error('Failed to submit update');
+      setSuccessType('amended');
       setStep('success');
     } catch {
       setError('Failed to submit update. Please try again.');
@@ -308,11 +311,17 @@ export default function SubmitPage() {
     return (
       <div className="max-w-xl mx-auto text-center py-16 space-y-4">
         <div className="text-5xl">✅</div>
-        <h1 className="text-[28px] font-bold text-charcoal">Event Submitted!</h1>
-        <p className="text-warm-gray">Your event is now live on Halaqas. Thank you for contributing!</p>
+        <h1 className="text-[28px] font-bold text-charcoal">
+          {successType === 'amended' ? 'Update Submitted!' : 'Event Submitted!'}
+        </h1>
+        <p className="text-warm-gray">
+          {successType === 'amended'
+            ? 'Your suggested changes will be reviewed shortly. Thank you for helping keep things accurate!'
+            : 'Your event is now live on Halaqas. Thank you for contributing!'}
+        </p>
         <div className="flex justify-center gap-3 mt-6">
           <Button variant="primary" href="/events">View Events</Button>
-          <Button variant="outline" onClick={() => { setStep('input'); setForm(INITIAL_FORM); setDuplicates([]); }}>
+          <Button variant="outline" onClick={() => { setStep('input'); setForm(INITIAL_FORM); setDuplicates([]); setSuccessType('submitted'); }}>
             Submit Another
           </Button>
         </div>

@@ -27,10 +27,12 @@ async function getEvents(params: {
   q?: string;
 }) {
   const supabase = getServiceClient();
+  const today = new Date().toISOString().split('T')[0];
   let query = supabase
     .from('events')
     .select('*, mosque:mosques(*)')
     .eq('status', 'active')
+    .or(`is_recurring.eq.true,fixed_date.is.null,fixed_date.gte.${today}`)
     .order('created_at', { ascending: false });
 
   if (params.type) query = query.eq('event_type', params.type);

@@ -26,10 +26,12 @@ async function getMosquesAndEvents(suburb?: string) {
     .eq('active', true)
     .order('name');
 
+  const today = new Date().toISOString().split('T')[0];
   const { data: events } = await supabase
     .from('events')
     .select('*, mosque:mosques(*)')
-    .eq('status', 'active');
+    .eq('status', 'active')
+    .or(`is_recurring.eq.true,fixed_date.is.null,fixed_date.gte.${today}`);
 
   let filteredMosques = mosques || [];
 

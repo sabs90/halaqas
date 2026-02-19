@@ -23,11 +23,13 @@ async function getMosque(id: string) {
 
 async function getMosqueEvents(mosqueId: string) {
   const supabase = getServiceClient();
+  const today = new Date().toISOString().split('T')[0];
   const { data } = await supabase
     .from('events')
     .select('*, mosque:mosques(*)')
     .eq('mosque_id', mosqueId)
     .eq('status', 'active')
+    .or(`is_recurring.eq.true,fixed_date.is.null,fixed_date.gte.${today}`)
     .order('created_at', { ascending: false });
   return data || [];
 }

@@ -17,11 +17,13 @@ export async function GET(
 
   if (!mosque) return new NextResponse('Mosque not found', { status: 404 });
 
+  const today = new Date().toISOString().split('T')[0];
   const { data: events } = await supabase
     .from('events')
     .select('*')
     .eq('mosque_id', id)
-    .eq('status', 'active');
+    .eq('status', 'active')
+    .or(`is_recurring.eq.true,fixed_date.is.null,fixed_date.gte.${today}`);
 
   const icsContent = generateICS(events || [], mosque);
 
