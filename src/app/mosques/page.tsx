@@ -47,7 +47,8 @@ async function getMosquesAndEvents(suburb?: string) {
       filteredMosques = filteredMosques.filter(mosque =>
         mosque.name.toLowerCase().includes(q) ||
         mosque.suburb.toLowerCase().includes(q) ||
-        mosque.address.toLowerCase().includes(q)
+        mosque.address.toLowerCase().includes(q) ||
+        (mosque.nicknames || []).some((n: string) => n.toLowerCase().includes(q))
       );
     }
   }

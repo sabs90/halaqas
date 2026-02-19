@@ -156,12 +156,15 @@ export default function SubmitPage() {
         else updates.prayer_offset_minutes = 15;
       }
     }
-    // Try to match mosque
+    // Try to match mosque (check name + nicknames)
     if (parsed.mosque_or_venue) {
-      const match = mosques.find(m =>
-        m.name.toLowerCase().includes(parsed.mosque_or_venue!.toLowerCase()) ||
-        parsed.mosque_or_venue!.toLowerCase().includes(m.name.toLowerCase().split('(')[0].trim())
-      );
+      const match = mosques.find(m => {
+        const names = [m.name, ...(m.nicknames || [])];
+        return names.some(n =>
+          n.toLowerCase().includes(parsed.mosque_or_venue!.toLowerCase()) ||
+          parsed.mosque_or_venue!.toLowerCase().includes(n.toLowerCase().split('(')[0].trim())
+        );
+      });
       if (match) updates.mosque_id = match.id;
       else updates.venue_name = parsed.mosque_or_venue;
     }
@@ -474,9 +477,22 @@ export default function SubmitPage() {
             <select
               value={form.mosque_id}
               onChange={(e) => {
-                updateForm({ mosque_id: e.target.value, venue_name: '', venue_address: '', venue_latitude: null, venue_longitude: null });
+                const newMosqueId = e.target.value;
+                const previousVenue = form.venue_name.trim();
+                updateForm({ mosque_id: newMosqueId, venue_name: '', venue_address: '', venue_latitude: null, venue_longitude: null });
                 setNearbyMosques([]);
                 setGeocodeStatus('idle');
+                // Auto-learn nickname when user corrects venue → mosque
+                if (newMosqueId && previousVenue) {
+                  const selectedMosque = mosques.find(m => m.id === newMosqueId);
+                  if (selectedMosque && !selectedMosque.name.toLowerCase().includes(previousVenue.toLowerCase())) {
+                    fetch(`/api/mosques/${newMosqueId}/nicknames`, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ nickname: previousVenue }),
+                    }).catch(() => {});
+                  }
+                }
               }}
               className="w-full text-sm rounded-button border border-sand-dark p-2.5 bg-white text-charcoal"
             >

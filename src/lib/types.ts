@@ -10,6 +10,7 @@ export type AmendmentStatus = 'pending' | 'approved' | 'rejected';
 export interface Mosque {
   id: string;
   name: string;
+  nicknames: string[];
   address: string;
   suburb: string;
   latitude: number;

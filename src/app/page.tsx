@@ -59,7 +59,8 @@ async function getEvents(params: {
         mosqueSuburb.includes(q) ||
         title.includes(q) ||
         speaker.includes(q) ||
-        description.includes(q)
+        description.includes(q) ||
+        (event.mosque?.nicknames || []).some((n: string) => n.toLowerCase().includes(q))
       ) return true;
 
       if (matchedSuburb) {
