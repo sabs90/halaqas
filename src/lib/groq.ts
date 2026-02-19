@@ -20,6 +20,7 @@ Given an image of a flyer or a text message about an event, extract the followin
   "is_recurring": "boolean",
   "recurrence_pattern": "string — e.g. 'every thursday', 'daily during ramadan', or null",
   "description": "string — any additional details, or null",
+  "venue_address": "string — full street address of the venue, or null",
   "confidence": "number 0-1 — your overall confidence in the extraction"
 }
 

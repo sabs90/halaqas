@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/Button';
 import type { Mosque, EventType, Language, Gender, PrayerName, ParsedEventData } from '@/lib/types';
 
 type Tab = 'image' | 'text' | 'manual';
-type Step = 'input' | 'confirm' | 'success';
+type Step = 'input' | 'confirm' | 'duplicate_warning' | 'success';
 
 const EVENT_TYPES: { value: EventType; label: string }[] = [
   { value: 'talk', label: 'Talk' },
@@ -57,6 +57,8 @@ interface FormData {
   mosque_id: string;
   venue_name: string;
   venue_address: string;
+  venue_latitude: number | null;
+  venue_longitude: number | null;
   event_type: EventType;
   speaker: string;
   language: Language;
@@ -78,6 +80,8 @@ const INITIAL_FORM: FormData = {
   mosque_id: '',
   venue_name: '',
   venue_address: '',
+  venue_latitude: null,
+  venue_longitude: null,
   event_type: 'talk',
   speaker: '',
   language: 'english',
@@ -94,6 +98,16 @@ const INITIAL_FORM: FormData = {
   flyer_image_url: '',
 };
 
+interface DuplicateEvent {
+  id: string;
+  title: string;
+  mosque_id: string | null;
+  venue_name: string | null;
+  fixed_date: string | null;
+  event_type: string;
+  speaker: string | null;
+}
+
 export default function SubmitPage() {
   const [tab, setTab] = useState<Tab>('image');
   const [step, setStep] = useState<Step>('input');
@@ -103,6 +117,9 @@ export default function SubmitPage() {
   const [submitting, setSubmitting] = useState(false);
   const [pasteText, setPasteText] = useState('');
   const [error, setError] = useState('');
+  const [duplicates, setDuplicates] = useState<DuplicateEvent[]>([]);
+  const [geocodeStatus, setGeocodeStatus] = useState<'idle' | 'loading' | 'found' | 'not_found'>('idle');
+  const [nearbyMosques, setNearbyMosques] = useState<Mosque[]>([]);
 
   useEffect(() => {
     fetch('/api/mosques')
@@ -147,6 +164,7 @@ export default function SubmitPage() {
       if (match) updates.mosque_id = match.id;
       else updates.venue_name = parsed.mosque_or_venue;
     }
+    if (parsed.venue_address) updates.venue_address = parsed.venue_address;
     updateForm(updates);
     setStep('confirm');
   }
@@ -192,7 +210,35 @@ export default function SubmitPage() {
     }
   }
 
-  async function handleSubmit() {
+  async function handleGeocodeVenue() {
+    if (!form.venue_address.trim()) return;
+    setGeocodeStatus('loading');
+    setNearbyMosques([]);
+    try {
+      const res = await fetch('/api/geocode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address: form.venue_address }),
+      });
+      const data = await res.json();
+      if (data.coordinates) {
+        updateForm({
+          venue_latitude: data.coordinates.lat,
+          venue_longitude: data.coordinates.lng,
+        });
+        setGeocodeStatus('found');
+        if (data.nearbyMosques?.length > 0) {
+          setNearbyMosques(data.nearbyMosques);
+        }
+      } else {
+        setGeocodeStatus('not_found');
+      }
+    } catch {
+      setGeocodeStatus('not_found');
+    }
+  }
+
+  async function handleSubmit(force = false) {
     if (!form.title) { setError('Title is required'); return; }
     if (!form.mosque_id && !form.venue_name) { setError('Please select a mosque or enter a venue name'); return; }
 
@@ -208,12 +254,51 @@ export default function SubmitPage() {
           prayer_anchor: form.prayer_anchor || null,
           is_recurring: form.is_recurring || !!form.recurrence_pattern,
           recurrence_pattern: form.recurrence_pattern || null,
+          force,
         }),
       });
+
+      if (res.status === 409) {
+        const data = await res.json();
+        setDuplicates(data.duplicates);
+        setStep('duplicate_warning');
+        return;
+      }
+
       if (!res.ok) throw new Error('Failed to submit event');
       setStep('success');
     } catch {
       setError('Failed to submit event. Please try again.');
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  async function handleUpdateExisting(eventId: string) {
+    setSubmitting(true);
+    setError('');
+    try {
+      const res = await fetch(`/api/events/${eventId}/report`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          reason: 'wrong_details',
+          new_details: {
+            title: form.title,
+            speaker: form.speaker,
+            event_type: form.event_type,
+            language: form.language,
+            gender: form.gender,
+            fixed_date: form.fixed_date,
+            fixed_time: form.fixed_time,
+            description: form.description,
+          },
+        }),
+      });
+      if (!res.ok) throw new Error('Failed to submit update');
+      setStep('success');
+    } catch {
+      setError('Failed to submit update. Please try again.');
     } finally {
       setSubmitting(false);
     }
@@ -227,8 +312,54 @@ export default function SubmitPage() {
         <p className="text-warm-gray">Your event is now live on Halaqas. Thank you for contributing!</p>
         <div className="flex justify-center gap-3 mt-6">
           <Button variant="primary" href="/events">View Events</Button>
-          <Button variant="outline" onClick={() => { setStep('input'); setForm(INITIAL_FORM); }}>
+          <Button variant="outline" onClick={() => { setStep('input'); setForm(INITIAL_FORM); setDuplicates([]); }}>
             Submit Another
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (step === 'duplicate_warning') {
+    return (
+      <div className="max-w-xl mx-auto space-y-6">
+        <h1 className="text-[28px] font-bold text-charcoal">Similar Event Found</h1>
+        <div className="bg-amber-50 border border-amber-200 rounded-card p-4 text-sm text-amber-800">
+          We found an existing event that looks similar to what you&apos;re submitting.
+        </div>
+
+        {duplicates.map(dup => {
+          const mosque = mosques.find(m => m.id === dup.mosque_id);
+          return (
+            <div key={dup.id} className="bg-white border border-sand-dark rounded-card p-4 space-y-2">
+              <h3 className="font-semibold text-charcoal">{dup.title}</h3>
+              <div className="text-sm text-warm-gray space-y-1">
+                {mosque && <p>At: {mosque.name}</p>}
+                {dup.venue_name && <p>Venue: {dup.venue_name}</p>}
+                {dup.fixed_date && <p>Date: {dup.fixed_date}</p>}
+                {dup.speaker && <p>Speaker: {dup.speaker}</p>}
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => handleUpdateExisting(dup.id)}
+                disabled={submitting}
+              >
+                Update this event&apos;s details
+              </Button>
+            </div>
+          );
+        })}
+
+        <div className="flex flex-col gap-3 pt-2">
+          <Button
+            variant="secondary"
+            onClick={() => handleSubmit(true)}
+            disabled={submitting}
+          >
+            {submitting ? 'Submitting...' : 'This is different — submit anyway'}
+          </Button>
+          <Button variant="outline" onClick={() => { setStep('confirm'); setDuplicates([]); }}>
+            Cancel — go back to editing
           </Button>
         </div>
       </div>
@@ -333,7 +464,11 @@ export default function SubmitPage() {
             <label className="block text-sm font-semibold text-charcoal mb-1">Mosque / Venue *</label>
             <select
               value={form.mosque_id}
-              onChange={(e) => updateForm({ mosque_id: e.target.value, venue_name: '', venue_address: '' })}
+              onChange={(e) => {
+                updateForm({ mosque_id: e.target.value, venue_name: '', venue_address: '', venue_latitude: null, venue_longitude: null });
+                setNearbyMosques([]);
+                setGeocodeStatus('idle');
+              }}
               className="w-full text-sm rounded-button border border-sand-dark p-2.5 bg-white text-charcoal"
             >
               <option value="">Other venue (enter below)</option>
@@ -354,9 +489,37 @@ export default function SubmitPage() {
                   type="text"
                   value={form.venue_address}
                   onChange={(e) => updateForm({ venue_address: e.target.value })}
+                  onBlur={handleGeocodeVenue}
                   placeholder="Venue address"
                   className="w-full text-sm rounded-button border border-sand-dark p-2.5 bg-white text-charcoal placeholder:text-stone"
                 />
+                {geocodeStatus === 'loading' && (
+                  <p className="text-xs text-warm-gray animate-pulse">Looking up address...</p>
+                )}
+                {geocodeStatus === 'found' && (
+                  <p className="text-xs text-green-600">Location found — event will appear on the map</p>
+                )}
+                {geocodeStatus === 'not_found' && (
+                  <p className="text-xs text-amber-600">Couldn&apos;t locate address — event won&apos;t appear on the map</p>
+                )}
+                {nearbyMosques.length > 0 && (
+                  <div className="bg-blue-50 border border-blue-200 rounded-card p-3 space-y-2">
+                    <p className="text-xs font-medium text-blue-800">Did you mean one of these mosques?</p>
+                    {nearbyMosques.map(m => (
+                      <button
+                        key={m.id}
+                        onClick={() => {
+                          updateForm({ mosque_id: m.id, venue_name: '', venue_address: '', venue_latitude: null, venue_longitude: null });
+                          setNearbyMosques([]);
+                          setGeocodeStatus('idle');
+                        }}
+                        className="block w-full text-left text-sm text-blue-700 hover:text-blue-900 hover:underline"
+                      >
+                        {m.name} — {m.address}
+                      </button>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -499,7 +662,7 @@ export default function SubmitPage() {
           </div>
 
           <div className="flex gap-3 pt-2">
-            <Button variant="secondary" onClick={handleSubmit} disabled={submitting}>
+            <Button variant="secondary" onClick={() => handleSubmit()} disabled={submitting}>
               {submitting ? 'Submitting...' : 'Submit Event'}
             </Button>
             <Button variant="outline" onClick={() => setStep('input')}>

@@ -78,6 +78,7 @@ export interface ParsedEventData {
   is_recurring: boolean;
   recurrence_pattern: string | null;
   description: string | null;
+  venue_address: string | null;
   confidence: number;
 }
 

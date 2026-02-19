@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServiceClient } from '@/lib/supabase';
+import { geocodeAddress } from '@/lib/geocoding';
 
 export async function GET(request: NextRequest) {
   const supabase = getServiceClient();
@@ -32,12 +33,52 @@ export async function POST(request: NextRequest) {
   const supabase = getServiceClient();
   const body = await request.json();
 
+  // Duplicate detection (skip if force flag is set)
+  if (!body.force) {
+    let dupQuery = supabase
+      .from('events')
+      .select('id, title, mosque_id, venue_name, fixed_date, event_type, speaker')
+      .eq('status', 'active')
+      .ilike('title', body.title);
+
+    if (body.mosque_id) {
+      dupQuery = dupQuery.eq('mosque_id', body.mosque_id);
+    } else if (body.venue_name) {
+      dupQuery = dupQuery.ilike('venue_name', body.venue_name);
+    }
+
+    // For one-off events with a fixed date, also match on date
+    if (body.fixed_date && !body.is_recurring) {
+      dupQuery = dupQuery.eq('fixed_date', body.fixed_date);
+    }
+
+    const { data: duplicates } = await dupQuery;
+
+    if (duplicates && duplicates.length > 0) {
+      return NextResponse.json({ duplicates }, { status: 409 });
+    }
+  }
+
+  // Geocode venue address if no mosque selected
+  let venueLatitude: number | null = body.venue_latitude || null;
+  let venueLongitude: number | null = body.venue_longitude || null;
+
+  if (!body.mosque_id && body.venue_address && !venueLatitude) {
+    const coords = await geocodeAddress(body.venue_address);
+    if (coords) {
+      venueLatitude = coords.latitude;
+      venueLongitude = coords.longitude;
+    }
+  }
+
   const { data, error } = await supabase
     .from('events')
     .insert({
       mosque_id: body.mosque_id || null,
       venue_name: body.venue_name || null,
       venue_address: body.venue_address || null,
+      venue_latitude: venueLatitude,
+      venue_longitude: venueLongitude,
       title: body.title,
       description: body.description || null,
       event_type: body.event_type || 'other',

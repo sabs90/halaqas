@@ -18,6 +18,15 @@ const DefaultIcon = L.icon({
 });
 L.Marker.prototype.options.icon = DefaultIcon;
 
+const VenueIcon = new L.Icon({
+  iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-orange.png',
+  iconRetinaUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-orange.png',
+  shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+});
+
 function LocateButton() {
   const map = useMap();
   const [locating, setLocating] = useState(false);
@@ -51,6 +60,11 @@ export function EventMap({ mosques, events }: EventMapProps) {
     acc[key].push(event);
     return acc;
   }, {} as Record<string, Event[]>);
+
+  // Venue events: no mosque_id but have coordinates
+  const venueEvents = events.filter(
+    e => !e.mosque_id && e.venue_latitude && e.venue_longitude
+  );
 
   // Sydney centre
   const center: [number, number] = [-33.8688, 151.0693];
@@ -97,6 +111,26 @@ export function EventMap({ mosques, events }: EventMapProps) {
             </Marker>
           );
         })}
+
+        {venueEvents.map((event) => (
+          <Marker
+            key={`venue-${event.id}`}
+            position={[event.venue_latitude!, event.venue_longitude!]}
+            icon={VenueIcon}
+          >
+            <Popup>
+              <div className="min-w-[200px]">
+                <h3 className="font-bold text-sm text-charcoal">{event.venue_name}</h3>
+                {event.venue_address && (
+                  <p className="text-xs text-warm-gray mt-1">{event.venue_address}</p>
+                )}
+                <Link href={`/events/${event.id}`} className="block text-xs text-secondary hover:underline mt-2">
+                  {event.title}
+                </Link>
+              </div>
+            </Popup>
+          </Marker>
+        ))}
       </MapContainer>
     </div>
   );
