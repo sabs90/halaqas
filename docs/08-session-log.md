@@ -4,6 +4,47 @@ This file is the persistent memory between Claude Code sessions. Each entry summ
 
 ---
 
+## Session 2 — UX Restructure & Calendar (2026-02-19)
+
+### Completed
+- **Home page now IS the event directory:** Moved full event listing with search bar, type/language/gender filters, and event grid from `/events` to the home page (`/`). Hero banner remains at top. `/events` now redirects to `/`.
+- **"Add to Calendar" on event detail pages:** Each event has an "Add to Calendar" button that generates and downloads a `.ics` file. Recurring events include RRULE so the full series is added to the user's calendar (e.g. "Every Tuesday" creates a weekly recurring entry).
+- **Mosques + Map merged:** Map view integrated into the mosques page (`/mosques`). Added suburb search bar with 5km radius filtering (Haversine). `/map` now redirects to `/mosques`.
+- **Header nav simplified:** Removed "Events" and "Map" nav items. Now shows: Mosques, Submit Event, About.
+- **Footer updated:** Replaced "Events" link with "Mosques".
+- **Hero banner cleaned up:** Removed "Browse Events" button (was linking to itself). Changed "Submit an Event" to secondary colour variant.
+- **About page:** Removed Go Pray comparison line.
+- **EventFilters made path-aware:** Uses `usePathname()` so filters work correctly on `/` instead of only `/events`.
+- **Event detail back link:** Now points to `/` instead of `/events`.
+
+### Decisions Made
+- Home page should be the primary event browsing experience — no separate events page needed
+- Map belongs on the mosques page, not as a standalone page
+- Single-event .ics download should include RRULE for recurring events (adds full series, not just one occurrence)
+- Old routes (`/events`, `/map`) redirect rather than 404 to preserve any shared links
+
+### Issues / Bugs
+- R2 image storage still not configured (uploads fall back to data URLs)
+- Dev server can be slow on first load / when `.next` cache is stale — clearing `.next` and restarting fixes it
+- `next/dynamic` with `ssr: false` requires a client wrapper component (MapWrapper)
+
+### Next Session
+- Set up Cloudflare Pages for auto-deploy from GitHub
+- Set up Cloudflare R2 bucket and configure credentials
+- Generate PWA icons
+- QA pass: test all flows on mobile (especially new merged mosques+map page)
+- Replace placeholder mosque data with Go Pray database when available
+- Begin seeding real Ramadan events for top Sydney mosques
+- Add rate limiting to submission and report endpoints
+- Commit and push all Session 2 changes
+
+### Open Questions
+- Go Pray database access and format (still pending)
+- halaqas.com domain registration
+- Cloudflare account setup (for Pages + R2)
+
+---
+
 ## Session 1 — Full MVP Build (2026-02-19)
 
 ### Completed
@@ -28,12 +69,15 @@ This file is the persistent memory between Claude Code sessions. Each entry summ
 ```
 src/
   app/
-    page.tsx                    — Home (hero + upcoming events)
-    events/page.tsx             — Event directory with filters
-    events/[id]/page.tsx        — Event detail + share + report
-    mosques/page.tsx            — Mosque directory
+    page.tsx                    — Home (hero + event directory with search/filters)
+    events/page.tsx             — Redirects to /
+    events/[id]/page.tsx        — Event detail + share + report + add to calendar
+    events/[id]/AddToCalendarButton.tsx — .ics download with RRULE support
+    events/[id]/ReportButton.tsx — Report issue flow
+    mosques/page.tsx            — Mosque directory + map + suburb search (5km radius)
+    mosques/MosqueSearch.tsx     — Suburb search client component
     mosques/[id]/page.tsx       — Mosque detail + calendar subscribe
-    map/page.tsx                — Map view
+    map/page.tsx                — Redirects to /mosques
     submit/page.tsx             — Event submission (3 input paths)
     about/page.tsx              — About page
     admin/page.tsx              — Admin login + dashboard

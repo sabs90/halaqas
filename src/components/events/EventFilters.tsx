@@ -1,6 +1,6 @@
 'use client';
 
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useCallback, useState, useEffect, useRef } from 'react';
 import { FilterPill } from '@/components/ui/FilterPill';
 import type { EventType, Language, Gender } from '@/lib/types';
@@ -32,6 +32,7 @@ const GENDERS: { value: Gender; label: string }[] = [
 
 export function EventFilters() {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
 
   const currentType = searchParams.get('type');
@@ -42,10 +43,11 @@ export function EventFilters() {
   const [searchValue, setSearchValue] = useState(currentSearch);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Sync search input when URL changes externally
   useEffect(() => {
     setSearchValue(currentSearch);
   }, [currentSearch]);
+
+  const basePath = pathname === '/' ? '/' : pathname;
 
   const setFilter = useCallback(
     (key: string, value: string | null) => {
@@ -55,9 +57,10 @@ export function EventFilters() {
       } else {
         params.delete(key);
       }
-      router.push(`/events?${params.toString()}`);
+      const qs = params.toString();
+      router.push(qs ? `${basePath}?${qs}` : basePath);
     },
-    [router, searchParams]
+    [router, searchParams, basePath]
   );
 
   function handleSearchChange(value: string) {

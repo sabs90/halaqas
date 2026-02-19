@@ -189,7 +189,7 @@ Users subscribe to this URL in their calendar app. The calendar app periodically
 ## 9. Image Storage
 
 - Flyer images uploaded during event submission are stored in Cloudflare R2
-- Images are resized/compressed server-side before storage to manage the 10GB free tier
+- Images are compressed client-side before upload (no `sharp` — compatible with edge runtime)
 - Served via Cloudflare's CDN for fast delivery
 - URL stored in the `flyer_image_url` column of the events table
 

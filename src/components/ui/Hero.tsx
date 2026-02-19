@@ -13,11 +13,8 @@ export function Hero() {
         <p className="mt-3 text-[15px] text-white/85 sm:text-lg">
           Discover talks, classes, and events at mosques across Sydney
         </p>
-        <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
-          <Button variant="secondary" href="/events">
-            Browse Events
-          </Button>
-          <Button variant="ghost" href="/submit" className="!bg-white/10 !text-white hover:!bg-white/20">
+        <div className="mt-8 flex justify-center">
+          <Button variant="secondary" href="/submit">
             Submit an Event
           </Button>
         </div>

@@ -5,9 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
 const NAV_ITEMS = [
-  { href: '/events', label: 'Events' },
   { href: '/mosques', label: 'Mosques' },
-  { href: '/map', label: 'Map' },
   { href: '/submit', label: 'Submit Event' },
   { href: '/about', label: 'About' },
 ];

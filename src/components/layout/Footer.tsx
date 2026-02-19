@@ -14,7 +14,7 @@ export function Footer() {
         <div className="flex justify-center gap-6 text-sm">
           <Link href="/about" className="hover:text-white transition-colors">About</Link>
           <Link href="/submit" className="hover:text-white transition-colors">Submit Event</Link>
-          <Link href="/events" className="hover:text-white transition-colors">Events</Link>
+          <Link href="/mosques" className="hover:text-white transition-colors">Mosques</Link>
         </div>
         <p className="mt-6 text-xs text-white/40">
           &copy; {new Date().getFullYear()} Halaqas. Not affiliated with any mosque or organisation.

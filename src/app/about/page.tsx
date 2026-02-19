@@ -17,10 +17,6 @@ export default function AboutPage() {
           community-powered website that collates Islamic events and programs across Sydney mosques
           into a single searchable directory with subscribable calendars.
         </p>
-        <p>
-          Think of it as the missing layer on top of <strong className="text-charcoal">Go Pray</strong>:
-          Go Pray tells you <em>where</em> to pray, Halaqas tells you <em>what&apos;s on</em>.
-        </p>
       </section>
 
       <section className="bg-sand rounded-card p-6 space-y-3">
