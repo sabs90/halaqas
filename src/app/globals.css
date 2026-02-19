@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+@theme inline {
+  /* Primary — Earthy Teal */
+  --color-primary: #1E5248;
+  --color-primary-light: #26695D;
+  --color-primary-dark: #153D36;
+
+  /* Secondary — Terracotta */
+  --color-secondary: #C4704B;
+  --color-secondary-light: #D4896A;
+  --color-secondary-dark: #A85A38;
+
+  /* Neutrals — Sand & Stone */
+  --color-cream: #FDFBF7;
+  --color-sand: #F2EEE6;
+  --color-sand-dark: #E4DDD2;
+  --color-stone: #9C9590;
+  --color-warm-gray: #6B6560;
+  --color-charcoal: #2C2825;
+
+  /* Accents */
+  --color-sage: #7AA89A;
+  --color-sage-deep: #5A7A6E;
+  --color-gold: #C49A3C;
+
+  /* Border Radius */
+  --radius-card: 12px;
+  --radius-button: 10px;
+  --radius-tag: 6px;
+  --radius-pill: 20px;
+
+  /* Shadows */
+  --shadow-card-hover: 0 4px 20px rgba(30, 82, 72, 0.08);
+  --shadow-modal: 0 8px 32px rgba(44, 40, 37, 0.12);
+  --shadow-dropdown: 0 4px 16px rgba(44, 40, 37, 0.08);
+
+  /* Font */
+  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+}
+
+body {
+  background: var(--color-cream);
+  color: var(--color-warm-gray);
+  font-family: var(--font-sans);
+}
+
+/* Focus states */
+*:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-sand);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-sand-dark);
+  border-radius: 3px;
+}
