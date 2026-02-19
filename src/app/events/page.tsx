@@ -18,8 +18,8 @@ interface Props {
     type?: string;
     language?: string;
     gender?: string;
-    suburb?: string;
     mosque?: string;
+    q?: string;
   }>;
 }
 
@@ -27,8 +27,8 @@ async function getEvents(params: {
   type?: string;
   language?: string;
   gender?: string;
-  suburb?: string;
   mosque?: string;
+  q?: string;
 }) {
   const supabase = getServiceClient();
   let query = supabase
@@ -45,17 +45,42 @@ async function getEvents(params: {
   const { data } = await query;
   let events = data || [];
 
-  // Suburb radius filtering (5km)
-  if (params.suburb) {
-    const suburbData = SYDNEY_SUBURBS.find(s => s.name === params.suburb);
-    if (suburbData) {
-      events = events.filter(event => {
+  // Text search across suburb, mosque name, speaker, and title
+  if (params.q) {
+    const q = params.q.toLowerCase();
+
+    // Check if search term matches a suburb — if so, also do radius filtering
+    const matchedSuburb = SYDNEY_SUBURBS.find(s => s.name.toLowerCase().includes(q));
+
+    events = events.filter(event => {
+      const mosqueName = (event.mosque?.name || event.venue_name || '').toLowerCase();
+      const mosqueSuburb = (event.mosque?.suburb || '').toLowerCase();
+      const title = event.title.toLowerCase();
+      const speaker = (event.speaker || '').toLowerCase();
+      const description = (event.description || '').toLowerCase();
+
+      // Direct text match
+      if (
+        mosqueName.includes(q) ||
+        mosqueSuburb.includes(q) ||
+        title.includes(q) ||
+        speaker.includes(q) ||
+        description.includes(q)
+      ) {
+        return true;
+      }
+
+      // Suburb radius match (5km)
+      if (matchedSuburb) {
         const lat = event.mosque?.latitude || event.venue_latitude;
         const lng = event.mosque?.longitude || event.venue_longitude;
-        if (!lat || !lng) return false;
-        return haversineDistance(suburbData.latitude, suburbData.longitude, lat, lng) <= 5;
-      });
-    }
+        if (lat && lng) {
+          return haversineDistance(matchedSuburb.latitude, matchedSuburb.longitude, lat, lng) <= 5;
+        }
+      }
+
+      return false;
+    });
   }
 
   return events;
@@ -81,8 +106,8 @@ export default async function EventsPage({ searchParams }: Props) {
         </div>
       ) : (
         <div className="text-center py-16 bg-sand rounded-card">
-          <p className="text-warm-gray">No events match your filters.</p>
-          <p className="text-sm text-stone mt-1">Try adjusting your search or browse all events.</p>
+          <p className="text-warm-gray">No events match your search.</p>
+          <p className="text-sm text-stone mt-1">Try a different search term or clear your filters.</p>
         </div>
       )}
     </div>
