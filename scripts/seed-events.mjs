@@ -1,7 +1,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { readFileSync } from 'fs';
 
-// Read env vars
+// ── Read env ──────────────────────────────────────────────────────────
 const envContent = readFileSync('.env.local', 'utf8');
 const getEnv = (key) => envContent.split('\n').find(l => l.startsWith(key + '='))?.split('=').slice(1).join('=')?.trim();
 
@@ -10,198 +10,178 @@ const supabase = createClient(
   getEnv('SUPABASE_SERVICE_ROLE_KEY')
 );
 
-// Get mosque IDs
-const { data: mosques } = await supabase.from('mosques').select('id, name');
-const mosqueMap = {};
-for (const m of mosques) mosqueMap[m.name] = m.id;
+// ── Helpers ───────────────────────────────────────────────────────────
+function parseOffset(offsetStr) {
+  if (!offsetStr) return 0;
+  const match = offsetStr.match(/(\d+)\s*min\s*(before|after)/i);
+  if (match) {
+    const minutes = parseInt(match[1]);
+    return match[2].toLowerCase() === 'before' ? -minutes : minutes;
+  }
+  if (offsetStr.toLowerCase().includes('before')) return -15;
+  return 0; // "after" = immediately after
+}
 
-const find = (partial) => {
-  const entry = mosques.find(m => m.name.toLowerCase().includes(partial.toLowerCase()));
-  return entry?.id || null;
-};
+function mapEvent(e, mosqueId, overrides = {}) {
+  const hasClockTime = !!e.time;
+  const hasPrayerAnchor = !!e.prayer_anchor;
 
-const events = [
+  let time_mode, fixed_time, prayer_anchor, prayer_offset_minutes;
+
+  if (hasClockTime) {
+    time_mode = 'fixed';
+    fixed_time = e.time.length === 5 ? e.time + ':00' : e.time;
+    prayer_anchor = null;
+    prayer_offset_minutes = 0;
+  } else if (hasPrayerAnchor) {
+    time_mode = 'prayer_anchored';
+    fixed_time = null;
+    prayer_anchor = e.prayer_anchor;
+    prayer_offset_minutes = parseOffset(e.prayer_offset);
+  } else {
+    time_mode = 'fixed';
+    fixed_time = null;
+    prayer_anchor = null;
+    prayer_offset_minutes = 0;
+  }
+
+  return {
+    mosque_id: mosqueId,
+    title: e.title,
+    event_type: e.event_type,
+    speaker: e.speaker || null,
+    language: e.language || 'english',
+    gender: e.gender || 'mixed',
+    time_mode,
+    fixed_date: e.date || null,
+    fixed_time,
+    prayer_anchor,
+    prayer_offset_minutes,
+    is_recurring: e.is_recurring || false,
+    recurrence_pattern: e.recurrence_pattern || null,
+    recurrence_end_date: e.recurrence_end_date || null,
+    description: e.description || null,
+    venue_address: e.venue_address || null,
+    status: 'active',
+    ...overrides,
+  };
+}
+
+// ── Step 1: Delete all existing events ────────────────────────────────
+console.log('Deleting all existing events...');
+const { error: delError } = await supabase.from('events').delete().gte('created_at', '1970-01-01');
+if (delError) { console.error('Delete error:', delError); process.exit(1); }
+console.log('  ✓ All events deleted\n');
+
+// ── Step 2: Ensure mosques exist ──────────────────────────────────────
+const newMosques = [
   {
-    mosque_id: find('lakemba'),
-    title: 'Tafseer of Surah Al-Kahf',
-    event_type: 'class',
-    speaker: 'Sheikh Ahmad Abdo',
-    language: 'english',
-    gender: 'mixed',
-    time_mode: 'prayer_anchored',
-    prayer_anchor: 'isha',
-    prayer_offset_minutes: 15,
-    is_recurring: true,
-    recurrence_pattern: 'every_friday',
-    description: 'Weekly tafseer class covering Surah Al-Kahf, suitable for all levels.',
+    name: 'Australian Islamic House',
+    address: '2094 Camden Valley Way, Edmondson Park NSW 2174',
+    suburb: 'Edmondson Park',
+    latitude: -33.8674,
+    longitude: 150.8521,
   },
   {
-    mosque_id: find('auburn'),
-    title: 'Ramadan Taraweeh Program',
-    event_type: 'taraweeh',
-    speaker: null,
-    language: 'arabic',
-    gender: 'mixed',
-    time_mode: 'prayer_anchored',
-    prayer_anchor: 'isha',
-    prayer_offset_minutes: 0,
-    is_recurring: true,
-    recurrence_pattern: 'daily_ramadan',
-    description: 'Full Quran recitation over the month of Ramadan. Led by Hafiz Muhammad.',
-  },
-  {
-    mosque_id: find('sunnah'),
-    title: 'Sisters Halaqa — Purification of the Heart',
-    event_type: 'sisters_circle',
-    speaker: 'Ustadha Yasmin Mogahed',
-    language: 'english',
-    gender: 'sisters',
-    time_mode: 'prayer_anchored',
-    prayer_anchor: 'dhuhr',
-    prayer_offset_minutes: 30,
-    is_recurring: true,
-    recurrence_pattern: 'every_saturday',
-    description: 'Weekly sisters circle focusing on spiritual development.',
-  },
-  {
-    mosque_id: find('isra'),
-    title: 'Youth Night — Identity & Faith',
-    event_type: 'youth',
-    speaker: 'Brother Bilal Dannoun',
-    language: 'english',
-    gender: 'mixed',
-    time_mode: 'prayer_anchored',
-    prayer_anchor: 'maghrib',
-    prayer_offset_minutes: 15,
-    is_recurring: true,
-    recurrence_pattern: 'every_wednesday',
-    description: 'Interactive sessions for youth aged 15-25 exploring faith, identity, and modern challenges.',
-  },
-  {
-    mosque_id: find('parramatta'),
-    title: 'Community Iftar',
-    event_type: 'iftar',
-    speaker: null,
-    language: 'mixed',
-    gender: 'mixed',
-    time_mode: 'prayer_anchored',
-    prayer_anchor: 'maghrib',
-    prayer_offset_minutes: 0,
-    is_recurring: true,
-    recurrence_pattern: 'daily_ramadan',
-    description: 'Free community iftar every night of Ramadan. All welcome.',
-  },
-  {
-    mosque_id: find('al-noor'),
-    title: 'Quran Memorisation Circle',
-    event_type: 'quran_circle',
-    speaker: null,
-    language: 'arabic',
-    gender: 'brothers',
-    time_mode: 'prayer_anchored',
-    prayer_anchor: 'fajr',
-    prayer_offset_minutes: 15,
-    is_recurring: true,
-    recurrence_pattern: 'daily',
-    description: 'Daily Quran memorisation and revision circle after Fajr prayer.',
-  },
-  {
-    mosque_id: find('liverpool'),
-    title: 'Friday Night Lecture — Seerah Series',
-    event_type: 'talk',
-    speaker: 'Sheikh Wesam Charkawi',
-    language: 'english',
-    gender: 'mixed',
-    time_mode: 'prayer_anchored',
-    prayer_anchor: 'isha',
-    prayer_offset_minutes: 20,
-    is_recurring: true,
-    recurrence_pattern: 'every_friday',
-    description: 'Ongoing series covering the life of Prophet Muhammad (peace be upon him).',
-  },
-  {
-    mosque_id: find('punchbowl'),
-    title: 'Arabic Language Basics',
-    event_type: 'class',
-    speaker: 'Ustadh Omar Ibrahim',
-    language: 'english',
-    gender: 'mixed',
-    time_mode: 'fixed',
-    fixed_date: '2026-03-01',
-    fixed_time: '10:00',
-    prayer_anchor: null,
-    prayer_offset_minutes: 0,
-    is_recurring: true,
-    recurrence_pattern: 'every_sunday',
-    description: 'Beginner-friendly Arabic class covering reading and basic conversation.',
-  },
-  {
-    mosque_id: find('surry'),
-    title: 'Mindful Muslim — Mental Health Workshop',
-    event_type: 'talk',
-    speaker: 'Dr Sarah Hassan',
-    language: 'english',
-    gender: 'mixed',
-    time_mode: 'fixed',
-    fixed_date: '2026-03-07',
-    fixed_time: '14:00',
-    prayer_anchor: null,
-    prayer_offset_minutes: 0,
-    is_recurring: false,
-    recurrence_pattern: null,
-    description: 'A one-off workshop on mental health, wellbeing, and faith. Free entry.',
-  },
-  {
-    mosque_id: find('imam hasan'),
-    title: 'Ramadan Charity Drive',
-    event_type: 'charity',
-    speaker: null,
-    language: 'mixed',
-    gender: 'mixed',
-    time_mode: 'fixed',
-    fixed_date: '2026-02-28',
-    fixed_time: '09:00',
-    prayer_anchor: null,
-    prayer_offset_minutes: 0,
-    is_recurring: false,
-    recurrence_pattern: null,
-    description: 'Collecting food hampers and clothing for families in need this Ramadan.',
-  },
-  {
-    mosque_id: find('unsw'),
-    title: 'Jummah Khutbah & Prayer',
-    event_type: 'talk',
-    speaker: null,
-    language: 'english',
-    gender: 'mixed',
-    time_mode: 'prayer_anchored',
-    prayer_anchor: 'dhuhr',
-    prayer_offset_minutes: 0,
-    is_recurring: true,
-    recurrence_pattern: 'every_friday',
-    description: 'Weekly Jummah prayer at UNSW Musallah. All students and staff welcome.',
-  },
-  {
-    mosque_id: find('lakemba'),
-    title: 'Ramadan Taraweeh — Full Quran Recitation',
-    event_type: 'taraweeh',
-    speaker: null,
-    language: 'arabic',
-    gender: 'mixed',
-    time_mode: 'prayer_anchored',
-    prayer_anchor: 'isha',
-    prayer_offset_minutes: 5,
-    is_recurring: true,
-    recurrence_pattern: 'daily_ramadan',
-    description: 'Lakemba Mosque Taraweeh program with renowned reciters.',
+    name: 'Dar Ibn Abbas',
+    address: '14 Rossmore Ave, Punchbowl NSW 2196',
+    suburb: 'Punchbowl',
+    latitude: -33.9290,
+    longitude: 151.0550,
   },
 ];
 
-const { data, error } = await supabase.from('events').insert(events).select('id, title');
+for (const m of newMosques) {
+  const { data: existing } = await supabase
+    .from('mosques')
+    .select('id')
+    .ilike('name', `%${m.name}%`)
+    .maybeSingle();
+
+  if (!existing) {
+    const { error } = await supabase.from('mosques').insert(m);
+    if (error) { console.error(`Error adding ${m.name}:`, error); process.exit(1); }
+    console.log(`  + Added mosque: ${m.name}`);
+  } else {
+    console.log(`  ○ Mosque exists: ${m.name}`);
+  }
+}
+
+// ── Step 3: Load mosque lookup ────────────────────────────────────────
+const { data: mosques } = await supabase.from('mosques').select('id, name');
+const find = (partial) => {
+  const entry = mosques.find(m => m.name.toLowerCase().includes(partial.toLowerCase()));
+  if (!entry) console.warn(`  ⚠ Mosque not found: "${partial}"`);
+  return entry?.id || null;
+};
+
+const aih = find('australian islamic');
+const dia = find('dar ibn abbas');
+const alNoor = find('al-noor') || find('al noor');
+const liverpool = find('liverpool');
+const lakemba = find('lakemba');
+const punchbowl = find('punchbowl');
+
+// ── Step 4: Build event list from flyer data ──────────────────────────
+const expected = JSON.parse(readFileSync('scripts/flyer-expected.json', 'utf8'));
+
+const events = [];
+
+// --- AIH Ramadan Comps (skip "Prayer Cards") ---
+for (const e of expected['AIH - ramadan comps.jpeg'].events) {
+  if (e.title.includes('Prayer Cards')) continue;
+  events.push(mapEvent(e, aih));
+}
+
+// --- DIA Ramadan Program ---
+for (const e of expected['DIA - ramadan program.jpg'].events) {
+  events.push(mapEvent(e, dia));
+}
+
+// --- AIH Sisters Iftar ---
+for (const e of expected['aih - sisters iftar.jpg'].events) {
+  events.push(mapEvent(e, aih));
+}
+
+// --- Masjid Al Noor ---
+for (const e of expected['masjid al noor ramadan.jpg'].events) {
+  events.push(mapEvent(e, alNoor));
+}
+
+// --- MIA Liverpool ---
+for (const e of expected['mia liverpool.jpg'].events) {
+  events.push(mapEvent(e, liverpool));
+}
+
+// --- Open Iftar Lakemba (LMA = Lakemba Mosque, but venue is Haldon St) ---
+for (const e of expected['open iftar lakemba.jpg'].events) {
+  events.push(mapEvent(e, lakemba, {
+    venue_name: 'Haldon Street, Lakemba',
+    venue_address: 'Haldon Street, Lakemba NSW (Between Oneata St & Gillies St)',
+  }));
+}
+
+// --- Punchbowl Taraweeh ---
+for (const e of expected['punchbowl - taraweeh.jpeg'].events) {
+  events.push(mapEvent(e, punchbowl));
+}
+
+// --- Punchbowl Mosque Ramadan Lessons ---
+for (const e of expected['punchbowl mosque.jpg'].events) {
+  events.push(mapEvent(e, punchbowl));
+}
+
+// ── Step 5: Insert all events ─────────────────────────────────────────
+console.log(`\nInserting ${events.length} events...`);
+
+const { data, error } = await supabase.from('events').insert(events).select('id, title, event_type');
 
 if (error) {
-  console.error('Error seeding events:', error);
-} else {
-  console.log(`Seeded ${data.length} events:`);
-  data.forEach(e => console.log(`  ✓ ${e.title}`));
+  console.error('Insert error:', error);
+  process.exit(1);
+}
+
+console.log(`\n✓ Seeded ${data.length} events:`);
+for (const e of data) {
+  console.log(`  ${e.event_type.padEnd(12)} ${e.title}`);
 }

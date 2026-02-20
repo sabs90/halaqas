@@ -1,4 +1,4 @@
-export type EventType = 'talk' | 'class' | 'quran_circle' | 'iftar' | 'taraweeh' | 'charity' | 'youth' | 'sisters_circle' | 'other';
+export type EventType = 'talk' | 'class' | 'quran_circle' | 'iftar' | 'taraweeh' | 'tahajjud' | 'itikaf' | 'charity' | 'youth' | 'sisters_circle' | 'competition' | 'workshop' | 'other';
 export type Language = 'english' | 'arabic' | 'urdu' | 'turkish' | 'bahasa' | 'mixed' | 'other';
 export type Gender = 'brothers' | 'sisters' | 'mixed';
 export type TimeMode = 'fixed' | 'prayer_anchored';
@@ -78,9 +78,31 @@ export interface ParsedEventData {
   gender: Gender | null;
   is_recurring: boolean;
   recurrence_pattern: string | null;
+  recurrence_end_date: string | null;
   description: string | null;
   venue_address: string | null;
   confidence: number;
+}
+
+export interface MosqueSuggestion {
+  id: string;
+  name: string;
+  address: string | null;
+  suburb: string | null;
+  latitude: number | null;
+  longitude: number | null;
+  suggested_by_contact: string | null;
+  status: 'pending' | 'approved' | 'rejected';
+  created_at: string;
+}
+
+export interface Feedback {
+  id: string;
+  name: string | null;
+  contact: string | null;
+  message: string;
+  status: 'new' | 'read';
+  created_at: string;
 }
 
 export interface SuburbData {

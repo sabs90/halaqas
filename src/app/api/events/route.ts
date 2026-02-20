@@ -94,6 +94,7 @@ export async function POST(request: NextRequest) {
       prayer_offset_minutes: body.prayer_offset_minutes || 0,
       is_recurring: body.is_recurring || false,
       recurrence_pattern: body.recurrence_pattern || null,
+      recurrence_end_date: body.recurrence_end_date || null,
       flyer_image_url: body.flyer_image_url || null,
       submitter_contact: body.submitter_contact || null,
       status: 'active',

@@ -122,6 +122,31 @@
 | created_at | timestamptz | |
 | reviewed_at | timestamptz | |
 
+### mosque_suggestions
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | uuid | Primary key |
+| name | text | Suggested mosque name |
+| address | text | Optional address |
+| suburb | text | Optional suburb |
+| latitude | decimal | Optional coordinates |
+| longitude | decimal | Optional coordinates |
+| suggested_by_contact | text | Optional submitter contact |
+| status | enum | pending, approved, rejected |
+| created_at | timestamptz | |
+
+### feedback
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | uuid | Primary key |
+| name | text | Optional sender name |
+| contact | text | Optional contact info |
+| message | text | Feedback message (required) |
+| status | enum | new, read |
+| created_at | timestamptz | |
+
 ## 5. Key API Routes
 
 | Route | Method | Purpose |
@@ -136,6 +161,16 @@
 | `/api/mosques/[id]/calendar.ics` | GET | Dynamic .ics feed for a mosque |
 | `/api/admin/amendments` | GET | List pending amendments (protected) |
 | `/api/admin/amendments/[id]` | POST | Approve or reject amendment (protected) |
+| `/api/admin/events` | GET | List all events (protected) |
+| `/api/admin/events` | PATCH/DELETE | Update or delete events (protected) |
+| `/api/admin/mosques` | GET | List pending mosque suggestions (protected) |
+| `/api/admin/mosques` | POST | Approve or reject mosque suggestion (protected) |
+| `/api/mosques/suggest` | POST | Submit a mosque suggestion |
+| `/api/mosques/[id]/nicknames` | POST | Add a nickname for a mosque |
+| `/api/geocode` | POST | Geocode an address |
+| `/api/feedback` | POST | Submit feedback/contact message |
+| `/api/admin/feedback` | GET | List new feedback (protected) |
+| `/api/admin/feedback` | POST | Mark feedback as read (protected) |
 
 ## 6. AI Parsing Prompt Design
 

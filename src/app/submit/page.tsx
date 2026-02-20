@@ -15,7 +15,11 @@ const EVENT_TYPES: { value: EventType; label: string }[] = [
   { value: 'taraweeh', label: 'Taraweeh' },
   { value: 'charity', label: 'Charity' },
   { value: 'youth', label: 'Youth' },
+  { value: 'tahajjud', label: 'Tahajjud' },
+  { value: 'itikaf', label: "I'tikaf" },
   { value: 'sisters_circle', label: 'Sisters Circle' },
+  { value: 'competition', label: 'Competition' },
+  { value: 'workshop', label: 'Workshop' },
   { value: 'other', label: 'Other' },
 ];
 
@@ -70,6 +74,7 @@ interface FormData {
   prayer_offset_minutes: number;
   is_recurring: boolean;
   recurrence_pattern: string;
+  recurrence_end_date: string;
   description: string;
   submitter_contact: string;
   flyer_image_url: string;
@@ -93,6 +98,7 @@ const INITIAL_FORM: FormData = {
   prayer_offset_minutes: 15,
   is_recurring: false,
   recurrence_pattern: '',
+  recurrence_end_date: '',
   description: '',
   submitter_contact: '',
   flyer_image_url: '',
@@ -121,6 +127,8 @@ export default function SubmitPage() {
   const [successType, setSuccessType] = useState<'submitted' | 'amended'>('submitted');
   const [geocodeStatus, setGeocodeStatus] = useState<'idle' | 'loading' | 'found' | 'not_found'>('idle');
   const [nearbyMosques, setNearbyMosques] = useState<Mosque[]>([]);
+  const [suggestStatus, setSuggestStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
+  const [dragging, setDragging] = useState(false);
 
   useEffect(() => {
     fetch('/api/mosques')
@@ -145,7 +153,10 @@ export default function SubmitPage() {
     if (parsed.description) updates.description = parsed.description;
     if (parsed.is_recurring) updates.is_recurring = true;
     if (parsed.recurrence_pattern) {
-      updates.recurrence_pattern = parsed.recurrence_pattern.replace(/\s+/g, '_').toLowerCase();
+      updates.recurrence_pattern = parsed.recurrence_pattern;
+    }
+    if (parsed.recurrence_end_date) {
+      updates.recurrence_end_date = parsed.recurrence_end_date;
     }
     if (parsed.prayer_anchor) {
       updates.time_mode = 'prayer_anchored';
@@ -173,10 +184,7 @@ export default function SubmitPage() {
     setStep('confirm');
   }
 
-  async function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
+  async function processImageFile(file: File) {
     setParsing(true);
     setError('');
     try {
@@ -192,6 +200,18 @@ export default function SubmitPage() {
     } finally {
       setParsing(false);
     }
+  }
+
+  function handleImageUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) processImageFile(file);
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type.startsWith('image/')) processImageFile(file);
   }
 
   async function handleTextParse() {
@@ -211,6 +231,27 @@ export default function SubmitPage() {
       setError('Failed to parse text. Please try again or enter details manually.');
     } finally {
       setParsing(false);
+    }
+  }
+
+  async function handleSuggestMosque() {
+    if (!form.venue_name.trim()) return;
+    setSuggestStatus('sending');
+    try {
+      await fetch('/api/mosques/suggest', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: form.venue_name,
+          address: form.venue_address || null,
+          latitude: form.venue_latitude,
+          longitude: form.venue_longitude,
+          suggested_by_contact: form.submitter_contact || null,
+        }),
+      });
+      setSuggestStatus('sent');
+    } catch {
+      setSuggestStatus('idle');
     }
   }
 
@@ -414,15 +455,34 @@ export default function SubmitPage() {
 
           {tab === 'image' && (
             <div className="space-y-4">
-              <label className="flex flex-col items-center justify-center gap-3 border-2 border-dashed border-sand-dark rounded-card p-10 cursor-pointer hover:border-primary transition-colors">
+              <label
+                onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+                onDragLeave={() => setDragging(false)}
+                onDrop={handleDrop}
+                className={`flex flex-col items-center justify-center gap-3 border-2 border-dashed rounded-card p-10 cursor-pointer transition-colors ${
+                  dragging
+                    ? 'border-primary bg-primary/[0.04]'
+                    : 'border-sand-dark hover:border-primary'
+                }`}
+              >
                 <svg className="w-10 h-10 text-stone" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
                   <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" />
                 </svg>
-                <span className="text-sm text-warm-gray">
-                  {parsing ? 'Parsing flyer with AI...' : 'Click to upload a flyer image'}
+                <span className="text-sm text-warm-gray text-center">
+                  {parsing ? 'Parsing flyer with AI...' : 'Tap to upload or drag & drop a flyer image'}
                 </span>
                 <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={parsing} />
               </label>
+
+              <label className="flex items-center justify-center gap-2 border border-sand-dark rounded-card p-3 cursor-pointer hover:border-primary transition-colors">
+                <svg className="w-5 h-5 text-stone" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                  <circle cx="12" cy="13" r="4" />
+                </svg>
+                <span className="text-sm text-warm-gray">Take a photo</span>
+                <input type="file" accept="image/*" capture="environment" className="hidden" onChange={handleImageUpload} disabled={parsing} />
+              </label>
+
               {parsing && (
                 <div className="text-center text-sm text-primary animate-pulse">
                   AI is extracting event details from your flyer...
@@ -482,6 +542,7 @@ export default function SubmitPage() {
                 updateForm({ mosque_id: newMosqueId, venue_name: '', venue_address: '', venue_latitude: null, venue_longitude: null });
                 setNearbyMosques([]);
                 setGeocodeStatus('idle');
+                setSuggestStatus('idle');
                 // Auto-learn nickname when user corrects venue → mosque
                 if (newMosqueId && previousVenue) {
                   const selectedMosque = mosques.find(m => m.id === newMosqueId);
@@ -537,6 +598,7 @@ export default function SubmitPage() {
                           updateForm({ mosque_id: m.id, venue_name: '', venue_address: '', venue_latitude: null, venue_longitude: null });
                           setNearbyMosques([]);
                           setGeocodeStatus('idle');
+                          setSuggestStatus('idle');
                         }}
                         className="block w-full text-left text-sm text-blue-700 hover:text-blue-900 hover:underline"
                       >
@@ -544,6 +606,21 @@ export default function SubmitPage() {
                       </button>
                     ))}
                   </div>
+                )}
+                {form.venue_name.trim() && suggestStatus === 'idle' && (
+                  <button
+                    type="button"
+                    onClick={handleSuggestMosque}
+                    className="text-xs text-primary hover:text-primary-dark hover:underline"
+                  >
+                    Is this a mosque? Suggest adding it &rarr;
+                  </button>
+                )}
+                {suggestStatus === 'sending' && (
+                  <p className="text-xs text-warm-gray animate-pulse">Sending suggestion...</p>
+                )}
+                {suggestStatus === 'sent' && (
+                  <p className="text-xs text-green-600">Thanks! Your mosque suggestion has been submitted for review.</p>
                 )}
               </div>
             )}

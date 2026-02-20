@@ -5,15 +5,25 @@ import { useCallback, useState, useEffect, useRef } from 'react';
 import { FilterPill } from '@/components/ui/FilterPill';
 import type { EventType, Language, Gender } from '@/lib/types';
 
-const EVENT_TYPES: { value: EventType; label: string }[] = [
+const LEARNING_TYPES: { value: EventType; label: string }[] = [
   { value: 'talk', label: 'Talk' },
   { value: 'class', label: 'Class' },
+  { value: 'workshop', label: 'Workshop' },
   { value: 'quran_circle', label: 'Quran Circle' },
-  { value: 'iftar', label: 'Iftar' },
+];
+
+const PRAYER_TYPES: { value: EventType; label: string }[] = [
   { value: 'taraweeh', label: 'Taraweeh' },
-  { value: 'sisters_circle', label: 'Sisters Circle' },
+  { value: 'tahajjud', label: 'Tahajjud' },
+  { value: 'itikaf', label: "I'tikaf" },
+];
+
+const COMMUNITY_TYPES: { value: EventType; label: string }[] = [
+  { value: 'iftar', label: 'Iftar' },
   { value: 'youth', label: 'Youth' },
+  { value: 'sisters_circle', label: 'Sisters Circle' },
   { value: 'charity', label: 'Charity' },
+  { value: 'competition', label: 'Competition' },
 ];
 
 const LANGUAGES: { value: Language; label: string }[] = [
@@ -102,37 +112,33 @@ export function EventFilters() {
         )}
       </div>
 
-      {/* Event type pills */}
-      <div className="flex flex-wrap gap-2 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
+      {/* Event type pills — grouped */}
+      <div className="flex flex-wrap items-center gap-2 overflow-x-auto pb-1 -mx-4 px-4 sm:mx-0 sm:px-0">
         <FilterPill label="All" active={!currentType} onClick={() => setFilter('type', null)} />
-        {EVENT_TYPES.map(({ value, label }) => (
-          <FilterPill
-            key={value}
-            label={label}
-            active={currentType === value}
-            onClick={() => setFilter('type', value)}
-          />
+        <span className="w-px h-5 bg-sand-dark self-center mx-0.5" />
+        {LEARNING_TYPES.map(({ value, label }) => (
+          <FilterPill key={value} label={label} active={currentType === value} onClick={() => setFilter('type', value)} />
+        ))}
+        <span className="w-px h-5 bg-sand-dark self-center mx-0.5" />
+        {PRAYER_TYPES.map(({ value, label }) => (
+          <FilterPill key={value} label={label} active={currentType === value} onClick={() => setFilter('type', value)} />
+        ))}
+        <span className="w-px h-5 bg-sand-dark self-center mx-0.5" />
+        {COMMUNITY_TYPES.map(({ value, label }) => (
+          <FilterPill key={value} label={label} active={currentType === value} onClick={() => setFilter('type', value)} />
         ))}
       </div>
 
-      {/* Language & gender */}
-      <div className="flex flex-wrap gap-2">
-        {LANGUAGES.map(({ value, label }) => (
-          <FilterPill
-            key={value}
-            label={label}
-            active={currentLanguage === value}
-            onClick={() => setFilter('language', value)}
-          />
-        ))}
-        <span className="w-px h-6 bg-sand-dark self-center mx-1" />
+      {/* Gender & Language */}
+      <div className="flex flex-wrap items-center gap-2">
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-stone mr-0.5">Gender</span>
         {GENDERS.map(({ value, label }) => (
-          <FilterPill
-            key={value}
-            label={label}
-            active={currentGender === value}
-            onClick={() => setFilter('gender', value)}
-          />
+          <FilterPill key={value} label={label} active={currentGender === value} onClick={() => setFilter('gender', value)} />
+        ))}
+        <span className="w-px h-5 bg-sand-dark self-center mx-1" />
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-stone mr-0.5">Language</span>
+        {LANGUAGES.map(({ value, label }) => (
+          <FilterPill key={value} label={label} active={currentLanguage === value} onClick={() => setFilter('language', value)} />
         ))}
       </div>
     </div>

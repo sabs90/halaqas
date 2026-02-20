@@ -80,6 +80,14 @@ export default function AdminPage() {
           <h2 className="text-lg font-bold text-charcoal">Manage Events</h2>
           <p className="text-sm text-warm-gray mt-1">Edit, archive, or delete events.</p>
         </Link>
+        <Link href="/admin/mosques" className="block bg-white border border-sand-dark rounded-card p-6 hover:border-primary hover:shadow-card-hover transition-all">
+          <h2 className="text-lg font-bold text-charcoal">Mosque Suggestions</h2>
+          <p className="text-sm text-warm-gray mt-1">Review and approve suggested mosques from users.</p>
+        </Link>
+        <Link href="/admin/feedback" className="block bg-white border border-sand-dark rounded-card p-6 hover:border-primary hover:shadow-card-hover transition-all">
+          <h2 className="text-lg font-bold text-charcoal">Feedback</h2>
+          <p className="text-sm text-warm-gray mt-1">Review messages and feedback from users.</p>
+        </Link>
       </div>
     </div>
   );

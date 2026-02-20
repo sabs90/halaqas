@@ -4,6 +4,87 @@ This file is the persistent memory between Claude Code sessions. Each entry summ
 
 ---
 
+## Session 4 — AI Prompt Refinement, Real Event Seeding, ICS Fixes (2026-02-20)
+
+### Completed
+- **AI flyer parsing prompt refinement:** Created `scripts/test-parse-flyers.mjs` test harness to systematically test the Groq prompt against 8 real flyers. Iterated through 4+ prompt rounds fixing: multi-event extraction, prayer-anchored time rules, mosque name detection, Ramadan date context, skip rules for non-events. Verified all 8 flyers with user, saved golden baselines to `scripts/flyer-expected.json`. Ported final prompt to production `src/lib/groq.ts`.
+- **New event types:** Added `tahajjud`, `itikaf`, `competition`, `workshop` to EventType across the entire stack (types, DB migration 005, UI components, filters, submit page, prompts).
+- **Multi-event support:** Added `parseImageWithGroqMulti()`, `extractAllEvents()`, and `backfillRecurrenceEndDate()` post-processing to `groq.ts`.
+- **Real event seeding:** Replaced all 12 dummy events with 28 real events from 8 verified flyers. Added 2 new mosques (Australian Islamic House, Dar Ibn Abbas). Updated `scripts/seed-events.mjs` to read from `scripts/flyer-expected.json` and map flyer data to DB schema.
+- **ICS calendar fixes (major):**
+  - Fixed missing `VTIMEZONE` definition — Apple Calendar was displaying UTC times as local. Added full Australia/Sydney VTIMEZONE block with AEST/AEDT DST rules.
+  - Fixed `formatSydneyLocal()` — now uses `Intl.DateTimeFormat` with explicit `timeZone: 'Australia/Sydney'` instead of system-local `getHours()`.
+  - Fixed recurring events with no `fixed_date` — `getStartDateForPattern()` picks the correct next day-of-week instead of defaulting to today.
+  - Fixed date-only events (no time) — rendered as ICS all-day events (`DTSTART;VALUE=DATE`) instead of being skipped.
+  - Fixed `AddToCalendarButton.tsx` — invalid date from double-appended seconds (`19:15:00:00`), missing prayer-anchored support, same VTIMEZONE/UTC issues.
+  - Changed default event duration from 60min to 30min (10min for "short" talks).
+  - Removed aggressive 1hr Cache-Control header from calendar endpoint during dev.
+- **Filter UX reorganisation:** Grouped event type pills into logical categories (Learning | Prayer | Community) with dividers. Added small uppercase labels for Gender and Language groups.
+- **ICS description footer:** Added "Via halaqas.com — Australian Islamic events directory" to all calendar event descriptions.
+
+### Decisions Made
+- `tahajjud` is a separate event type from `taraweeh` (different prayer, different time)
+- `itikaf` kept as extractable type for filtering, even though user may want to exclude from public display
+- Prayer Cards and similar take-home activities are NOT events (LLM limitation — still extracted sometimes, accepted)
+- `backfillRecurrenceEndDate()` post-processing compensates for LLM not applying Ramadan end dates to all sibling events
+- ICS uses `VTIMEZONE` + `TZID=Australia/Sydney` (not UTC Z-suffix) for proper timezone display in Apple Calendar
+- Calendar event duration: 30min default, 10min for events with "short" in title
+- Lebanese Muslim Association events map to existing Lakemba Mosque with venue override for street address
+
+### Issues / Bugs
+- Apple Calendar aggressively caches subscribed calendars — changes may take hours to appear. Workaround: delete and re-subscribe.
+- LLM still sometimes sets `prayer_anchor` alongside a specific clock time (accepted limitation)
+- LLM still sometimes extracts non-events like Prayer Cards (accepted limitation)
+
+### Next Session
+- Set up Cloudflare Pages for auto-deploy from GitHub
+- Set up Cloudflare R2 bucket and configure credentials
+- Generate PWA icons
+- QA pass: test all flows on mobile (especially calendar add/subscribe)
+- Add rate limiting to submission and report endpoints
+- Seed more events from additional mosque flyers
+- Link Supabase CLI (`supabase login` + `supabase link`)
+
+### Open Questions
+- Go Pray database access and format (still pending)
+- halaqas.com domain registration
+- Cloudflare account setup (for Pages + R2)
+
+---
+
+## Session 3 — Contact/Feedback, Upload UX, CLAUDE.md (2026-02-20)
+
+### Completed
+- **Contact Us / Feedback feature (full stack):** New `feedback` table (migration `004_feedback.sql`), `Feedback` type, public `POST /api/feedback` endpoint, `/contact` page with name/contact/message form, admin `GET/POST /api/admin/feedback` endpoint, `/admin/feedback` review page with "Mark as Read" button. Added Contact link to Header nav, Footer links, and Feedback card to admin dashboard. Follows the same pattern as mosque suggestions.
+- **Flyer upload UX improvements:** Added drag & drop support to the "Upload Flyer" drop zone (highlights on drag, accepts dropped image files). Added a "Take a photo" button with `capture="environment"` for mobile users to snap a flyer directly using their phone camera. Refactored image processing into shared `processImageFile()` function used by all three input methods.
+- **Created `CLAUDE.md`:** Project-root file automatically loaded into every Claude Code session. Contains stack overview, commands, project structure, key patterns (API routes, types, styling, "suggestion pattern" for new features), database tables, doc index, and end-session workflow. Replaces the manual start/end prompt copy-paste workflow from `docs/00-claude-code-prompts.md`.
+
+### Decisions Made
+- `CLAUDE.md` should be a stable, concise index — not a duplicate of the detailed docs. Only update when architecture or conventions change.
+- End-session workflow is now documented in `CLAUDE.md` — triggered by saying "end session"
+- Camera capture uses `capture="environment"` (rear camera) for photographing physical flyers at mosques
+
+### Issues / Bugs
+- R2 image storage still not configured (uploads fall back to data URLs)
+- Supabase CLI not linked (`supabase login` needed) — migration was run manually via Supabase dashboard
+
+### Next Session
+- Set up Cloudflare Pages for auto-deploy from GitHub
+- Set up Cloudflare R2 bucket and configure credentials
+- Generate PWA icons
+- QA pass: test all flows on mobile (especially contact form, drag & drop, camera capture)
+- Replace placeholder mosque data with Go Pray database when available
+- Begin seeding real Ramadan events for top Sydney mosques
+- Add rate limiting to submission and report endpoints
+- Link Supabase CLI (`supabase login` + `supabase link`)
+
+### Open Questions
+- Go Pray database access and format (still pending)
+- halaqas.com domain registration
+- Cloudflare account setup (for Pages + R2)
+
+---
+
 ## Session 2 — UX Restructure & Calendar (2026-02-19)
 
 ### Completed

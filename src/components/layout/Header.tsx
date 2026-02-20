@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { href: '/mosques', label: 'Mosques' },
   { href: '/submit', label: 'Submit Event' },
   { href: '/about', label: 'About' },
+  { href: '/contact', label: 'Contact' },
 ];
 
 export function Header() {

@@ -79,12 +79,13 @@ The roadmap is split into three phases. Only Phase 1 needs to be complete before
 
 ### Milestone 1.6 — Content Seeding & Launch Prep (Week 6–7)
 
-- [ ] Manually seed events for top 20 Sydney mosques (using the submission flow)
-- [ ] Focus on Ramadan-specific programs: taraweeh schedules, iftar events, lecture series
+- [x] Manually seed events for top 20 Sydney mosques (using the submission flow) — *seeded 28 real events from 8 flyers across 5 mosques in Session 4*
+- [x] Focus on Ramadan-specific programs: taraweeh schedules, iftar events, lecture series — *covered in Session 4 flyer testing*
 - [ ] QA pass: test all flows on mobile (iPhone + Android), check edge cases
 - [x] PWA setup: add-to-home-screen manifest *(icons not yet generated)*
 - [x] SEO basics: meta tags, sitemap, structured data (Event schema)
 - [x] Simple "About" page explaining what Halaqas is and how to contribute
+- [x] Contact / feedback page with form and admin review — *added in Session 3*
 - [ ] Rate limiting on submission endpoints
 
 **Deliverable:** Halaqas is live with 20+ mosques and real events. Ready for community use.
@@ -113,9 +114,9 @@ The roadmap is split into three phases. Only Phase 1 needs to be complete before
 
 ### Milestone 2.3 — Feedback-Driven Improvements
 
-- [ ] Collect and prioritise community feedback
+- [x] Collect and prioritise community feedback — *feedback table + contact page + admin review page built in Session 3*
 - [ ] Address top usability issues
-- [ ] Optimise AI parsing prompt based on real submission data (common flyer formats, edge cases)
+- [x] Optimise AI parsing prompt based on real submission data (common flyer formats, edge cases) — *iteratively refined across 8 flyers in Session 4, 85% field accuracy*
 - [ ] Add Gemini Flash as fallback for submissions where Llama 4 Scout parsing confidence is low
 
 ---
@@ -146,10 +147,10 @@ The roadmap is split into three phases. Only Phase 1 needs to be complete before
 | 1.3 Submission Flow | 5–7 days | **Done** (R2 upload pending) | 1.1 complete, Groq API key |
 | 1.4 Calendar/Map/Sharing | 3–5 days | **Done** | 1.2 complete |
 | 1.5 Reporting & Admin | 3–5 days | **Done** (auto-archive pending) | 1.2, 1.3 complete |
-| 1.6 Seeding & Launch | 3–5 days | **Partially done** (seeding + QA + rate limiting pending) | All above complete |
-| **Total Phase 1** | **~5–7 weeks** | **~85% complete** (built in 2 sessions) | |
+| 1.6 Seeding & Launch | 3–5 days | **Mostly done** (QA + rate limiting pending) | All above complete |
+| **Total Phase 1** | **~5–7 weeks** | **~90% complete** (built in 4 sessions) | |
 
-Milestones 1.1–1.5 were built in a single session using Claude Code. Remaining work is infrastructure setup (Cloudflare Pages, R2), data (Go Pray import, real event seeding), and polish (QA, rate limiting, PWA icons).
+Milestones 1.1–1.5 were built in a single session using Claude Code. Session 4 completed AI prompt refinement and real event seeding. Remaining work is infrastructure setup (Cloudflare Pages, R2) and polish (QA, rate limiting, PWA icons).
 
 ---
 
@@ -161,5 +162,5 @@ Milestones 1.1–1.5 were built in a single session using Claude Code. Remaining
 | Groq API account + key | **Done** — key configured in .env.local | Resolved |
 | halaqas.com domain | Not yet registered | Low — register early |
 | Cloudflare account | Not yet set up | Low — free tier |
-| Supabase account | **Done** — project created, schema deployed, 20 mosques + 12 events seeded | Resolved |
-| Flyers from top 20 mosques | Need to collect | Medium — requires manual effort in the weeks before Ramadan |
+| Supabase account | **Done** — project created, schema deployed, 22 mosques + 28 real events seeded | Resolved |
+| Flyers from top 20 mosques | **Done** — 8 flyers tested, prompt refined, 28 events seeded | Resolved |

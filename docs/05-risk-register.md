@@ -59,7 +59,7 @@
 | **Impact** | Medium |
 | **Overall** | Medium |
 | **Description** | Flyers vary enormously in design, language, quality, and completeness. The AI may misread dates, confuse speakers, or miss key details. Incorrect listings erode trust. |
-| **Mitigation** | User confirmation step catches most errors before publishing. Display source flyer image on event page so users can verify. Iteratively improve the AI prompt based on real submission data. Fall back to Gemini Flash for low-confidence extractions. Manual form option as ultimate fallback. |
+| **Mitigation** | User confirmation step catches most errors before publishing. Display source flyer image on event page so users can verify. AI prompt iteratively refined against 8 real flyers (Session 4) achieving 85% field accuracy with post-processing for edge cases. Fall back to Gemini Flash for low-confidence extractions. Manual form option as ultimate fallback. |
 | **Contingency** | If AI parsing is consistently unreliable, simplify to a semi-manual flow: AI pre-fills what it can, user completes the rest. Even partial extraction saves time over fully manual entry. |
 
 ### R5: Stale / ghost recurring events accumulate

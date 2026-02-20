@@ -31,7 +31,7 @@ export async function GET(
     headers: {
       'Content-Type': 'text/calendar; charset=utf-8',
       'Content-Disposition': `attachment; filename="${mosque.name.replace(/[^a-zA-Z0-9]/g, '_')}.ics"`,
-      'Cache-Control': 'public, max-age=3600',
+      'Cache-Control': 'no-cache',
     },
   });
 }
