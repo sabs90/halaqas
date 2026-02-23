@@ -11,9 +11,12 @@ export function Hero() {
           <span className="text-sage font-light text-2xl">حلقات</span>
         </h1>
         <p className="mt-3 text-[15px] text-white/85 sm:text-lg">
-          Discover talks, classes, and events at mosques across Sydney
+          Discover talks, classes, and events at mosques across Australia
         </p>
-        <div className="mt-8 flex justify-center">
+        <p className="mt-2 text-sm text-white/60">
+          Know what&apos;s happening at your local mosque? Help the community by adding it.
+        </p>
+        <div className="mt-6 flex justify-center">
           <Button variant="secondary" href="/submit">
             Submit an Event
           </Button>

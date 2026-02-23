@@ -68,11 +68,12 @@
 | Column | Type | Notes |
 |--------|------|-------|
 | id | uuid | Primary key |
-| name | text | Mosque name |
+| name | text | Mosque name (unique constraint) |
 | address | text | Full street address |
 | suburb | text | Suburb name (for filtering) |
-| latitude | decimal | From Go Pray database |
-| longitude | decimal | From Go Pray database |
+| state | text | Australian state/territory code (NSW, VIC, QLD, WA, SA, ACT, NT, TAS) |
+| latitude | decimal | Geocoded coordinates |
+| longitude | decimal | Geocoded coordinates |
 | active | boolean | Default true, false if de-listed |
 | go_pray_id | text | Reference to Go Pray database |
 | created_at | timestamptz | |

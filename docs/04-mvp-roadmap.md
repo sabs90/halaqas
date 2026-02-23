@@ -133,7 +133,7 @@ The roadmap is split into three phases. Only Phase 1 needs to be complete before
 - **Event series / courses:** Better handling of multi-session classes (Week 1 of 8, etc.)
 - **Community features:** Bookmarking events, personal event calendar view
 - **Analytics dashboard:** Public stats (most active mosques, popular event types, peak times)
-- **Expansion:** Other Australian cities (Melbourne, Brisbane) if there's demand
+- **~~Expansion:~~** ~~Other Australian cities (Melbourne, Brisbane) if there's demand~~ — **Done in Session 5** (80 mosques across all 8 states/territories)
 - **Native app:** Only if there's clear evidence the PWA isn't sufficient
 
 ---
@@ -162,5 +162,5 @@ Milestones 1.1–1.5 were built in a single session using Claude Code. Session 4
 | Groq API account + key | **Done** — key configured in .env.local | Resolved |
 | halaqas.com domain | Not yet registered | Low — register early |
 | Cloudflare account | Not yet set up | Low — free tier |
-| Supabase account | **Done** — project created, schema deployed, 22 mosques + 28 real events seeded | Resolved |
+| Supabase account | **Done** — project created, schema deployed, 80 mosques (8 states) + 28 real events seeded | Resolved |
 | Flyers from top 20 mosques | **Done** — 8 flyers tested, prompt refined, 28 events seeded | Resolved |

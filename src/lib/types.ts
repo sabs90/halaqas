@@ -13,6 +13,7 @@ export interface Mosque {
   nicknames: string[];
   address: string;
   suburb: string;
+  state: string;
   latitude: number;
   longitude: number;
   active: boolean;

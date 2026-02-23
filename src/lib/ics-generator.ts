@@ -25,6 +25,26 @@ function escapeICS(text: string): string {
   return text.replace(/\\/g, '\\\\').replace(/;/g, '\\;').replace(/,/g, '\\,').replace(/\n/g, '\\n');
 }
 
+/** Fold lines longer than 75 octets per RFC 5545 */
+function foldLine(line: string): string {
+  const bytes = new TextEncoder().encode(line);
+  if (bytes.length <= 75) return line;
+  const parts: string[] = [];
+  let start = 0;
+  let limit = 75;
+  while (start < bytes.length) {
+    let end = Math.min(start + limit, bytes.length);
+    // Don't split in the middle of a multi-byte UTF-8 character
+    while (end > start && end < bytes.length && (bytes[end] & 0xC0) === 0x80) {
+      end--;
+    }
+    parts.push(new TextDecoder().decode(bytes.slice(start, end)));
+    start = end;
+    limit = 74; // subsequent lines have a leading space, so 75 - 1
+  }
+  return parts.join('\r\n ');
+}
+
 /** Format a Date in Australia/Sydney local time as ICS: YYYYMMDDTHHmmSS */
 function formatSydneyLocal(date: Date): string {
   const parts = new Intl.DateTimeFormat('en-CA', {
@@ -94,7 +114,7 @@ export function generateICS(events: Event[], mosque: Mosque): string {
     'BEGIN:VCALENDAR',
     'VERSION:2.0',
     'PRODID:-//Halaqas//EN',
-    `X-WR-CALNAME:${escapeICS(mosque.name)} — Halaqas`,
+    foldLine(`X-WR-CALNAME:${escapeICS(mosque.name)} - Halaqas`),
     'CALSCALE:GREGORIAN',
     'METHOD:PUBLISH',
     VTIMEZONE,
@@ -143,6 +163,7 @@ export function generateICS(events: Event[], mosque: Mosque): string {
 
     lines.push('BEGIN:VEVENT');
     lines.push(`UID:${event.id}@halaqas.com`);
+    lines.push(`DTSTAMP:${formatUTC(new Date())}`);
     if (isAllDay) {
       lines.push(`DTSTART;VALUE=DATE:${formatDateOnly(event.fixed_date!)}`);
       lines.push(`DTEND;VALUE=DATE:${nextDay(event.fixed_date!)}`);
@@ -150,12 +171,12 @@ export function generateICS(events: Event[], mosque: Mosque): string {
       lines.push(`DTSTART;TZID=Australia/Sydney:${formatSydneyLocal(startDate!)}`);
       lines.push(`DTEND;TZID=Australia/Sydney:${formatSydneyLocal(endDate!)}`);
     }
-    lines.push(`SUMMARY:${escapeICS(event.title)}`);
-    if (location) lines.push(`LOCATION:${escapeICS(location)}`);
+    lines.push(foldLine(`SUMMARY:${escapeICS(event.title)}`));
+    if (location) lines.push(foldLine(`LOCATION:${escapeICS(location)}`));
     const descParts: string[] = [];
     if (event.description) descParts.push(event.description);
     descParts.push('Via halaqas.com — Australian Islamic events directory');
-    lines.push(`DESCRIPTION:${escapeICS(descParts.join('\n\n'))}`);
+    lines.push(foldLine(`DESCRIPTION:${escapeICS(descParts.join('\n\n'))}`));
     lines.push(`URL:${process.env.NEXT_PUBLIC_SITE_URL || 'https://halaqas.com'}/events/${event.id}`);
 
     if (event.is_recurring && event.recurrence_pattern) {
@@ -174,5 +195,5 @@ export function generateICS(events: Event[], mosque: Mosque): string {
   }
 
   lines.push('END:VCALENDAR');
-  return lines.join('\r\n');
+  return lines.join('\r\n') + '\r\n';
 }

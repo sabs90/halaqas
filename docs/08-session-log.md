@@ -4,6 +4,46 @@ This file is the persistent memory between Claude Code sessions. Each entry summ
 
 ---
 
+## Session 5 — Australian Mosque Expansion (2026-02-23)
+
+### Completed
+- **Nationwide mosque expansion:** Added 58 new mosques across all 8 Australian states/territories, bringing the total from 22 (all NSW) to 80. Migration 006 adds `state` column, unique constraint on mosque name, and state index.
+  - NSW: 22 existing + 17 new = 39
+  - VIC: 15, QLD: 8, WA: 8, SA: 5, ACT: 3, NT: 1, TAS: 1
+- **Geocoding helper script:** Created `scripts/generate-mosque-migration.mjs` — takes a hardcoded mosque list, hits Nominatim (OpenStreetMap) at 1 req/sec rate limit, outputs a SQL migration file. 49/58 auto-geocoded; 9 filled with manual approximate coordinates.
+- **State filtering on mosques page:** Added pill-style state filter tabs (All, NSW, VIC, QLD, WA, SA, ACT, NT, TAS) above the search bar. URL params `?state=VIC&q=Preston` work together. Mosque cards show state badge. Count displayed above results.
+- **Map auto-zoom:** Replaced hardcoded Sydney center with `FitBounds` component that auto-zooms the Leaflet map to fit all visible mosques. Map height reduced from 500px to 350px so mosque list is visible on page load.
+- **Hero banner update:** Changed "across Sydney" to "across Australia". Added community invite line: "Know what's happening at your local mosque? Help the community by adding it."
+- **Admin mosque approval fix:** Added `state` field when inserting approved mosque suggestions (defaults to NSW).
+- **Mosque detail page:** Now shows state alongside suburb.
+
+### Decisions Made
+- State stored as short code (NSW, VIC, etc.) not full name — shorter, easier to filter
+- Default mosques page shows all states (not filtered to NSW) to showcase national coverage
+- Unique constraint on mosque name prevents duplicate inserts during migration
+- Map auto-fits to visible mosques rather than hardcoding a city center — works for any state
+- Geocoding script kept as a reusable tool for future mosque additions
+
+### Issues / Bugs
+- 9 mosques needed manual approximate coordinates (Nominatim couldn't resolve exact addresses). Accuracy is suburb-level, sufficient for map display.
+- `mosque_suggestions` table doesn't have a `state` column yet — admin approval defaults to NSW
+
+### Next Session
+- Set up Cloudflare Pages for auto-deploy from GitHub
+- Set up Cloudflare R2 bucket and configure credentials
+- Generate PWA icons
+- QA pass: test all flows on mobile (especially state filtering, map zoom)
+- Seed more events (especially for non-NSW mosques)
+- Add rate limiting to submission and report endpoints
+- Add `state` column to `mosque_suggestions` table and suggestion form
+
+### Open Questions
+- Go Pray database access and format (still pending)
+- halaqas.com domain registration
+- Cloudflare account setup (for Pages + R2)
+
+---
+
 ## Session 4 — AI Prompt Refinement, Real Event Seeding, ICS Fixes (2026-02-20)
 
 ### Completed

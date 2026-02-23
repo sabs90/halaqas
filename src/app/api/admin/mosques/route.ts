@@ -47,6 +47,7 @@ export async function POST(request: NextRequest) {
       name: suggestion.name,
       address: suggestion.address || '',
       suburb: suggestion.suburb || '',
+      state: suggestion.state || 'NSW',
       latitude: suggestion.latitude || 0,
       longitude: suggestion.longitude || 0,
       nicknames: [],

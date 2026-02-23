@@ -30,8 +30,7 @@ export async function GET(
   return new NextResponse(icsContent, {
     headers: {
       'Content-Type': 'text/calendar; charset=utf-8',
-      'Content-Disposition': `attachment; filename="${mosque.name.replace(/[^a-zA-Z0-9]/g, '_')}.ics"`,
-      'Cache-Control': 'no-cache',
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
     },
   });
 }

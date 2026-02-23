@@ -27,6 +27,18 @@ const VenueIcon = new L.Icon({
   popupAnchor: [1, -34],
 });
 
+function FitBounds({ mosques }: { mosques: Mosque[] }) {
+  const map = useMap();
+
+  useEffect(() => {
+    if (mosques.length === 0) return;
+    const bounds = L.latLngBounds(mosques.map(m => [m.latitude, m.longitude] as [number, number]));
+    map.fitBounds(bounds, { padding: [40, 40], maxZoom: 13 });
+  }, [mosques, map]);
+
+  return null;
+}
+
 function LocateButton() {
   const map = useMap();
   const [locating, setLocating] = useState(false);
@@ -66,7 +78,7 @@ export function EventMap({ mosques, events }: EventMapProps) {
     e => !e.mosque_id && e.venue_latitude && e.venue_longitude
   );
 
-  // Sydney centre
+  // Default to Sydney; FitBounds will override if mosques are present
   const center: [number, number] = [-33.8688, 151.0693];
 
   return (
@@ -75,12 +87,13 @@ export function EventMap({ mosques, events }: EventMapProps) {
         center={center}
         zoom={11}
         scrollWheelZoom={true}
-        style={{ height: '500px', width: '100%' }}
+        style={{ height: '350px', width: '100%' }}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
+        <FitBounds mosques={mosques} />
         <LocateButton />
 
         {mosques.map((mosque) => {
