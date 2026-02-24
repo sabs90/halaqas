@@ -53,7 +53,6 @@ export default async function MosqueDetailPage({ params }: Props) {
   const events = await getMosqueEvents(id);
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://halaqas.com';
   const icsHttpUrl = `${siteUrl}/api/mosques/${id}/calendar.ics`;
-  const webcalUrl = siteUrl.replace(/^https?:\/\//, 'webcal://') + `/api/mosques/${id}/calendar.ics`;
 
   return (
     <div className="space-y-6">
@@ -75,7 +74,7 @@ export default async function MosqueDetailPage({ params }: Props) {
         <p className="mt-1 text-xs text-stone">{mosque.suburb}, {mosque.state}</p>
 
         <div className="mt-4 flex flex-wrap gap-3">
-          <SubscribeCalendarButton mosqueName={mosque.name} webcalUrl={webcalUrl} icsHttpUrl={icsHttpUrl} />
+          <SubscribeCalendarButton mosqueName={mosque.name} icsHttpUrl={icsHttpUrl} />
           <Button variant="outline" href={`/events?mosque=${mosque.id}`}>
             View in Directory
           </Button>

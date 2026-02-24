@@ -27,9 +27,11 @@ export async function GET(
 
   const icsContent = generateICS(events || [], mosque);
 
+  const filename = mosque.name.replace(/[^a-zA-Z0-9]/g, '_') + '.ics';
   return new NextResponse(icsContent, {
     headers: {
       'Content-Type': 'text/calendar; charset=utf-8',
+      'Content-Disposition': `attachment; filename="${filename}"`,
       'Cache-Control': 'no-cache, no-store, must-revalidate',
     },
   });
