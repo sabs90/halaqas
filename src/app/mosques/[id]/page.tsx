@@ -75,8 +75,11 @@ export default async function MosqueDetailPage({ params }: Props) {
 
         <div className="mt-4 flex flex-wrap gap-3">
           <SubscribeCalendarButton mosqueName={mosque.name} icsHttpUrl={icsHttpUrl} />
-          <Button variant="outline" href={`/events?mosque=${mosque.id}`}>
-            View in Directory
+          <Button variant="outline" href={`/submit?mosque=${mosque.id}`}>
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
+            </svg>
+            Add an Event
           </Button>
         </div>
       </div>

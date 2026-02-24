@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import type { Mosque, EventType, Language, Gender, PrayerName, ParsedEventData } from '@/lib/types';
 
@@ -115,6 +116,7 @@ interface DuplicateEvent {
 }
 
 export default function SubmitPage() {
+  const searchParams = useSearchParams();
   const [tab, setTab] = useState<Tab>('image');
   const [step, setStep] = useState<Step>('input');
   const [form, setForm] = useState<FormData>(INITIAL_FORM);
@@ -133,9 +135,15 @@ export default function SubmitPage() {
   useEffect(() => {
     fetch('/api/mosques')
       .then(r => r.json())
-      .then(data => setMosques(data))
+      .then(data => {
+        setMosques(data);
+        const mosqueParam = searchParams.get('mosque');
+        if (mosqueParam && data.some((m: Mosque) => m.id === mosqueParam)) {
+          setForm(prev => ({ ...prev, mosque_id: mosqueParam }));
+        }
+      })
       .catch(() => {});
-  }, []);
+  }, [searchParams]);
 
   function updateForm(updates: Partial<FormData>) {
     setForm(prev => ({ ...prev, ...updates }));
