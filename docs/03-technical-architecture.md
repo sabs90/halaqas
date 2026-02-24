@@ -12,7 +12,7 @@
 | Layer | Technology | Rationale |
 |-------|-----------|-----------|
 | **Framework** | Next.js (App Router) | React-based, SSR/SSG support, API routes for backend logic, excellent Claude Code support |
-| **Hosting** | Cloudflare Pages | Generous free tier (unlimited bandwidth), fast Australian edge nodes, GitHub auto-deploy |
+| **Hosting** | Netlify | Free tier with auto-deploy from GitHub, currently at halaqas.netlify.app |
 | **Database** | Supabase (PostgreSQL) | Free tier (500MB, 50K monthly active users), REST API, built-in dashboard, row-level security |
 | **AI Parsing** | Groq API — Llama 4 Scout | Vision + JSON mode, $0.11/$0.34 per million tokens, OpenAI-compatible API |
 | **AI Fallback** | Google Gemini 2.5 Flash | Backup for edge cases where Llama 4 Scout struggles, $0.15/$0.60 per million tokens |
@@ -26,7 +26,7 @@
 
 ```
 ┌─────────────────────────────────────────────────────┐
-│                   Cloudflare Pages                    │
+│                      Netlify                            │
 │                                                       │
 │  ┌──────────────┐  ┌──────────────┐  ┌─────────────┐ │
 │  │  Next.js SSR  │  │  Static Pages │  │  API Routes │ │
@@ -218,9 +218,13 @@ Each mosque gets a dynamic .ics endpoint that generates a valid iCalendar feed:
 - Contains all active events for that mosque
 - Prayer-anchored events include calculated clock times for the current week
 - Recurring events use iCalendar RRULE for proper calendar integration
-- Standard fields: SUMMARY, DTSTART, DTEND, LOCATION, DESCRIPTION, URL
+- Standard fields: SUMMARY, DTSTART, DTEND, LOCATION, DESCRIPTION, URL, DTSTAMP
+- RFC 5545 compliant: VTIMEZONE block (Australia/Sydney), line folding at 75 octets, CRLF line endings
 
-Users subscribe to this URL in their calendar app. The calendar app periodically re-fetches the feed (typically every 6–12 hours for Google Calendar) to pick up new and changed events.
+**Calendar UX:**
+- **Single event:** Dropdown with Download .ics, Google Calendar (`action=TEMPLATE`), Outlook (web compose)
+- **Mosque (all events):** Dropdown with Download .ics (one-time import) and Subscribe via `webcal://` (live-updating feed)
+- Subscription requires the domain to resolve (webcal:// makes the calendar app fetch the URL directly)
 
 ## 9. Image Storage
 
@@ -240,15 +244,16 @@ Users subscribe to this URL in their calendar app. The calendar app periodically
 ## 11. Hosting & Deployment
 
 - Code lives in a GitHub repository
-- Cloudflare Pages auto-deploys on push to `main`
-- Environment variables (Groq API key, Supabase URL/key, admin password) stored in Cloudflare Pages settings
-- No CI/CD pipeline needed beyond Cloudflare's built-in build step
+- Netlify auto-deploys on push to `main` (currently at halaqas.netlify.app)
+- Environment variables (Groq API key, Supabase URL/key, admin password, NEXT_PUBLIC_SITE_URL) stored in Netlify settings
+- `NEXT_PUBLIC_SITE_URL` is baked in at build time — must redeploy after changing
+- No CI/CD pipeline needed beyond Netlify's built-in build step
 
 ## 12. Cost Estimate
 
 | Service | Free Tier Limit | Expected Usage | Monthly Cost |
 |---------|----------------|----------------|-------------|
-| Cloudflare Pages | Unlimited bandwidth, 500 builds/month | Well within limits | $0 |
+| Netlify | 100GB bandwidth, 300 build minutes/month | Well within limits | $0 |
 | Supabase | 500MB database, 1GB file storage, 50K MAU | Well within limits | $0 |
 | Cloudflare R2 | 10GB storage, 10M reads/month | ~1GB images in year one | $0 |
 | Groq API | Pay per token | ~500 submissions/month peak | ~$0.10 |

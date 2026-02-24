@@ -114,7 +114,7 @@
 | **Mitigation** | At expected scale (hundreds of events, not thousands), 500MB is enormous. Image storage is on Cloudflare R2 (separate 10GB free tier). Monitor usage via Supabase dashboard. |
 | **Contingency** | Supabase Pro is $25/month if needed — a very manageable step up if the platform has grown enough to hit limits. |
 
-### R9: Cloudflare Pages build limits
+### R9: Netlify build limits
 
 | Field | Detail |
 |-------|--------|
@@ -122,9 +122,9 @@
 | **Likelihood** | Low |
 | **Impact** | Low |
 | **Overall** | Low |
-| **Description** | Cloudflare Pages free tier allows 500 builds per month. Rapid iteration during development could approach this. |
-| **Mitigation** | 500 builds is roughly 16 per day — more than sufficient even during active development. Batch changes rather than pushing every small fix. |
-| **Contingency** | Cloudflare Pages Pro ($20/month) removes build limits if needed. |
+| **Description** | Netlify free tier allows 300 build minutes per month. Rapid iteration during development could approach this. |
+| **Mitigation** | Each build takes ~2-3 minutes, allowing ~100+ builds per month — more than sufficient even during active development. Batch changes rather than pushing every small fix. |
+| **Contingency** | Netlify Pro ($19/month) provides 25,000 build minutes if needed. |
 
 ---
 
@@ -199,5 +199,5 @@
 | R6: Spam submissions | Low | Rate limiting, AI as natural barrier |
 | R7: Groq API changes | Low | Gemini fallback, abstraction layer |
 | R8: Supabase limits | Low | Well within free tier |
-| R9: Cloudflare build limits | Low | Well within free tier |
+| R9: Netlify build limits | Low | Well within free tier |
 | R11: Privacy concerns | Low | All info already public, removal on request |

@@ -4,6 +4,45 @@ This file is the persistent memory between Claude Code sessions. Each entry summ
 
 ---
 
+## Session 6 — ICS Calendar Fixes & Calendar UX (2026-02-24)
+
+### Completed
+- **Android ICS fix:** Added `DTSTAMP` to every VEVENT in both server-side (`ics-generator.ts`) and client-side (`AddToCalendarButton.tsx`) ICS generation. Android strictly requires this per RFC 5545; without it, calendar says "no events could be added".
+- **RFC 5545 line folding:** Added `foldLine()` function to `ics-generator.ts` that folds lines longer than 75 octets per spec, with proper UTF-8 boundary handling. Applied to SUMMARY, LOCATION, DESCRIPTION, X-WR-CALNAME.
+- **Trailing CRLF:** ICS output now ends with `\r\n` as required by spec.
+- **Single-event "Add to Calendar" dropdown:** Rewrote `AddToCalendarButton.tsx` from a simple download button to a dropdown with three options: Download .ics, Google Calendar (`action=TEMPLATE`), and Outlook (web compose URL). Extracted shared `getEventDates()` function for date computation across all three formats.
+- **Mosque "Add All to Calendar" dropdown:** Rewrote `SubscribeCalendarButton.tsx` as a dropdown with two options: Download .ics (one-time import) and Subscribe to calendar (live-updating via `webcal://` protocol). Each option has a subtitle explaining the behaviour.
+- **"Add an Event" button on mosque page:** Added button linking to `/submit?mosque={id}` on mosque detail pages.
+- **Submit page mosque pre-fill:** Added `useSearchParams` to submit page so `?mosque=UUID` query param pre-fills the mosque selector after mosques load.
+- **Deployed to Netlify:** Site now live at `halaqas.netlify.app`. Committed and pushed all changes.
+
+### Decisions Made
+- Google Calendar `action=TEMPLATE` works reliably for single events (opens pre-filled form in browser). Google Calendar `cid=` subscription is unreliable for third-party ICS feeds — removed from mosque dropdown.
+- Outlook `addfromweb` subscription similarly unreliable — removed from mosque dropdown.
+- Mosque calendar dropdown simplified to two options: .ics download (works everywhere now) and webcal:// subscription (will work when domain is set up).
+- `Content-Disposition: attachment` kept on mosque ICS endpoint for download behaviour.
+- Hosting moved to Netlify (not Cloudflare Pages as originally planned).
+
+### Issues / Bugs
+- `webcal://` subscription fails because `NEXT_PUBLIC_SITE_URL` points to `halaqas.com` which doesn't resolve yet. Will work once domain is configured to point to Netlify.
+- `NEXT_PUBLIC_SITE_URL` is baked in at Next.js build time — must redeploy after changing it in Netlify env vars.
+- Apple Calendar aggressively caches subscribed calendars (known from Session 4).
+
+### Next Session
+- Set up `halaqas.com` domain and point to Netlify — this unblocks webcal:// subscription
+- Update `NEXT_PUBLIC_SITE_URL` to the final domain and redeploy
+- Set up Cloudflare R2 bucket for image storage
+- Generate PWA icons
+- QA pass: test all calendar flows on mobile (Android + iOS) with production URL
+- Add rate limiting to submission and report endpoints
+- Seed more events (especially for non-NSW mosques)
+
+### Open Questions
+- halaqas.com domain registration and DNS setup (immediate priority)
+- Cloudflare R2 setup (for image storage — separate from hosting)
+
+---
+
 ## Session 5 — Australian Mosque Expansion (2026-02-23)
 
 ### Completed

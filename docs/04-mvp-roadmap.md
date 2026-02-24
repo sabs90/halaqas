@@ -15,13 +15,13 @@ The roadmap is split into three phases. Only Phase 1 needs to be complete before
 ### Milestone 1.1 — Foundation (Week 1–2)
 
 - [x] Set up GitHub repo, Next.js project, Tailwind CSS
-- [ ] Connect Cloudflare Pages for auto-deploy
+- [x] Connect hosting for auto-deploy *(deployed on Netlify, not Cloudflare Pages as originally planned)*
 - [x] Set up Supabase project with database schema (mosques, events, amendments tables)
 - [ ] Set up Cloudflare R2 bucket for image storage
 - [ ] Import Go Pray mosque database (names, addresses, coordinates) into Supabase
 - [x] Basic project structure: pages, API routes, layout components
 
-**Deliverable:** Empty but deployed website at halaqas.com with mosque data loaded.
+**Deliverable:** Empty but deployed website at halaqas.netlify.app with mosque data loaded. Domain halaqas.com pending DNS setup.
 
 ### Milestone 1.2 — Event Directory & Mosque Pages (Week 2–3)
 
@@ -60,7 +60,7 @@ The roadmap is split into three phases. Only Phase 1 needs to be complete before
 - [x] Geolocation "near me" option
 - [x] WhatsApp share button on each event with Open Graph meta tags for rich preview
 - [x] Source flyer image displayed on event detail page
-- [x] "Add to Calendar" button on individual event detail pages with RRULE for recurring events — *added in Session 2*
+- [x] "Add to Calendar" button on individual event detail pages with RRULE for recurring events — *added in Session 2, upgraded to dropdown with .ics/Google Cal/Outlook in Session 6*
 
 **Deliverable:** Full discovery experience — list, map, calendar, sharing.
 
@@ -81,7 +81,7 @@ The roadmap is split into three phases. Only Phase 1 needs to be complete before
 
 - [x] Manually seed events for top 20 Sydney mosques (using the submission flow) — *seeded 28 real events from 8 flyers across 5 mosques in Session 4*
 - [x] Focus on Ramadan-specific programs: taraweeh schedules, iftar events, lecture series — *covered in Session 4 flyer testing*
-- [ ] QA pass: test all flows on mobile (iPhone + Android), check edge cases
+- [ ] QA pass: test all flows on mobile (iPhone + Android), check edge cases — *partial: calendar flows tested on Android in Session 6, webcal blocked by domain not resolving*
 - [x] PWA setup: add-to-home-screen manifest *(icons not yet generated)*
 - [x] SEO basics: meta tags, sitemap, structured data (Event schema)
 - [x] Simple "About" page explaining what Halaqas is and how to contribute
@@ -142,7 +142,7 @@ The roadmap is split into three phases. Only Phase 1 needs to be complete before
 
 | Milestone | Estimated Effort | Status | Dependencies |
 |-----------|-----------------|--------|--------------|
-| 1.1 Foundation | 3–5 days | **Mostly done** (R2 + Cloudflare Pages pending) | Go Pray database access |
+| 1.1 Foundation | 3–5 days | **Mostly done** (R2 + domain pending, Netlify deployed) | Go Pray database access |
 | 1.2 Event Directory | 5–7 days | **Done** | 1.1 complete |
 | 1.3 Submission Flow | 5–7 days | **Done** (R2 upload pending) | 1.1 complete, Groq API key |
 | 1.4 Calendar/Map/Sharing | 3–5 days | **Done** | 1.2 complete |
@@ -150,7 +150,7 @@ The roadmap is split into three phases. Only Phase 1 needs to be complete before
 | 1.6 Seeding & Launch | 3–5 days | **Mostly done** (QA + rate limiting pending) | All above complete |
 | **Total Phase 1** | **~5–7 weeks** | **~90% complete** (built in 4 sessions) | |
 
-Milestones 1.1–1.5 were built in a single session using Claude Code. Session 4 completed AI prompt refinement and real event seeding. Remaining work is infrastructure setup (Cloudflare Pages, R2) and polish (QA, rate limiting, PWA icons).
+Milestones 1.1–1.5 were built in a single session using Claude Code. Session 4 completed AI prompt refinement and real event seeding. Session 6 deployed to Netlify and fixed ICS calendar issues for Android. Remaining work is domain setup (halaqas.com), R2 image storage, and polish (QA, rate limiting, PWA icons).
 
 ---
 
