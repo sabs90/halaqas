@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import type { Mosque, EventType, Language, Gender, PrayerName, ParsedEventData } from '@/lib/types';
@@ -116,6 +116,14 @@ interface DuplicateEvent {
 }
 
 export default function SubmitPage() {
+  return (
+    <Suspense fallback={<div className="text-center py-16 text-warm-gray">Loading...</div>}>
+      <SubmitPageContent />
+    </Suspense>
+  );
+}
+
+function SubmitPageContent() {
   const searchParams = useSearchParams();
   const [tab, setTab] = useState<Tab>('image');
   const [step, setStep] = useState<Step>('input');
