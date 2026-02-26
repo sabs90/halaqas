@@ -164,8 +164,9 @@
 | `/api/admin/amendments/[id]` | POST | Approve or reject amendment (protected) |
 | `/api/admin/events` | GET | List all events (protected) |
 | `/api/admin/events` | PATCH/DELETE | Update or delete events (protected) |
-| `/api/admin/mosques` | GET | List pending mosque suggestions (protected) |
+| `/api/admin/mosques` | GET | List pending mosque suggestions; `?list=all` returns all mosques (protected) |
 | `/api/admin/mosques` | POST | Approve or reject mosque suggestion (protected) |
+| `/api/admin/mosques` | PATCH | Update mosque details (protected) |
 | `/api/mosques/suggest` | POST | Submit a mosque suggestion |
 | `/api/mosques/[id]/nicknames` | POST | Add a nickname for a mosque |
 | `/api/geocode` | POST | Geocode an address |

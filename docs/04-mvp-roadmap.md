@@ -73,6 +73,7 @@ The roadmap is split into three phases. Only Phase 1 needs to be complete before
 - [x] Admin review queue: old details vs new details, approve/reject
 - [x] Admin ability to edit, delete, archive events
 - [x] Admin ability to de-list a mosque
+- [x] Admin ability to view and edit all mosque details (name, address, suburb, state, coordinates, nicknames, active status)
 - [ ] Auto-archive logic: recurring events flagged after 3 months of no confirmation
 
 **Deliverable:** Complete quality management loop — community reports, admin reviews.

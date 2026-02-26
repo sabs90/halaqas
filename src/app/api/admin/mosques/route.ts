@@ -2,12 +2,23 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServiceClient } from '@/lib/supabase';
 import { isAdmin } from '@/lib/admin-auth';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   if (!(await isAdmin())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
   const supabase = getServiceClient();
+  const { searchParams } = new URL(request.url);
+
+  if (searchParams.get('list') === 'all') {
+    const { data, error } = await supabase
+      .from('mosques')
+      .select('*')
+      .order('name');
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json(data);
+  }
+
   const { data, error } = await supabase
     .from('mosque_suggestions')
     .select('*')
@@ -79,5 +90,33 @@ export async function POST(request: NextRequest) {
     }
   }
 
+  return NextResponse.json({ success: true });
+}
+
+const ALLOWED_FIELDS = ['name', 'address', 'suburb', 'state', 'latitude', 'longitude', 'nicknames', 'active'];
+
+export async function PATCH(request: NextRequest) {
+  if (!(await isAdmin())) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const body = await request.json();
+  const { id, ...rest } = body;
+  if (!id) {
+    return NextResponse.json({ error: 'Missing mosque id' }, { status: 400 });
+  }
+
+  const updates: Record<string, unknown> = {};
+  for (const key of ALLOWED_FIELDS) {
+    if (key in rest) updates[key] = rest[key];
+  }
+  if (Object.keys(updates).length === 0) {
+    return NextResponse.json({ error: 'No valid fields to update' }, { status: 400 });
+  }
+
+  const supabase = getServiceClient();
+  const { error } = await supabase.from('mosques').update(updates).eq('id', id);
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ success: true });
 }

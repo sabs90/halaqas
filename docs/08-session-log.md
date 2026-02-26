@@ -4,6 +4,34 @@ This file is the persistent memory between Claude Code sessions. Each entry summ
 
 ---
 
+## Session 7 — Admin Mosque Edit Feature (2026-02-27)
+
+### Completed
+- **Admin mosque management page:** New page at `/admin/mosques/manage` to view and edit all mosques in the database. Features inline editing of name, address, suburb, state, coordinates, nicknames, and active status.
+- **Extended admin mosques API:** GET now supports `?list=all` to return all mosques (ordered by name). Added PATCH handler to update mosque fields with whitelist validation.
+- **Admin dashboard card:** Added "Manage Mosques" card to admin dashboard, placed before "Mosque Suggestions".
+- Client-side search (name, suburb, address, nicknames) and state filter dropdown on the manage page.
+
+### Decisions Made
+- Kept existing `/admin/mosques` suggestions page unchanged — the new manage page is a separate route at `/admin/mosques/manage`.
+- PATCH handler whitelists 8 fields (`name`, `address`, `suburb`, `state`, `latitude`, `longitude`, `nicknames`, `active`) to prevent arbitrary updates.
+- No new migration needed — all columns already exist in the mosques table.
+
+### Issues / Bugs
+- Pre-existing build error: `/submit` page uses `useSearchParams()` without a Suspense boundary, causing `npm run build` to fail. TypeScript compiles cleanly (no type errors). This issue predates this session.
+
+### Next Session
+- Fix the `/submit` page Suspense boundary issue so `npm run build` passes
+- Set up `halaqas.com` domain and point to Netlify
+- Set up Cloudflare R2 bucket for image storage
+- QA pass: test all flows on mobile with production URL
+- Add rate limiting to submission endpoints
+
+### Open Questions
+- halaqas.com domain registration and DNS setup (carried over)
+
+---
+
 ## Session 6 — ICS Calendar Fixes & Calendar UX (2026-02-24)
 
 ### Completed
