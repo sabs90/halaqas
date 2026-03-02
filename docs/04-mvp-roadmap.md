@@ -46,7 +46,7 @@ The roadmap is split into three phases. Only Phase 1 needs to be complete before
 - [x] Mosque dropdown selector from database, plus "Other Venue" option with manual address
 - [x] Prayer-anchored time selection (prayer + offset)
 - [x] Recurring event options (pattern selector)
-- [ ] Image upload to Cloudflare R2 *(fallback to data URLs until R2 configured)*
+- [ ] Image upload to Cloudflare R2 *(pipeline wired up in Session 9: compress → upload → store URL → display. Uses data URL fallback until R2 credentials configured)*
 - [x] Event published to database on confirmation
 
 **Deliverable:** End-to-end submission flow working — upload flyer, confirm details, event goes live.
@@ -59,7 +59,7 @@ The roadmap is split into three phases. Only Phase 1 needs to be complete before
 - [x] Click mosque pin → see upcoming events
 - [x] Geolocation "near me" option
 - [x] WhatsApp share button on each event with Open Graph meta tags for rich preview
-- [x] Source flyer image displayed on event detail page
+- [x] Source flyer image displayed on event detail page — *wired up end-to-end in Session 9 (was previously always null)*
 - [x] "Add to Calendar" button on individual event detail pages with RRULE for recurring events — *added in Session 2, upgraded to dropdown with .ics/Google Cal/Outlook in Session 6*
 
 **Deliverable:** Full discovery experience — list, map, calendar, sharing.
@@ -74,13 +74,14 @@ The roadmap is split into three phases. Only Phase 1 needs to be complete before
 - [x] Admin ability to edit, delete, archive events
 - [x] Admin ability to de-list a mosque
 - [x] Admin ability to view and edit all mosque details (name, address, suburb, state, coordinates, nicknames, active status)
+- [x] Batch flyer processing tool: multi-file upload, sequential AI parsing, editable review table, bulk submission — *added in Session 10*
 - [ ] Auto-archive logic: recurring events flagged after 3 months of no confirmation
 
 **Deliverable:** Complete quality management loop — community reports, admin reviews.
 
 ### Milestone 1.6 — Content Seeding & Launch Prep (Week 6–7)
 
-- [x] Manually seed events for top 20 Sydney mosques (using the submission flow) — *seeded 28 real events from 8 flyers across 5 mosques in Session 4*
+- [x] Manually seed events for top 20 Sydney mosques (using the submission flow) — *seeded 28 real events from 8 flyers across 5 mosques in Session 4. Coverage tracker at `docs/09-mosque-coverage.md`*
 - [x] Focus on Ramadan-specific programs: taraweeh schedules, iftar events, lecture series — *covered in Session 4 flyer testing*
 - [ ] QA pass: test all flows on mobile (iPhone + Android), check edge cases — *partial: calendar flows tested on Android in Session 6, webcal blocked by domain not resolving*
 - [x] PWA setup: add-to-home-screen manifest *(icons not yet generated)*

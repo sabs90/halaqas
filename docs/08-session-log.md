@@ -4,28 +4,119 @@ This file is the persistent memory between Claude Code sessions. Each entry summ
 
 ---
 
-## Session 7 — Admin Mosque Edit Feature (2026-02-27)
+## Session 10 — Batch Flyer Processing Tool (2026-03-03)
+
+### Completed
+- **Batch flyer processing page** (`/admin/batch`): New admin tool for bulk event data entry. Three-step flow: Upload → Review → Submit.
+  - **Upload step:** Multi-file drag-and-drop zone with sequential flyer processing (avoids Groq rate limits). Shows thumbnails with live status per flyer (queued/parsing/done/error) and event count.
+  - **Review step:** Events grouped by source flyer with collapsible sections. Each event is an editable card with: checkbox to include/exclude, confidence badge (green/amber/red), editable title, mosque dropdown, event type, language, gender, speaker, time mode toggle (fixed/prayer), recurrence, description. Compact 2-column layout. Select All / Deselect All controls.
+  - **Submit step:** Iterates through selected events, POSTs to `/api/events` with `force: true` (skip duplicate detection). Real-time progress bar. Summary of created/failed events. Retry Failed button. Start New Batch to reset.
+- **Admin parse-flyers API** (`/api/admin/parse-flyers`): Admin-gated endpoint accepting single image via FormData. Calls `parseImageWithGroqMulti()` for multi-event extraction + `uploadToR2()` in parallel. Returns `{ events, flyer_image_url }`.
+- **Admin dashboard updated:** Added "Batch Process Flyers" card to admin dashboard grid.
+
+### Decisions Made
+- Client-side orchestration — each flyer sent individually to the API endpoint (avoids Netlify serverless timeout limits). Progress tracked in the browser.
+- Sequential flyer processing to avoid Groq rate limits (not parallel).
+- Reused existing `POST /api/events` with `force: true` for submission — no new event creation logic needed.
+- Duplicated `compressImage()` and mosque matching logic from `/submit` into batch page (decoupled from public form).
+- No changes to `groq.ts`, `types.ts`, `r2.ts`, or `events/route.ts`.
+
+### Issues / Bugs
+- None from this session.
+
+### Next Session
+- Set up `halaqas.com` domain and point to Netlify
+- Set up Cloudflare R2 bucket for image storage (will replace data URL fallback)
+- QA pass: test batch tool with real flyers on mobile
+- Add rate limiting to submission endpoints
+- Continue seeding events using the coverage tracker and batch tool
+
+### Open Questions
+- halaqas.com domain registration and DNS setup (carried over — main blocker)
+
+---
+
+## Session 9 — Flyer Image Save & Display (2026-03-02)
+
+### Completed
+- **Flyer image pipeline wired up end-to-end:** Uploaded flyers are now saved and displayed on event detail pages. Previously the image was parsed by AI then discarded — `flyer_image_url` was always null.
+- **Client-side image compression:** Added `compressImage()` in the submit page — resizes to max 1200px wide (preserving aspect ratio) and re-encodes as JPEG at 0.75 quality before uploading. Keeps data URL fallback manageable (~100-200KB vs 2-5MB raw).
+- **Parse-image API uploads flyer:** `/api/parse-image` now calls `uploadToR2()` in parallel with Groq parsing and returns `flyer_image_url` in the response. Uses data URL fallback until R2 credentials are configured.
+- **Form state capture:** `applyParsedData()` now captures `flyer_image_url` from the parse response into form state. The existing `handleSubmit()` already spreads the full form into the POST body, so it flows through automatically.
+- **Type updated:** Added `flyer_image_url` to `ParsedEventData` interface.
+
+### Decisions Made
+- Image compression done client-side (Canvas API) rather than server-side — reduces upload size before it hits the API, and keeps data URL fallback size reasonable.
+- Compression settings: max 1200px width, JPEG 0.75 quality — good balance of visual quality vs file size for flyers.
+- Upload runs in parallel with Groq parsing (`Promise.all`) — no additional latency.
+
+### Issues / Bugs
+- R2 credentials still not configured — images stored as base64 data URLs in the database. This works but is inefficient for storage. Will be resolved when R2 bucket is set up.
+
+### Next Session
+- Set up `halaqas.com` domain and point to Netlify
+- Set up Cloudflare R2 bucket for image storage (will replace data URL fallback)
+- QA pass: test flyer upload → event display flow on mobile
+- Add rate limiting to submission endpoints
+- Continue seeding events using the coverage tracker as a guide
+
+### Open Questions
+- halaqas.com domain registration and DNS setup (carried over — main blocker)
+
+---
+
+## Session 8 — Planning & Coverage Tracker (2026-03-02)
+
+### Completed
+- **Mosque coverage tracker:** Created `docs/09-mosque-coverage.md` — a checklist of all 80 mosques organised by state and approximate prominence, with event counts. Serves as a manual to-do list for seeding events during Ramadan.
+- **Reviewed project status:** Assessed overall progress (~90% of Phase 1 complete), identified remaining blockers (domain, R2, rate limiting).
+
+### Decisions Made
+- **Google Calendar sync approach parked:** Considered maintaining a Google Calendar per mosque and syncing nightly, but decided to hold off until `halaqas.com` domain is registered — the existing `webcal://` subscription should work once DNS resolves. Google Calendar sync would add significant complexity (80 calendars, API credentials, prayer-anchored time recalculation, up to 24hr delay).
+- Coverage tracker kept as a simple markdown file rather than a database feature — easy to update manually between sessions.
+
+### Issues / Bugs
+- None from this session.
+
+### Next Session
+- Set up `halaqas.com` domain and point to Netlify
+- Update `NEXT_PUBLIC_SITE_URL` to final domain and redeploy
+- Set up Cloudflare R2 bucket for image storage
+- QA pass: test all flows on mobile with production URL
+- Add rate limiting to submission endpoints
+- Continue seeding events using the coverage tracker as a guide
+
+### Open Questions
+- halaqas.com domain registration and DNS setup (carried over — this is the main blocker)
+
+---
+
+## Session 7 — Admin Mosque Management & Build Fix (2026-03-02)
 
 ### Completed
 - **Admin mosque management page:** New page at `/admin/mosques/manage` to view and edit all mosques in the database. Features inline editing of name, address, suburb, state, coordinates, nicknames, and active status.
 - **Extended admin mosques API:** GET now supports `?list=all` to return all mosques (ordered by name). Added PATCH handler to update mosque fields with whitelist validation.
 - **Admin dashboard card:** Added "Manage Mosques" card to admin dashboard, placed before "Mosque Suggestions".
-- Client-side search (name, suburb, address, nicknames) and state filter dropdown on the manage page.
+- **Client-side search and filter:** Search across name, suburb, address, nicknames; state dropdown filter.
+- **Auto-geocoding on address edit:** Changing a mosque's address and blurring the field auto-geocodes via `/api/geocode` and populates lat/lng fields. Shows status feedback (found/not found).
+- **Clickable mosque cards:** Entire mosque card is clickable to open edit form, not just a small Edit button.
+- **Fixed /submit build error:** Wrapped `useSearchParams()` in a `<Suspense>` boundary — `npm run build` now passes cleanly.
 
 ### Decisions Made
 - Kept existing `/admin/mosques` suggestions page unchanged — the new manage page is a separate route at `/admin/mosques/manage`.
 - PATCH handler whitelists 8 fields (`name`, `address`, `suburb`, `state`, `latitude`, `longitude`, `nicknames`, `active`) to prevent arbitrary updates.
 - No new migration needed — all columns already exist in the mosques table.
+- Reused existing `/api/geocode` endpoint for admin mosque address geocoding.
 
 ### Issues / Bugs
-- Pre-existing build error: `/submit` page uses `useSearchParams()` without a Suspense boundary, causing `npm run build` to fail. TypeScript compiles cleanly (no type errors). This issue predates this session.
+- None outstanding from this session.
 
 ### Next Session
-- Fix the `/submit` page Suspense boundary issue so `npm run build` passes
 - Set up `halaqas.com` domain and point to Netlify
 - Set up Cloudflare R2 bucket for image storage
 - QA pass: test all flows on mobile with production URL
 - Add rate limiting to submission endpoints
+- Seed more events (especially for non-NSW mosques)
 
 ### Open Questions
 - halaqas.com domain registration and DNS setup (carried over)

@@ -167,6 +167,7 @@
 | `/api/admin/mosques` | GET | List pending mosque suggestions; `?list=all` returns all mosques (protected) |
 | `/api/admin/mosques` | POST | Approve or reject mosque suggestion (protected) |
 | `/api/admin/mosques` | PATCH | Update mosque details (protected) |
+| `/api/admin/parse-flyers` | POST | Parse single flyer image, return all extracted events + flyer URL (protected) |
 | `/api/mosques/suggest` | POST | Submit a mosque suggestion |
 | `/api/mosques/[id]/nicknames` | POST | Add a nickname for a mosque |
 | `/api/geocode` | POST | Geocode an address |

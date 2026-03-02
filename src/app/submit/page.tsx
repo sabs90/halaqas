@@ -196,16 +196,48 @@ function SubmitPageContent() {
       else updates.venue_name = parsed.mosque_or_venue;
     }
     if (parsed.venue_address) updates.venue_address = parsed.venue_address;
+    if (parsed.flyer_image_url) updates.flyer_image_url = parsed.flyer_image_url;
     updateForm(updates);
     setStep('confirm');
+  }
+
+  async function compressImage(file: File): Promise<File> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const MAX_WIDTH = 1200;
+        let { width, height } = img;
+        if (width > MAX_WIDTH) {
+          height = Math.round(height * (MAX_WIDTH / width));
+          width = MAX_WIDTH;
+        }
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) { resolve(file); return; }
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) { resolve(file); return; }
+            resolve(new File([blob], file.name.replace(/\.\w+$/, '.jpg'), { type: 'image/jpeg' }));
+          },
+          'image/jpeg',
+          0.75
+        );
+      };
+      img.onerror = () => reject(new Error('Failed to load image'));
+      img.src = URL.createObjectURL(file);
+    });
   }
 
   async function processImageFile(file: File) {
     setParsing(true);
     setError('');
     try {
+      const compressed = await compressImage(file);
       const formData = new globalThis.FormData();
-      formData.append('image', file);
+      formData.append('image', compressed);
 
       const res = await fetch('/api/parse-image', { method: 'POST', body: formData });
       if (!res.ok) throw new Error('Failed to parse image');

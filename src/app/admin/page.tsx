@@ -92,6 +92,10 @@ export default function AdminPage() {
           <h2 className="text-lg font-bold text-charcoal">Feedback</h2>
           <p className="text-sm text-warm-gray mt-1">Review messages and feedback from users.</p>
         </Link>
+        <Link href="/admin/batch" className="block bg-white border border-sand-dark rounded-card p-6 hover:border-primary hover:shadow-card-hover transition-all">
+          <h2 className="text-lg font-bold text-charcoal">Batch Process Flyers</h2>
+          <p className="text-sm text-warm-gray mt-1">Upload multiple flyers, review extracted events, and submit in bulk.</p>
+        </Link>
       </div>
     </div>
   );

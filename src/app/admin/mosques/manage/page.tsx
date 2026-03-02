@@ -16,6 +16,8 @@ export default function ManageMosquesPage() {
   const [editForm, setEditForm] = useState<Partial<Mosque>>({});
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [geocoding, setGeocoding] = useState(false);
+  const [geocodeStatus, setGeocodeStatus] = useState<'idle' | 'found' | 'not_found'>('idle');
 
   useEffect(() => { loadMosques(); }, []);
 
@@ -45,6 +47,32 @@ export default function ManageMosquesPage() {
     setEditingId(null);
     setEditForm({});
     setError('');
+    setGeocodeStatus('idle');
+  }
+
+  async function geocodeAddress() {
+    const address = editForm.address?.trim();
+    if (!address) return;
+    setGeocoding(true);
+    setGeocodeStatus('idle');
+    try {
+      const res = await fetch('/api/geocode', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ address }),
+      });
+      const data = await res.json();
+      if (data.coordinates) {
+        setEditForm(prev => ({ ...prev, latitude: data.coordinates.lat, longitude: data.coordinates.lng }));
+        setGeocodeStatus('found');
+      } else {
+        setGeocodeStatus('not_found');
+      }
+    } catch {
+      setGeocodeStatus('not_found');
+    } finally {
+      setGeocoding(false);
+    }
   }
 
   async function saveEdit() {
@@ -142,9 +170,13 @@ export default function ManageMosquesPage() {
                   <input
                     type="text"
                     value={editForm.address || ''}
-                    onChange={e => setEditForm({ ...editForm, address: e.target.value })}
+                    onChange={e => { setEditForm({ ...editForm, address: e.target.value }); setGeocodeStatus('idle'); }}
+                    onBlur={geocodeAddress}
                     className="w-full text-sm rounded-button border border-sand-dark p-2.5 bg-white text-charcoal"
                   />
+                  {geocoding && <p className="text-xs text-warm-gray mt-1 animate-pulse">Looking up coordinates...</p>}
+                  {geocodeStatus === 'found' && <p className="text-xs text-green-600 mt-1">Coordinates updated from address</p>}
+                  {geocodeStatus === 'not_found' && <p className="text-xs text-amber-600 mt-1">Could not geocode address — enter coordinates manually</p>}
                 </div>
                 <div className="grid gap-3 sm:grid-cols-4">
                   <div>
@@ -213,28 +245,26 @@ export default function ManageMosquesPage() {
                 </div>
               </div>
             ) : (
-              <div className="flex items-center gap-4">
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs font-medium px-2 py-0.5 rounded-tag bg-primary/10 text-primary">
-                      {mosque.state}
-                    </span>
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-tag ${
-                      mosque.active ? 'bg-sage/20 text-sage-deep' : 'bg-stone/20 text-stone'
-                    }`}>
-                      {mosque.active ? 'active' : 'inactive'}
-                    </span>
-                  </div>
-                  <h3 className="mt-1 text-sm font-bold text-charcoal truncate">{mosque.name}</h3>
-                  <p className="text-xs text-warm-gray truncate">{mosque.address}</p>
-                  {mosque.nicknames?.length > 0 && (
-                    <p className="text-xs text-stone truncate">aka: {mosque.nicknames.join(', ')}</p>
-                  )}
+              <button
+                onClick={() => startEdit(mosque)}
+                className="w-full text-left cursor-pointer"
+              >
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium px-2 py-0.5 rounded-tag bg-primary/10 text-primary">
+                    {mosque.state}
+                  </span>
+                  <span className={`text-xs font-medium px-2 py-0.5 rounded-tag ${
+                    mosque.active ? 'bg-sage/20 text-sage-deep' : 'bg-stone/20 text-stone'
+                  }`}>
+                    {mosque.active ? 'active' : 'inactive'}
+                  </span>
                 </div>
-                <Button variant="outline" onClick={() => startEdit(mosque)} className="!text-xs !px-3 !py-1.5 shrink-0">
-                  Edit
-                </Button>
-              </div>
+                <h3 className="mt-1 text-sm font-bold text-charcoal truncate">{mosque.name}</h3>
+                <p className="text-xs text-warm-gray truncate">{mosque.address}</p>
+                {mosque.nicknames?.length > 0 && (
+                  <p className="text-xs text-stone truncate">aka: {mosque.nicknames.join(', ')}</p>
+                )}
+              </button>
             )}
           </div>
         ))}

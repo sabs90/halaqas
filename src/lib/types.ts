@@ -82,6 +82,7 @@ export interface ParsedEventData {
   recurrence_end_date: string | null;
   description: string | null;
   venue_address: string | null;
+  flyer_image_url: string | null;
   confidence: number;
 }
 
