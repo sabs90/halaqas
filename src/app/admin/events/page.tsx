@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
-import { EventTypeTag } from '@/components/events/EventTypeTag';
+import { EventTypeTag, AudienceTag } from '@/components/events/EventTypeTag';
 import type { Event } from '@/lib/types';
 import Link from 'next/link';
 
@@ -64,8 +64,11 @@ export default function AdminEventsPage() {
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-2">
                 <EventTypeTag type={event.event_type} />
+                {event.is_kids && <AudienceTag kind="kids" />}
+                {event.is_family && <AudienceTag kind="family" />}
                 <span className={`text-xs font-medium px-2 py-0.5 rounded-tag ${
                   event.status === 'active' ? 'bg-sage/20 text-sage-deep' :
+                  event.status === 'pending_review' ? 'bg-amber-100 text-amber-800' :
                   event.status === 'archived' ? 'bg-stone/20 text-stone' :
                   'bg-secondary/20 text-secondary-dark'
                 }`}>

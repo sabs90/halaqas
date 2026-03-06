@@ -44,6 +44,8 @@ Each event object must have these fields:
   "recurrence_end_date": "string — ISO date (YYYY-MM-DD) or null. For ALL Ramadan 2026 recurring events (daily_ramadan, weekly during Ramadan, tahajjud in last 10 nights, etc.), use '2026-03-19'. If the flyer is explicitly about Ramadan (e.g. titled 'Ramadan Lessons', 'Ramadan Program', etc.), ALL recurring events on it end at Ramadan — use '2026-03-19'. Only null for non-Ramadan ongoing events with no stated end.",
   "description": "string — include ALL of these if present on the flyer: number of rak'at, juz coverage (e.g. '1½ Juz every night'), registration links/URLs, contact phone numbers, website URLs, special instructions, topics covered, cost/pricing, capacity limits, age restrictions, and any other useful details. Or null if truly nothing extra.",
   "venue_address": "string — full street address if shown on the flyer, or null",
+  "is_kids": "boolean — true if this event is specifically for kids/children (e.g. 'kids program', 'children's class', 'kids Quran competition', 'youth under 12'). Default false.",
+  "is_family": "boolean — true if this event is explicitly family-oriented or welcomes families (e.g. 'family iftar', 'family night', 'bring the whole family', 'fun for the family'). Default false.",
   "confidence": "number 0-1 — your overall confidence in the extraction"
 }
 

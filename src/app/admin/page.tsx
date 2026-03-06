@@ -72,6 +72,10 @@ export default function AdminPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
+        <Link href="/admin/review" className="block bg-white border border-amber-300 rounded-card p-6 hover:border-primary hover:shadow-card-hover transition-all">
+          <h2 className="text-lg font-bold text-charcoal">Review Submissions</h2>
+          <p className="text-sm text-warm-gray mt-1">Approve or reject user-submitted events before they go live.</p>
+        </Link>
         <Link href="/admin/amendments" className="block bg-white border border-sand-dark rounded-card p-6 hover:border-primary hover:shadow-card-hover transition-all">
           <h2 className="text-lg font-bold text-charcoal">Review Amendments</h2>
           <p className="text-sm text-warm-gray mt-1">Review and approve or reject reported issues.</p>
@@ -95,6 +99,10 @@ export default function AdminPage() {
         <Link href="/admin/batch" className="block bg-white border border-sand-dark rounded-card p-6 hover:border-primary hover:shadow-card-hover transition-all">
           <h2 className="text-lg font-bold text-charcoal">Batch Process Flyers</h2>
           <p className="text-sm text-warm-gray mt-1">Upload multiple flyers, review extracted events, and submit in bulk.</p>
+        </Link>
+        <Link href="/admin/analytics" className="block bg-white border border-sand-dark rounded-card p-6 hover:border-primary hover:shadow-card-hover transition-all">
+          <h2 className="text-lg font-bold text-charcoal">Analytics</h2>
+          <p className="text-sm text-warm-gray mt-1">View page views, popular mosques, and tracking data.</p>
         </Link>
       </div>
     </div>

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import type { Event } from '@/lib/types';
 import { getEventTime } from '@/lib/prayer-times';
+import { trackEvent } from '@/lib/tracking';
 
 const VTIMEZONE = [
   'BEGIN:VTIMEZONE',
@@ -260,6 +261,7 @@ export function AddToCalendarButton({ event }: { event: Event }) {
   }, [open]);
 
   function handleDownload() {
+    trackEvent('calendar_download_event', { event_id: event.id, mosque_id: event.mosque_id || undefined });
     const ics = generateSingleEventICS(event);
     const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
     const url = URL.createObjectURL(blob);
@@ -310,7 +312,10 @@ export function AddToCalendarButton({ event }: { event: Event }) {
             href={getGoogleCalendarUrl(event)}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() => setOpen(false)}
+            onClick={() => {
+              trackEvent('calendar_google_event', { event_id: event.id, mosque_id: event.mosque_id || undefined });
+              setOpen(false);
+            }}
             className="w-full px-4 py-2.5 text-left text-sm text-charcoal hover:bg-sand flex items-center gap-3 transition-colors"
           >
             <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none">
@@ -330,7 +335,10 @@ export function AddToCalendarButton({ event }: { event: Event }) {
             href={getOutlookUrl(event)}
             target="_blank"
             rel="noopener noreferrer"
-            onClick={() => setOpen(false)}
+            onClick={() => {
+              trackEvent('calendar_outlook_event', { event_id: event.id, mosque_id: event.mosque_id || undefined });
+              setOpen(false);
+            }}
             className="w-full px-4 py-2.5 text-left text-sm text-charcoal hover:bg-sand flex items-center gap-3 transition-colors"
           >
             <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24" fill="none">

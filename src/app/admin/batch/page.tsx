@@ -83,6 +83,8 @@ interface BatchEvent {
   is_recurring: boolean;
   recurrence_pattern: string;
   recurrence_end_date: string;
+  is_kids: boolean;
+  is_family: boolean;
   description: string;
   flyer_image_url: string;
   confidence: number;
@@ -92,6 +94,7 @@ interface SubmitResult {
   eventId: string;
   title: string;
   success: boolean;
+  duplicate?: boolean;
   error?: string;
 }
 
@@ -99,7 +102,7 @@ function compressImage(file: File): Promise<File> {
   return new Promise((resolve, reject) => {
     const img = new Image();
     img.onload = () => {
-      const MAX_WIDTH = 1200;
+      const MAX_WIDTH = 800;
       let { width, height } = img;
       if (width > MAX_WIDTH) {
         height = Math.round(height * (MAX_WIDTH / width));
@@ -117,7 +120,7 @@ function compressImage(file: File): Promise<File> {
           resolve(new File([blob], file.name.replace(/\.\w+$/, '.jpg'), { type: 'image/jpeg' }));
         },
         'image/jpeg',
-        0.75
+        0.6
       );
     };
     img.onerror = () => reject(new Error('Failed to load image'));
@@ -164,6 +167,8 @@ function parsedToEvent(parsed: ParsedEventData, flyerIndex: number, flyerUrl: st
     is_recurring: parsed.is_recurring || false,
     recurrence_pattern: parsed.recurrence_pattern || '',
     recurrence_end_date: parsed.recurrence_end_date || '',
+    is_kids: parsed.is_kids || false,
+    is_family: parsed.is_family || false,
     description: parsed.description || '',
     flyer_image_url: flyerUrl,
     confidence: parsed.confidence ?? 0.5,
@@ -512,18 +517,21 @@ export default function BatchPage() {
             is_recurring: ev.is_recurring || !!ev.recurrence_pattern,
             recurrence_pattern: ev.recurrence_pattern || null,
             recurrence_end_date: ev.recurrence_end_date || null,
+            is_kids: ev.is_kids || false,
+            is_family: ev.is_family || false,
             description: ev.description || null,
             flyer_image_url: ev.flyer_image_url || null,
-            force: true,
           }),
         });
 
-        if (!res.ok) {
+        if (res.status === 409) {
+          results.push({ eventId: ev.id, title: ev.title, success: true, duplicate: true });
+        } else if (!res.ok) {
           const data = await res.json().catch(() => ({}));
           throw new Error(data.error || `HTTP ${res.status}`);
+        } else {
+          results.push({ eventId: ev.id, title: ev.title, success: true });
         }
-
-        results.push({ eventId: ev.id, title: ev.title, success: true });
       } catch (err) {
         results.push({
           eventId: ev.id,
@@ -574,18 +582,21 @@ export default function BatchPage() {
             is_recurring: ev.is_recurring || !!ev.recurrence_pattern,
             recurrence_pattern: ev.recurrence_pattern || null,
             recurrence_end_date: ev.recurrence_end_date || null,
+            is_kids: ev.is_kids || false,
+            is_family: ev.is_family || false,
             description: ev.description || null,
             flyer_image_url: ev.flyer_image_url || null,
-            force: true,
           }),
         });
 
-        if (!res.ok) {
+        if (res.status === 409) {
+          newResults.push({ eventId: ev.id, title: ev.title, success: true, duplicate: true });
+        } else if (!res.ok) {
           const data = await res.json().catch(() => ({}));
           throw new Error(data.error || `HTTP ${res.status}`);
+        } else {
+          newResults.push({ eventId: ev.id, title: ev.title, success: true });
         }
-
-        newResults.push({ eventId: ev.id, title: ev.title, success: true });
       } catch (err) {
         newResults.push({
           eventId: ev.id,
@@ -612,7 +623,8 @@ export default function BatchPage() {
 
   const completedFlyers = flyers.filter(f => f.status === 'done').length;
   const selectedCount = events.filter(e => e.included).length;
-  const successCount = submitResults.filter(r => r.success).length;
+  const createdCount = submitResults.filter(r => r.success && !r.duplicate).length;
+  const dupCount = submitResults.filter(r => r.duplicate).length;
   const failCount = submitResults.filter(r => !r.success).length;
 
   // Group events by flyer
@@ -730,9 +742,9 @@ export default function BatchPage() {
         </div>
       )}
 
-      {/* STEP 2: Review */}
+      {/* STEP 2: Review — wider layout for side-by-side flyer + events */}
       {step === 'review' && (
-        <div className="space-y-6">
+        <div className="space-y-6 w-screen max-w-5xl relative left-1/2 -translate-x-1/2 px-4">
           {/* Summary bar */}
           <div className="flex items-center justify-between bg-sand/50 rounded-card p-3">
             <span className="text-sm text-charcoal font-medium">
@@ -758,27 +770,31 @@ export default function BatchPage() {
           {flyerGroups.filter(g => g.events.length > 0).map((group) => (
             <div key={group.flyerIndex} className="space-y-3">
               <div className="flex items-center gap-3 py-2 border-b border-sand-dark">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={group.flyer.thumbnail}
-                  alt={group.flyer.file.name}
-                  className="w-10 h-10 object-cover rounded"
-                />
-                <div>
-                  <p className="text-sm font-semibold text-charcoal">{group.flyer.file.name}</p>
-                  <p className="text-xs text-warm-gray">{group.events.length} event(s)</p>
-                </div>
+                <p className="text-sm font-semibold text-charcoal">{group.flyer.file.name}</p>
+                <p className="text-xs text-warm-gray">{group.events.length} event(s)</p>
               </div>
-              <div className="space-y-3">
-                {group.events.map(event => (
-                  <EventCard
-                    key={event.id}
-                    event={event}
-                    mosques={mosques}
-                    onUpdate={updateEvent}
-                    onToggle={toggleEvent}
+              <div className="grid gap-4 lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)]">
+                {/* Flyer image */}
+                <div className="lg:sticky lg:top-4 lg:self-start">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={group.flyer.thumbnail}
+                    alt={group.flyer.file.name}
+                    className="w-full rounded-card border border-sand-dark"
                   />
-                ))}
+                </div>
+                {/* Extracted events */}
+                <div className="space-y-3">
+                  {group.events.map(event => (
+                    <EventCard
+                      key={event.id}
+                      event={event}
+                      mosques={mosques}
+                      onUpdate={updateEvent}
+                      onToggle={toggleEvent}
+                    />
+                  ))}
+                </div>
               </div>
             </div>
           ))}
@@ -818,10 +834,13 @@ export default function BatchPage() {
             <>
               <div className="text-center py-6 space-y-2">
                 <p className="text-2xl font-bold text-charcoal">
-                  {successCount} created, {failCount} failed
+                  {createdCount} created{dupCount > 0 ? `, ${dupCount} skipped` : ''}{failCount > 0 ? `, ${failCount} failed` : ''}
                 </p>
-                {failCount === 0 && (
+                {failCount === 0 && dupCount === 0 && (
                   <p className="text-sm text-green-600">All events submitted successfully!</p>
+                )}
+                {failCount === 0 && dupCount > 0 && (
+                  <p className="text-sm text-warm-gray">Duplicates were skipped automatically.</p>
                 )}
               </div>
 
@@ -841,11 +860,23 @@ export default function BatchPage() {
                 </div>
               )}
 
-              {/* Success events */}
-              {successCount > 0 && (
+              {/* Duplicate events */}
+              {dupCount > 0 && (
                 <div className="space-y-2">
-                  <h3 className="text-sm font-semibold text-green-600">Created Events</h3>
-                  {submitResults.filter(r => r.success).map(r => (
+                  <h3 className="text-sm font-semibold text-amber-600">Skipped — Already Exist ({dupCount})</h3>
+                  {submitResults.filter(r => r.duplicate).map(r => (
+                    <div key={r.eventId} className="bg-amber-50 border border-amber-200 rounded-card p-2 text-sm text-charcoal">
+                      {r.title}
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              {/* Created events */}
+              {createdCount > 0 && (
+                <div className="space-y-2">
+                  <h3 className="text-sm font-semibold text-green-600">Created Events ({createdCount})</h3>
+                  {submitResults.filter(r => r.success && !r.duplicate).map(r => (
                     <div key={r.eventId} className="bg-green-50 border border-green-200 rounded-card p-2 text-sm text-charcoal">
                       {r.title}
                     </div>

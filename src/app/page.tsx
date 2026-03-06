@@ -4,10 +4,11 @@ import { EventCard } from '@/components/events/EventCard';
 import { EventFilters } from '@/components/events/EventFilters';
 import { Button } from '@/components/ui/Button';
 import { getServiceClient } from '@/lib/supabase';
+import type { Event } from '@/lib/types';
 import { SYDNEY_SUBURBS } from '@/data/sydney-suburbs';
 import { haversineDistance } from '@/lib/haversine';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 60;
 
 interface Props {
   searchParams: Promise<{
@@ -15,6 +16,8 @@ interface Props {
     language?: string;
     gender?: string;
     mosque?: string;
+    kids?: string;
+    family?: string;
     q?: string;
   }>;
 }
@@ -24,24 +27,29 @@ async function getEvents(params: {
   language?: string;
   gender?: string;
   mosque?: string;
+  kids?: string;
+  family?: string;
   q?: string;
 }) {
   const supabase = getServiceClient();
   const today = new Date().toISOString().split('T')[0];
   let query = supabase
     .from('events')
-    .select('*, mosque:mosques(*)')
+    .select('id, title, event_type, status, is_recurring, recurrence_pattern, last_confirmed_at, time_mode, prayer_anchor, prayer_offset_minutes, fixed_time, fixed_date, language, gender, speaker, is_kids, is_family, venue_name, venue_latitude, venue_longitude, description, mosque_id, mosque:mosques(id, name, suburb, nicknames, latitude, longitude)')
     .eq('status', 'active')
     .or(`is_recurring.eq.true,fixed_date.is.null,fixed_date.gte.${today}`)
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .limit(50);
 
   if (params.type) query = query.eq('event_type', params.type);
   if (params.language) query = query.eq('language', params.language);
   if (params.gender) query = query.eq('gender', params.gender);
   if (params.mosque) query = query.eq('mosque_id', params.mosque);
+  if (params.kids === 'true') query = query.eq('is_kids', true);
+  if (params.family === 'true') query = query.eq('is_family', true);
 
   const { data } = await query;
-  let events = data || [];
+  let events = (data || []) as unknown as Event[];
 
   if (params.q) {
     const q = params.q.toLowerCase();
@@ -79,7 +87,7 @@ async function getEvents(params: {
 
 export default async function HomePage({ searchParams }: Props) {
   const params = await searchParams;
-  const hasFilters = params.q || params.type || params.language || params.gender || params.mosque;
+  const hasFilters = params.q || params.type || params.language || params.gender || params.mosque || params.kids || params.family;
   const events = await getEvents(params);
 
   return (

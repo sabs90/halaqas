@@ -4,6 +4,278 @@ This file is the persistent memory between Claude Code sessions. Each entry summ
 
 ---
 
+## Session 19 — Performance Optimisation (2026-03-07)
+
+### Completed
+- **ISR caching on key pages:** Replaced `force-dynamic` with `revalidate = 300` (5 min) on `events/[id]`, `mosques`, and `mosques/[id]` pages. Pages now serve from cache and revalidate in background.
+- **React `cache()` deduplication:** Wrapped `getEvent()` and `getMosque()` with React's `cache()` so `generateMetadata()` and the page component share a single DB query per request (was 2 queries each).
+- **Parallel data fetching:** `mosques/[id]` now fetches mosque and events concurrently with `Promise.all()` instead of sequentially.
+- **Loading skeletons:** Created `loading.tsx` files for home page, event detail, mosques list, and mosque detail — Next.js streams the shell immediately while data loads.
+- **API Cache-Control headers:** Events GET returns `public, max-age=60, stale-while-revalidate=300`. Calendar ICS endpoint changed from `no-cache, no-store` to `public, max-age=3600` and removed `Content-Disposition: attachment` (was blocking calendar subscription apps).
+- **Flyer image optimisation:** Replaced raw `<img>` with `next/image` on event detail page for automatic lazy loading, responsive sizing, and format conversion. Added `remotePatterns` to `next.config.ts`.
+- **EventCard memoisation:** Wrapped with `React.memo()` to prevent unnecessary re-renders during filter changes.
+- **Netlify static asset caching:** Added `[[headers]]` rules in `netlify.toml` for `/_next/static/*`, `*.js`, `*.css`, and `/fonts/*` with 1-year immutable cache.
+
+### Decisions Made
+- `revalidate = 300` (5 min) for detail pages vs `revalidate = 60` (1 min) on home page — detail pages change less frequently
+- Removed `Content-Disposition: attachment` from calendar ICS endpoint — it was preventing calendar apps from subscribing (treating it as a download instead of a feed)
+- Used wildcard `hostname: '**'` for `next/image` remote patterns since flyer images may come from various sources (R2, data URLs, etc.)
+
+### Issues / Bugs
+- None discovered
+
+### Next Session
+- Run migration 011 on Supabase production (carried over)
+- Seed some test events with kids/family tags (carried over)
+- Consider adding kids/family to the admin batch review form's editable fields (carried over)
+
+### Open Questions
+- None
+
+---
+
+## Session 18 — Home Page Performance (2026-03-07)
+
+### Completed
+- **Optimised home page query:** Replaced `select('*, mosque:mosques(*)')` with explicit column list (22 event + 6 mosque columns), dropping `flyer_image_url`, `submitter_contact`, `created_at`, `venue_address`, and unused mosque columns from the payload.
+- **Added query limit:** `.limit(50)` on both home page and `/api/events` GET route as a safety cap.
+- **ISR caching:** Replaced `force-dynamic` with `revalidate = 60` on home page — serves cached page instantly, regenerates in background every 60 seconds.
+- **API route parity:** Applied same column select and default limit (50) to `/api/events` GET handler.
+
+### Decisions Made
+- Limit of 50 events (not 100) — sufficient for the home page grid during Ramadan
+- `revalidate = 60` balances freshness vs performance — new events appear within 1 minute
+- Used `as unknown as Event[]` cast since Supabase TS inference doesn't handle explicit column selects on relations cleanly
+
+### Issues / Bugs
+- None discovered
+
+### Next Session
+- Run migration 011 on Supabase production (carried over)
+- Seed some test events with kids/family tags (carried over)
+- Consider adding kids/family to the admin batch review form's editable fields (carried over)
+
+### Open Questions
+- None
+
+---
+
+## Session 17 — Kids & Family Tags (2026-03-06)
+
+### Completed
+- **Kids & Family tags for events:** Added `is_kids` and `is_family` boolean columns to the events table (migration 011), allowing events to be tagged as child-friendly and/or family-oriented.
+- **AI parsing:** Updated Groq system prompt to extract kids/family indicators from flyers.
+- **Submit form:** Added "Kids event" and "Family event" checkboxes to the event submission form, auto-populated from AI parsing.
+- **Event display:** New `AudienceTag` component (blue for kids, sage for family) shown on EventCard, event detail page, and admin events page.
+- **Filtering:** Added "Kids" and "Family" toggle pills in a new "Audience" section of EventFilters. Server-side filtering on home page and API route.
+- **Batch processing:** Updated batch flyer tool to pass through is_kids/is_family from AI parsing to API.
+
+### Decisions Made
+- Kids and family are independent booleans (an event can be both, either, or neither) rather than an enum
+- Filter params use `kids=true` / `family=true` URL params (toggle on/off, not mutual exclusive)
+- AudienceTag uses same visual style as EventTypeTag but with distinct colours
+
+### Issues / Bugs
+- None discovered
+
+### Next Session
+- Run migration 011 on Supabase production
+- Seed some test events with kids/family tags
+- Consider adding kids/family to the admin batch review form's editable fields
+
+### Open Questions
+- None
+
+---
+
+## Session 16 — Event Review/Approval Workflow (2026-03-04)
+
+### Completed
+- **Event moderation workflow:** Public event submissions now land in `pending_review` status instead of going live immediately. Admin must approve before events appear on the site.
+- **Migration 010:** Added `pending_review` to the `event_status` enum
+- **Admin review API:** `GET /api/admin/review` lists pending events; `POST` approves (sets active + confirmed) or rejects (hard-deletes)
+- **Admin review page:** `/admin/review` shows full event details (type, language, gender, time, speaker, recurrence, description, flyer, submitter contact) with approve/reject buttons
+- **Admin dashboard:** Added "Review Submissions" card as the first item with amber border for visibility
+- **Admin events page:** Added amber badge styling for `pending_review` status
+- **Submit page:** Updated success message to "Submitted for Review!" explaining the event will appear once approved
+- **Duplicate detection:** Now checks both `active` and `pending_review` events to prevent duplicates across pending submissions
+- **Admin batch processing:** Unchanged — still inserts as `active` since admin is already reviewing during batch flow
+
+### Decisions Made
+- Public submissions → `pending_review` (hidden from public via existing RLS policy `status = 'active'`)
+- Admin batch processing stays as `active` — admin is already reviewing during the batch flow
+- Reject action hard-deletes rather than soft-archiving — rejected submissions have no value to keep
+- No notification system for submitters when their event is approved/rejected (keep it simple for now)
+
+### Issues / Bugs
+- None
+
+### Next Session
+- Run migration 010 (event review status) on Supabase
+- Run migration 009 (duplicate cleanup) on Supabase
+- Run migration 007 (analytics) on Supabase
+- Set up `halaqas.com` domain and point to Netlify
+- Set up Cloudflare R2 bucket for image storage
+- QA pass on mobile
+- Continue seeding events for remaining mosques
+
+### Open Questions
+- None
+
+---
+
+## Session 15 — Duplicate Prevention & Batch UX (2026-03-04)
+
+### Completed
+- **Event detail page:** Moved action buttons (Add to Calendar, WhatsApp Share, Report) above the flyer image for better visibility
+- **Duplicate event cleanup:** Migration 009 — SQL to delete existing duplicate events, keeping the most recently created row per group (partitioned by title + mosque + date + recurrence pattern)
+- **Batch admin dedup prevention:** Removed `force: true` from batch flyer submission so the existing dedup check in `POST /api/events` now runs. 409 (duplicate) responses are treated as "skipped" with amber UI, not errors
+- **Batch review layout:** Side-by-side flyer + events layout in the review step — flyer shown full-size on the left (sticky) with extracted events on the right. Container breaks out of 900px max-width to 1024px for better review experience
+
+### Decisions Made
+- No database-level unique constraint on events — app-level dedup (title + mosque + date match) is sufficient and more flexible for edge cases
+- Duplicates in batch flow treated as non-errors (amber "Skipped — Already Exist" section) rather than failures, since they're expected when re-processing flyers
+
+### Issues / Bugs
+- None
+
+### Next Session
+- Run migration 009 (duplicate cleanup) on Supabase
+- Run migration 007 (analytics) on Supabase
+- Add `NEXT_PUBLIC_UMAMI_WEBSITE_ID` to Netlify env vars
+- Set up `halaqas.com` domain and point to Netlify
+- Set up Cloudflare R2 bucket for image storage
+- QA pass on mobile
+- Continue seeding events for remaining mosques
+
+### Open Questions
+- halaqas.com domain registration and DNS setup (carried over)
+
+---
+
+## Session 14 — Duplicate Event UX Improvement (2026-03-04)
+
+### Completed
+- **"OK — no need to submit" button:** Added a third option to the duplicate event warning screen on `/submit`. When a user sees the "Similar Event Found" dialog, they can now acknowledge the duplicate without submitting or going back to edit. Shows a friendly confirmation: "Looks like this event is already listed. Thanks for checking!"
+
+### Decisions Made
+- Reused the existing `success` step with a new `duplicate_ok` success type rather than creating a separate step
+- Button order: "This is different — submit anyway" (terracotta) → "OK — no need to submit" (primary teal) → "Cancel — go back to editing" (outline)
+
+### Issues / Bugs
+- None
+
+### Next Session
+- Run migration 007 (analytics) on Supabase
+- Add `NEXT_PUBLIC_UMAMI_WEBSITE_ID` to Netlify env vars
+- Set up `halaqas.com` domain and point to Netlify
+- Set up Cloudflare R2 bucket for image storage
+- QA pass on mobile
+- Continue seeding events for remaining mosques
+
+### Open Questions
+- halaqas.com domain registration and DNS setup (carried over)
+
+---
+
+## Session 13 — Mosque Data Review & Cleanup (2026-03-04)
+
+### Completed
+- **Mosque review checklist workflow:** Generated `docs/mosque-review.md` with all 80 mosques from live DB, grouped by state with editable Name/Nicknames/Address fields and deletion checkboxes
+- **User reviewed all 80 mosques:** Marked 14 for deletion, corrected ~60 names/addresses/nicknames
+- **Database cleanup via Supabase REST API:** 14 mosques deleted, 60 updated (names, addresses, nicknames, coordinates), 1 new event created (Al Siraat College Epping taraweeh)
+- **Geocoding:** Re-geocoded all updated addresses via Nominatim (15 required retry with cleaned-up address formatting)
+- **Migration 008:** `supabase/migrations/008_mosque_review_cleanup.sql` — SQL record of all changes (applied via REST API, not raw SQL)
+- **Coverage doc refreshed:** `docs/09-mosque-coverage.md` regenerated from live DB — 66 mosques across 8 states, 7 with events
+
+### Decisions Made
+- Used Supabase REST API (PostgREST PATCH/DELETE) instead of raw SQL execution — REST API doesn't support arbitrary SQL
+- Kept migration SQL file as documentation record even though changes were applied via REST
+- Renumbered migration from 007 to 008 to avoid conflict with analytics migration
+
+### Issues / Bugs
+- 15/53 addresses failed Nominatim geocoding on first pass (unit numbers, duplicate suburbs, extra commas). All resolved on retry with cleaned-up formatting.
+- Two typos caught in user's review: "Masjid Al- (Belmore)" and "Hills District Muslim Societ" — confirmed corrections with user before applying.
+
+### Next Session
+- Run migration 007 (analytics) on Supabase
+- Add `NEXT_PUBLIC_UMAMI_WEBSITE_ID` to Netlify env vars
+- Set up `halaqas.com` domain and point to Netlify
+- Set up Cloudflare R2 bucket for image storage
+- QA pass on mobile
+- Continue seeding events for remaining mosques
+
+### Open Questions
+- halaqas.com domain registration and DNS setup (carried over)
+
+---
+
+## Session 12 — Usage Tracking & Analytics (2026-03-04)
+
+### Completed
+- **Hybrid analytics system:** Umami Cloud for general traffic (visitors, geo, devices, referrers) + Supabase DIY for domain-specific metrics queryable from admin panel.
+- **Database:** New `analytics_events` table (migration 007) with indexes on event_name, mosque_id, created_at, and composite. RLS allows public insert only.
+- **Tracking helpers:** `src/lib/tracking.ts` (client-side, fires to both `/api/analytics` and `window.umami`) and `src/lib/tracking-server.ts` (server-side, direct Supabase insert). Both fire-and-forget, never block UI or page renders.
+- **Public analytics API:** `POST /api/analytics` with allowlisted event names, silently accepts tracking data.
+- **12 instrumentation points:**
+  - Server-side: mosque_view, event_view, calendar_feed_fetch, event_submission, mosque_suggestion, feedback_submission
+  - Client-side: calendar_download_event, calendar_google_event, calendar_outlook_event, calendar_download_mosque, calendar_subscribe_mosque, whatsapp_share
+- **WhatsAppShareButton:** New client component extracted from inline server-rendered button to enable onClick tracking.
+- **SubscribeCalendarButton:** Added `mosqueId` prop for tracking context.
+- **Umami Cloud integration:** Script tag in layout.tsx, conditional on `NEXT_PUBLIC_UMAMI_WEBSITE_ID`. Configured with website ID.
+- **Admin analytics dashboard** (`/admin/analytics`): Period selector (7d/30d/90d), page view count, most popular mosques table (views + cal downloads), recent activity feed.
+- **Admin dashboard:** Added Analytics card to the grid.
+
+### Decisions Made
+- Hybrid approach: server-side tracking for page views (immune to ad blockers), client-side for button clicks.
+- No PII stored — no IPs, user agents, or cookies in the analytics table.
+- Event name allowlist in public API to prevent arbitrary data injection.
+- JS-side aggregation in admin API (no GROUP BY RPC) — fine for this scale.
+
+### Issues / Bugs
+- Migration 007 needs to be run manually in Supabase SQL editor.
+- `NEXT_PUBLIC_UMAMI_WEBSITE_ID` needs to be added to Netlify environment variables.
+
+### Next Session
+- Run migration 007 on Supabase
+- Add `NEXT_PUBLIC_UMAMI_WEBSITE_ID` to Netlify env vars
+- Set up `halaqas.com` domain and point to Netlify
+- Set up Cloudflare R2 bucket for image storage
+- QA pass on mobile
+- Continue seeding events
+
+### Open Questions
+- halaqas.com domain registration and DNS setup (carried over)
+
+---
+
+## Session 11 — Batch Upload NetworkError Fix (2026-03-04)
+
+### Completed
+- **Diagnosed batch flyer upload "NetworkError when attempting to fetch resource"** — root cause: Netlify serverless function timeout (10s free tier) exceeded by Groq vision API calls
+- **Added `maxDuration = 60` export** to `/api/admin/parse-flyers` and `/api/parse-image` route handlers — tells Netlify runtime to allow longer execution (capped at plan limit: 10s free, 26s Pro)
+- **Reduced image compression** in batch page from 1200px/75% to 800px/60% — smaller base64 payload speeds up Groq API response time
+- **Created `netlify.toml`** with `timeout = 26` for all serverless functions
+
+### Decisions Made
+- Smaller compressed images (800px/60%) are sufficient quality for Groq vision parsing and significantly reduce API latency
+- `maxDuration` route segment config is the Next.js-native way to configure function timeouts on Netlify
+
+### Issues / Bugs
+- On Netlify free tier, function timeout is hard-capped at 10 seconds regardless of `maxDuration` setting. If Groq API still exceeds 10s, upgrading to Netlify Pro (26s) or moving API routes to a different host may be needed.
+
+### Next Session
+- Deploy and test batch upload on Netlify to verify the fix
+- Set up `halaqas.com` domain and point to Netlify
+- Set up Cloudflare R2 bucket for image storage
+- Continue seeding events using batch tool
+- Add rate limiting to submission endpoints
+
+### Open Questions
+- Is the Netlify free tier 10s timeout sufficient after image compression reduction, or will Pro be needed?
+
+---
+
 ## Session 10 — Batch Flyer Processing Tool (2026-03-03)
 
 ### Completed

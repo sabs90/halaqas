@@ -1,13 +1,15 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
+import { trackEvent } from '@/lib/tracking';
 
 interface Props {
   mosqueName: string;
+  mosqueId: string;
   icsHttpUrl: string;
 }
 
-export function SubscribeCalendarButton({ mosqueName, icsHttpUrl }: Props) {
+export function SubscribeCalendarButton({ mosqueName, mosqueId, icsHttpUrl }: Props) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -22,6 +24,7 @@ export function SubscribeCalendarButton({ mosqueName, icsHttpUrl }: Props) {
   }, [open]);
 
   function handleDownload() {
+    trackEvent('calendar_download_mosque', { mosque_id: mosqueId });
     const a = document.createElement('a');
     a.href = icsHttpUrl;
     a.download = `${mosqueName.replace(/[^a-zA-Z0-9]/g, '_')}.ics`;
@@ -67,7 +70,10 @@ export function SubscribeCalendarButton({ mosqueName, icsHttpUrl }: Props) {
           </button>
           <a
             href={webcalUrl}
-            onClick={() => setOpen(false)}
+            onClick={() => {
+              trackEvent('calendar_subscribe_mosque', { mosque_id: mosqueId });
+              setOpen(false);
+            }}
             className="w-full px-4 py-2.5 text-left text-sm text-charcoal hover:bg-sand flex items-center gap-3 transition-colors"
           >
             <svg className="w-4 h-4 shrink-0 text-warm-gray" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">

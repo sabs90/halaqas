@@ -103,8 +103,10 @@
 | recurrence_pattern | text | e.g. "every_thursday", "every_friday", "daily_ramadan" |
 | recurrence_end_date | date | Optional explicit end date |
 | flyer_image_url | text | URL to stored flyer in R2 |
+| is_kids | boolean | Default false, true if event targets kids/children |
+| is_family | boolean | Default false, true if event is family-oriented |
 | submitter_contact | text | Optional email/phone (not displayed publicly) |
-| status | enum | active, archived, delisted |
+| status | enum | active, archived, delisted, pending_review |
 | last_confirmed_at | timestamptz | For auto-archive logic |
 | created_at | timestamptz | |
 | updated_at | timestamptz | |
@@ -148,6 +150,19 @@
 | status | enum | new, read |
 | created_at | timestamptz | |
 
+### analytics_events
+
+| Column | Type | Notes |
+|--------|------|-------|
+| id | uuid | Primary key |
+| event_name | text | Action name (e.g. mosque_view, calendar_download_event) |
+| mosque_id | uuid | FK to mosques (nullable), SET NULL on delete |
+| event_id | uuid | FK to events (nullable), SET NULL on delete |
+| metadata | jsonb | Optional extra data (default `{}`) |
+| created_at | timestamptz | |
+
+No PII stored. RLS: public insert only, reads via service role (admin). Indexes on `event_name`, `mosque_id`, `created_at`, and composite `(event_name, created_at)`.
+
 ## 5. Key API Routes
 
 | Route | Method | Purpose |
@@ -167,6 +182,8 @@
 | `/api/admin/mosques` | GET | List pending mosque suggestions; `?list=all` returns all mosques (protected) |
 | `/api/admin/mosques` | POST | Approve or reject mosque suggestion (protected) |
 | `/api/admin/mosques` | PATCH | Update mosque details (protected) |
+| `/api/admin/review` | GET | List events pending review (protected) |
+| `/api/admin/review` | POST | Approve or reject a pending event (protected) |
 | `/api/admin/parse-flyers` | POST | Parse single flyer image, return all extracted events + flyer URL (protected) |
 | `/api/mosques/suggest` | POST | Submit a mosque suggestion |
 | `/api/mosques/[id]/nicknames` | POST | Add a nickname for a mosque |
@@ -174,6 +191,8 @@
 | `/api/feedback` | POST | Submit feedback/contact message |
 | `/api/admin/feedback` | GET | List new feedback (protected) |
 | `/api/admin/feedback` | POST | Mark feedback as read (protected) |
+| `/api/analytics` | POST | Public fire-and-forget analytics event insert (allowlisted event names) |
+| `/api/admin/analytics` | GET | Aggregated analytics: page views, top mosques, recent activity (protected) |
 
 ## 6. AI Parsing Prompt Design
 
@@ -250,6 +269,14 @@ Each mosque gets a dynamic .ics endpoint that generates a valid iCalendar feed:
 - Environment variables (Groq API key, Supabase URL/key, admin password, NEXT_PUBLIC_SITE_URL) stored in Netlify settings
 - `NEXT_PUBLIC_SITE_URL` is baked in at build time — must redeploy after changing
 - No CI/CD pipeline needed beyond Netlify's built-in build step
+
+### Caching Strategy
+
+- **ISR (Incremental Static Regeneration):** Home page revalidates every 60s, detail pages (`events/[id]`, `mosques`, `mosques/[id]`) every 300s (5 min). Pages served from cache, regenerated in background.
+- **React `cache()`:** `getEvent()` and `getMosque()` wrapped with React's `cache()` to deduplicate DB queries within a single request (metadata + page component).
+- **API Cache-Control headers:** Events GET API returns `public, max-age=60, stale-while-revalidate=300`. Calendar ICS returns `public, max-age=3600`.
+- **Netlify static asset headers:** `/_next/static/*`, `*.js`, `*.css`, `/fonts/*` served with `max-age=31536000, immutable`.
+- **Loading skeletons:** `loading.tsx` files for main routes provide instant feedback while data loads.
 
 ## 12. Cost Estimate
 

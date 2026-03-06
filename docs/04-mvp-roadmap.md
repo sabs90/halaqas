@@ -47,7 +47,7 @@ The roadmap is split into three phases. Only Phase 1 needs to be complete before
 - [x] Prayer-anchored time selection (prayer + offset)
 - [x] Recurring event options (pattern selector)
 - [ ] Image upload to Cloudflare R2 *(pipeline wired up in Session 9: compress → upload → store URL → display. Uses data URL fallback until R2 credentials configured)*
-- [x] Event published to database on confirmation
+- [x] Event published to database on confirmation *(now goes to `pending_review` — admin approval required before public visibility, added Session 16)*
 
 **Deliverable:** End-to-end submission flow working — upload flyer, confirm details, event goes live.
 
@@ -74,14 +74,14 @@ The roadmap is split into three phases. Only Phase 1 needs to be complete before
 - [x] Admin ability to edit, delete, archive events
 - [x] Admin ability to de-list a mosque
 - [x] Admin ability to view and edit all mosque details (name, address, suburb, state, coordinates, nicknames, active status)
-- [x] Batch flyer processing tool: multi-file upload, sequential AI parsing, editable review table, bulk submission — *added in Session 10*
+- [x] Batch flyer processing tool: multi-file upload, sequential AI parsing, editable review table, bulk submission — *added in Session 10, dedup + side-by-side review layout in Session 15*
 - [ ] Auto-archive logic: recurring events flagged after 3 months of no confirmation
 
 **Deliverable:** Complete quality management loop — community reports, admin reviews.
 
 ### Milestone 1.6 — Content Seeding & Launch Prep (Week 6–7)
 
-- [x] Manually seed events for top 20 Sydney mosques (using the submission flow) — *seeded 28 real events from 8 flyers across 5 mosques in Session 4. Coverage tracker at `docs/09-mosque-coverage.md`*
+- [x] Manually seed events for top 20 Sydney mosques (using the submission flow) — *seeded 28 real events from 8 flyers across 5 mosques in Session 4. +1 Epping event in Session 11. Coverage tracker at `docs/09-mosque-coverage.md`*
 - [x] Focus on Ramadan-specific programs: taraweeh schedules, iftar events, lecture series — *covered in Session 4 flyer testing*
 - [ ] QA pass: test all flows on mobile (iPhone + Android), check edge cases — *partial: calendar flows tested on Android in Session 6, webcal blocked by domain not resolving*
 - [x] PWA setup: add-to-home-screen manifest *(icons not yet generated)*
@@ -134,8 +134,8 @@ The roadmap is split into three phases. Only Phase 1 needs to be complete before
 - **Mosque self-service:** Allow mosque admins to claim their page and manage events directly (requires lightweight auth)
 - **Event series / courses:** Better handling of multi-session classes (Week 1 of 8, etc.)
 - **Community features:** Bookmarking events, personal event calendar view
-- **Analytics dashboard:** Public stats (most active mosques, popular event types, peak times)
-- **~~Expansion:~~** ~~Other Australian cities (Melbourne, Brisbane) if there's demand~~ — **Done in Session 5** (80 mosques across all 8 states/territories)
+- **~~Analytics dashboard:~~** ~~Public stats (most active mosques, popular event types, peak times)~~ — **Done in Session 12** (hybrid Umami Cloud + Supabase DIY analytics with admin dashboard)
+- **~~Expansion:~~** ~~Other Australian cities (Melbourne, Brisbane) if there's demand~~ — **Done in Session 5** (66 mosques across all 8 states/territories after Session 13 review cleanup)
 - **Native app:** Only if there's clear evidence the PWA isn't sufficient
 
 ---
@@ -152,7 +152,7 @@ The roadmap is split into three phases. Only Phase 1 needs to be complete before
 | 1.6 Seeding & Launch | 3–5 days | **Mostly done** (QA + rate limiting pending) | All above complete |
 | **Total Phase 1** | **~5–7 weeks** | **~90% complete** (built in 4 sessions) | |
 
-Milestones 1.1–1.5 were built in a single session using Claude Code. Session 4 completed AI prompt refinement and real event seeding. Session 6 deployed to Netlify and fixed ICS calendar issues for Android. Remaining work is domain setup (halaqas.com), R2 image storage, and polish (QA, rate limiting, PWA icons).
+Milestones 1.1–1.5 were built in a single session using Claude Code. Session 4 completed AI prompt refinement and real event seeding. Session 6 deployed to Netlify and fixed ICS calendar issues for Android. Session 13 cleaned up mosque data (14 deleted, 60 corrected, now 66 mosques). Remaining work is domain setup (halaqas.com), R2 image storage, and polish (QA, rate limiting, PWA icons).
 
 ---
 
@@ -164,5 +164,5 @@ Milestones 1.1–1.5 were built in a single session using Claude Code. Session 4
 | Groq API account + key | **Done** — key configured in .env.local | Resolved |
 | halaqas.com domain | Not yet registered | Low — register early |
 | Cloudflare account | Not yet set up | Low — free tier |
-| Supabase account | **Done** — project created, schema deployed, 80 mosques (8 states) + 28 real events seeded | Resolved |
-| Flyers from top 20 mosques | **Done** — 8 flyers tested, prompt refined, 28 events seeded | Resolved |
+| Supabase account | **Done** — project created, schema deployed, 66 mosques (8 states) + 29 real events seeded | Resolved |
+| Flyers from top 20 mosques | **Done** — 8 flyers tested, prompt refined, 29 events seeded | Resolved |

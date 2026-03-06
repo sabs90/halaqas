@@ -204,8 +204,8 @@ Leave unchanged lines as-is.
 
 - [ ] **Broadmeadows Mosque (Turkish)** (id: 790d3843)
   - Name: Broadmeadows Mosque (Turkish)
-  - Nicknames: 
-  - Address: 46-48 Camp Rd, Broadmeadows VIC 3047
+  - Nicknames: Broadmeadows Turkish Islamic Cultural Centre
+  - Address: 45-55 King St, Dallas VIC 3047
 
 - [ ] **Coburg Mosque (Cypriot Turkish Islamic Centre)** (id: 1225ff49)
   - Name: Coburg Mosque (Cypriot Turkish Islamic Centre)
@@ -213,54 +213,56 @@ Leave unchanged lines as-is.
   - Address: 31 Nicholson St, Coburg VIC 3058
 
 - [ ] **Dandenong Mosque** (id: 425c45d1)
-  - Name: Dandenong Mosque
-  - Nicknames: 
-  - Address: 87 Foster St, Dandenong VIC 3175
+  - Name: Emir Sultan Mosque (Dandenong)
+  - Nicknames: ICMG Dandenong
+  - Address: 139 Cleeland St, Dandenong VIC 3175
 
 - [ ] **Epping Mosque (Epping Islamic Centre)** (id: 71b5440f)
-  - Name: Epping Mosque (Epping Islamic Centre)
+  - Name: Al Siraat College (Epping)
   - Nicknames: 
-  - Address: 7 Lyndarum Dr, Epping VIC 3076
+  - Address: 45 Harvest Home Rd, Epping VIC 3076, Australia
+  - Event: QURAN TAFSEER PROGRAM Every Monday after MAGHRIB through ramadan
 
 - [ ] **Fawkner Mosque** (id: 4026a52d)
   - Name: Fawkner Mosque
-  - Nicknames: 
-  - Address: 46-48 Baroda Ave, Fawkner VIC 3060
+  - Nicknames: Darul Ulum Islamic College Masjid
+  - Address: 17 Baird St, Fawkner VIC 3060
 
 - [ ] **Hallam Mosque (Hira Masjid)** (id: fb4e1270)
-  - Name: Hallam Mosque (Hira Masjid)
+  - Name: Hallam Masjid (Belgrave)
   - Nicknames: 
-  - Address: 38 Belgrave-Hallam Rd, Hallam VIC 3803
+  - Address: 131 - 133 Hallam Belgrave Road, Narre Warren North, VIC, Australia, 3804
 
 - [ ] **Heidelberg Mosque** (id: 90614fd3)
-  - Name: Heidelberg Mosque
+  - Name: Elsedeaq Heidelberg Mosque
   - Nicknames: 
-  - Address: 25 Yarra St, Heidelberg VIC 3084
+  - Address: 32 Elliott St, Heidelberg Heights, VIC, 3081, Australia
 
 - [ ] **IISCA Doveton Mosque** (id: 8b7d7005)
-  - Name: IISCA Doveton Mosque
-  - Nicknames: 
-  - Address: 15 Photinia St, Doveton VIC 3177
+  - Name: Afghan Islamic Centre & Omar Farooq Mosque (Doveton) - AICOM
+  - Nicknames: AICOM 
+  - Address: 14-16 Photonia Street, Doveton, VIC, Australia, 3177
 
 - [ ] **Newport Mosque** (id: 19755a67)
-  - Name: Newport Mosque
+  - Name: Australian Islamic Centre (Newport)
   - Nicknames: 
-  - Address: 1 Walker St, Newport VIC 3015
+  - Address: 23-27 Blenheim Rd, Newport VIC 3015
+
 
 - [ ] **Omar bin Al-Khattab Mosque (Carlton)** (id: b6b415cf)
-  - Name: Omar bin Al-Khattab Mosque (Carlton)
-  - Nicknames: 
+  - Name: Albanian Australian Islamic Society – AAIS (Carlton North)
+  - Nicknames: AAIS
   - Address: 765 Drummond St, Carlton VIC 3053
 
 - [ ] **Preston Mosque** (id: 403bdd7b)
-  - Name: Preston Mosque
-  - Nicknames: 
+  - Name: Omar Bin Al Khattab Masjid Preston
+  - Nicknames: Preston Mosque
   - Address: 90-96 Cramer St, Preston VIC 3072
 
 - [ ] **Sunshine Mosque** (id: 1fe14aa5)
-  - Name: Sunshine Mosque
+  - Name: Sunshine Mosque (Ardeer)
   - Nicknames: 
-  - Address: 619 Ballarat Rd, Albion VIC 3020
+  - Address: 618 Ballarat Rd, Ardeer VIC 3022
 
 - [ ] **Thomastown Mosque** (id: de5e4094)
   - Name: Thomastown Mosque
@@ -270,9 +272,9 @@ Leave unchanged lines as-is.
 - [ ] **Virgin Mary Mosque** (id: 88d544c7)
   - Name: Virgin Mary Mosque
   - Nicknames: 
-  - Address: 168-170 Hogans Rd, Hoppers Crossing VIC 3029
+  - Address: 143 Hogans Rd, Hoppers Crossing VIC 3029
 
-- [ ] **Werribee Islamic Centre** (id: f32a8c4d)
+- [X] **Werribee Islamic Centre** (id: f32a8c4d)
   - Name: Werribee Islamic Centre
   - Nicknames: 
   - Address: 5 Minindee Rd, Werribee VIC 3030
@@ -280,14 +282,14 @@ Leave unchanged lines as-is.
 ## QLD (8 mosques)
 
 - [ ] **Darra Mosque** (id: f17ff44e)
-  - Name: Darra Mosque
-  - Nicknames: 
-  - Address: 63-65 Station Rd, Darra QLD 4076
+  - Name: Darra Mosque (Oxley)
+  - Nicknames: Darra Mosque, Darra Masjid, Islamic Society of Darra
+  - Address: 219 Douglas St, Oxley QLD 4075
 
 - [ ] **Gold Coast Mosque** (id: d1c41424)
-  - Name: Gold Coast Mosque
-  - Nicknames: 
-  - Address: 23 Allied Dr, Arundel QLD 4214
+  - Name: Gold Coast Arundel Masjid
+  - Nicknames: Gold Coast Mosque, Arundel Masjid
+  - Address: 144 Allied Dr, Arundel QLD 4214
 
 - [ ] **Islamic College of Brisbane** (id: 69d520a9)
   - Name: Islamic College of Brisbane
@@ -295,16 +297,16 @@ Leave unchanged lines as-is.
   - Address: 45 Acacia Rd, Karawatha QLD 4117
 
 - [ ] **Kuraby Mosque (Islamic Society of Holland Park)** (id: 1203bf78)
-  - Name: Kuraby Mosque (Islamic Society of Holland Park)
-  - Nicknames: 
-  - Address: 19 Doig St, Holland Park QLD 4121
+  - Name: Masjid Al Farooq (Kuraby Mosque)
+  - Nicknames: Kuraby Mosque
+  - Address: 1408 Beenleigh Road, Kuraby QLD, Brisbane, QLD, Australia, 4112
 
 - [ ] **Logan Mosque (Masjid Taqwa)** (id: 5bb5e51b)
-  - Name: Logan Mosque (Masjid Taqwa)
+  - Name: Masjid Al Salam (Logan Mosque)
   - Nicknames: 
-  - Address: 24 Magnesium Dr, Crestmead QLD 4132
+  - Address: 262 Third Avenue, Kingston, QLD, Australia, 4114
 
-- [ ] **Masjid Al-Farooq (Sunnybank)** (id: e9fd5616)
+- [X] **Masjid Al-Farooq (Sunnybank)** (id: e9fd5616)
   - Name: Masjid Al-Farooq (Sunnybank)
   - Nicknames: 
   - Address: 13 Doig St, Sunnybank QLD 4109
@@ -312,26 +314,26 @@ Leave unchanged lines as-is.
 - [ ] **Slacks Creek Mosque** (id: fb6c3ce8)
   - Name: Slacks Creek Mosque
   - Nicknames: 
-  - Address: 17 Milne St, Slacks Creek QLD 4127
+  - Address: 16 Queens road , Slacks Creek, QLD, Australia, 4127
 
 - [ ] **Toowoomba Mosque** (id: bd0ab807)
   - Name: Toowoomba Mosque
   - Nicknames: 
-  - Address: 196 West St, Toowoomba QLD 4350
+  - Address: 217 West St, Toowoomba QLD 4350
 
 ## WA (8 mosques)
 
 - [ ] **Canning Vale Mosque** (id: 600509cc)
-  - Name: Canning Vale Mosque
+  - Name: Canning Vale Mosque (Iqra Academy Centre)
   - Nicknames: 
-  - Address: 2 Waranup Ct, Canning Vale WA 6155
+  - Address: 33 Tulloch Way, Canning Vale WA 6155
 
 - [ ] **Kenwick Mosque** (id: 8aa8c52c)
-  - Name: Kenwick Mosque
+  - Name: Kenwick Mosque 
   - Nicknames: 
-  - Address: 33 Bickley Rd, Kenwick WA 6107
+  - Address: 404 Bickley Rd, Kenwick WA 6107
 
-- [ ] **Madina Mosque (Wanneroo)** (id: 090df8c8)
+- [X] **Madina Mosque (Wanneroo)** (id: 090df8c8)
   - Name: Madina Mosque (Wanneroo)
   - Nicknames: 
   - Address: 20 Civic Dr, Wanneroo WA 6065
@@ -339,12 +341,12 @@ Leave unchanged lines as-is.
 - [ ] **Masjid Ibrahim (Southern River)** (id: e3632b33)
   - Name: Masjid Ibrahim (Southern River)
   - Nicknames: 
-  - Address: 2 Balfour St, Southern River WA 6110
+  - Address: 2 Leslie St, Southern River, Western Australia 6110
 
 - [ ] **Mirrabooka Mosque** (id: e06536c5)
-  - Name: Mirrabooka Mosque
-  - Nicknames: 
-  - Address: 8 Sudbury Rd, Mirrabooka WA 6061
+  - Name: Masjid Al-Taqwa (Mirrabooka)
+  - Nicknames: Mirrabooka Mosque
+  - Address: 135 Boyare Ave, Mirrabooka WA 6061
 
 - [ ] **Perth Mosque** (id: b713d475)
   - Name: Perth Mosque
@@ -354,19 +356,19 @@ Leave unchanged lines as-is.
 - [ ] **Rivervale Mosque** (id: 657f7883)
   - Name: Rivervale Mosque
   - Nicknames: 
-  - Address: 3 Malvern Rd, Rivervale WA 6103
+  - Address: 9 Rowe Ave, Rivervale WA 6103,
 
 - [ ] **Thornlie Mosque** (id: 68881571)
-  - Name: Thornlie Mosque
-  - Nicknames: 
-  - Address: 2 Garling St, Thornlie WA 6108
+  - Name: Thornlie Masjid (Australian Islamic College)
+  - Nicknames: AIC
+  - Address: 26 Clancy Way, Thornlie WA 6108
 
 ## SA (5 mosques)
 
 - [ ] **Adelaide Mosque** (id: 647b4e05)
-  - Name: Adelaide Mosque
+  - Name: Adelaide City Mosque
   - Nicknames: 
-  - Address: 20 Little Gilbert St, Adelaide SA 5000
+  - Address: 20-28 Little Gilbert St, Adelaide SA 5000
 
 - [ ] **Al-Khalil Mosque (Pooraka)** (id: f9e6830f)
   - Name: Al-Khalil Mosque (Pooraka)
@@ -374,33 +376,33 @@ Leave unchanged lines as-is.
   - Address: 29 Wandana Ave, Pooraka SA 5095
 
 - [ ] **Elizabeth Mosque** (id: 3c49f4b4)
-  - Name: Elizabeth Mosque
-  - Nicknames: 
-  - Address: 89 Hamblynn Rd, Elizabeth Downs SA 5113
+  - Name: Masjid Othman Bin Affan (Elizabeth Mosque)
+  - Nicknames: Elizabeth Mosque
+  - Address: 139-141 Hogarth Road, Elizabeth Grove, SA
 
 - [ ] **Murray Bridge Mosque** (id: ef2c759a)
   - Name: Murray Bridge Mosque
   - Nicknames: 
-  - Address: 26 Grubb St, Murray Bridge SA 5253
+  - Address: 85 Old Swanport Rd, Murray Bridge SA 5253
 
 - [ ] **Park Holme Mosque (Islamic Society of SA)** (id: 8907b6e2)
-  - Name: Park Holme Mosque (Islamic Society of SA)
-  - Nicknames: 
+  - Name: Marion Mosque (Islamic Society of SA)
+  - Nicknames: ISSA
   - Address: 658 Marion Rd, Park Holme SA 5043
 
 ## ACT (3 mosques)
 
 - [ ] **Canberra Islamic Centre** (id: 6afd0210)
-  - Name: Canberra Islamic Centre
-  - Nicknames: 
-  - Address: 130 Empire Circuit, Yarralumla ACT 2600
+  - Name: Canberra Islamic Centre (CIC) 
+  - Nicknames: CIC, Masjid Sabah Al Ahmad
+  - Address: 221 Clive Steele Ave, Monash ACT 2904
 
 - [ ] **Gungahlin Mosque** (id: 48daa881)
   - Name: Gungahlin Mosque
   - Nicknames: 
-  - Address: 130 Hibberson St, Gungahlin ACT 2912
+  - Address: 140 The Valley Avenue, Gungahlin, ACT, Australia, 2912
 
-- [ ] **Woden Mosque** (id: 80b0bfb3)
+- [X] **Woden Mosque** (id: 80b0bfb3)
   - Name: Woden Mosque
   - Nicknames: 
   - Address: 21 Irving St, Phillip ACT 2606
@@ -408,14 +410,14 @@ Leave unchanged lines as-is.
 ## NT (1 mosques)
 
 - [ ] **Darwin Mosque** (id: 2d886910)
-  - Name: Darwin Mosque
-  - Nicknames: 
-  - Address: 53 Vanderlin Dr, Casuarina NT 0810
+  - Name: Islamic Society of Darwin
+  - Nicknames: ISOD
+  - Address: 53 Vanderlin Dr, Wanguri NT 0810
 
 ## TAS (1 mosques)
 
 - [ ] **Hobart Mosque** (id: f6c53dc0)
   - Name: Hobart Mosque
   - Nicknames: 
-  - Address: 166 Warwick St, West Hobart TAS 7000
+  - Address: 166 Warwick St, Hobart TAS 7000
 

@@ -1,8 +1,9 @@
 'use client';
 
+import { memo } from 'react';
 import Link from 'next/link';
 import type { Event } from '@/lib/types';
-import { EventTypeTag } from './EventTypeTag';
+import { EventTypeTag, AudienceTag } from './EventTypeTag';
 import { getEventTime, formatPrayerTime } from '@/lib/prayer-times';
 
 function formatRecurrence(pattern: string | null): string | null {
@@ -53,7 +54,7 @@ interface EventCardProps {
   event: Event;
 }
 
-export function EventCard({ event }: EventCardProps) {
+export const EventCard = memo(function EventCard({ event }: EventCardProps) {
   const isStale = event.status === 'archived' ||
     (event.is_recurring && event.last_confirmed_at &&
       new Date().getTime() - new Date(event.last_confirmed_at).getTime() > 90 * 24 * 60 * 60 * 1000);
@@ -70,7 +71,11 @@ export function EventCard({ event }: EventCardProps) {
         }`}
       >
         <div className="flex items-start justify-between gap-3">
-          <EventTypeTag type={event.event_type} />
+          <div className="flex flex-wrap items-center gap-1.5">
+            <EventTypeTag type={event.event_type} />
+            {event.is_kids && <AudienceTag kind="kids" />}
+            {event.is_family && <AudienceTag kind="family" />}
+          </div>
           {recurrenceLabel && (
             <span className="flex items-center gap-1 text-xs font-medium text-warm-gray">
               <svg className="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -126,4 +131,4 @@ export function EventCard({ event }: EventCardProps) {
       </article>
     </Link>
   );
-}
+});

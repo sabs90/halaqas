@@ -83,7 +83,7 @@
 | **Impact** | Medium |
 | **Overall** | Low |
 | **Description** | Without user accounts, anyone can submit events. This could be exploited for spam, joke submissions, or inappropriate content. |
-| **Mitigation** | Rate limiting on submission endpoints. AI parsing adds a natural barrier (random text/images won't produce valid event data). Mosque dropdown constrains venue selection. Community reporting for inappropriate content. Admin can delete immediately. |
+| **Mitigation** | All public submissions land in `pending_review` status and require admin approval before appearing on the site (added Session 16). Rate limiting on submission endpoints. AI parsing adds a natural barrier (random text/images won't produce valid event data). Mosque dropdown constrains venue selection. Community reporting for inappropriate content. Admin can delete immediately. |
 | **Contingency** | If spam becomes a problem, add simple CAPTCHA or require an email confirmation step before publishing. |
 
 ---
@@ -114,7 +114,19 @@
 | **Mitigation** | At expected scale (hundreds of events, not thousands), 500MB is enormous. Image storage is on Cloudflare R2 (separate 10GB free tier). Monitor usage via Supabase dashboard. |
 | **Contingency** | Supabase Pro is $25/month if needed — a very manageable step up if the platform has grown enough to hit limits. |
 
-### R9: Netlify build limits
+### R9: Netlify serverless function timeout
+
+| Field | Detail |
+|-------|--------|
+| **Category** | Technical |
+| **Likelihood** | Medium |
+| **Impact** | Medium |
+| **Overall** | Medium |
+| **Description** | Netlify free tier caps serverless functions at 10 seconds. AI image parsing via Groq vision API can exceed this, causing "NetworkError" on batch flyer upload and potentially single-image submission. Discovered in Session 11. |
+| **Mitigation** | Reduced image compression (800px/60%) to speed up API calls. Added `maxDuration = 60` to route handlers and `netlify.toml` with `timeout = 26`. These take effect on Pro tier (26s max). |
+| **Contingency** | Upgrade to Netlify Pro ($19/month) for 26s timeout. If still insufficient, move AI parsing routes to a separate server (e.g. Railway, Fly.io) with no timeout limit. |
+
+### R10: Netlify build limits
 
 | Field | Detail |
 |-------|--------|
@@ -130,7 +142,7 @@
 
 ## Community & Sensitivity Risks
 
-### R10: Sectarian tensions or perceived bias
+### R11: Sectarian tensions or perceived bias
 
 | Field | Detail |
 |-------|--------|
@@ -142,7 +154,7 @@
 | **Mitigation** | Position Halaqas as agnostic and inclusive — same approach as Go Pray. No editorial curation or recommendation of specific mosques or events. The platform is a directory, not a recommendation engine. Avoid any branding or language that associates with a particular group. |
 | **Contingency** | If specific communities raise concerns, engage directly and respectfully. De-list specific mosques or events if there's a legitimate complaint. Consider an advisory group of diverse community members if this becomes a recurring issue. |
 
-### R11: Privacy concerns around event submission
+### R12: Privacy concerns around event submission
 
 | Field | Detail |
 |-------|--------|
@@ -158,7 +170,7 @@
 
 ## Sustainability Risks
 
-### R12: Solo maintainer burnout or unavailability
+### R13: Solo maintainer burnout or unavailability
 
 | Field | Detail |
 |-------|--------|
@@ -170,7 +182,7 @@
 | **Mitigation** | Design for minimal maintenance — auto-archive handles stale events, no user accounts means no support burden, infrastructure is serverless. Plan for volunteer admins in Phase 2. Keep the admin review flow simple enough that a trusted friend could step in with 5 minutes of explanation. |
 | **Contingency** | If capacity becomes an issue, temporarily disable the amendment review flow (let events stay as-is) and focus only on critical issues. The site continues to function without active admin attention — it just doesn't improve. |
 
-### R13: Post-Ramadan usage cliff
+### R14: Post-Ramadan usage cliff
 
 | Field | Detail |
 |-------|--------|
@@ -190,14 +202,15 @@
 |------|---------|---------------|
 | R1: No community submissions | **High** | Frictionless submission, Ramadan launch timing |
 | R5: Stale recurring events | **High** | Auto-archive, community reporting |
-| R12: Solo maintainer burnout | **High** | Minimal-maintenance design, volunteer admin plan |
-| R13: Post-Ramadan usage cliff | **High** | Calendar subscriptions, recurring events |
+| R13: Solo maintainer burnout | **High** | Minimal-maintenance design, volunteer admin plan |
+| R14: Post-Ramadan usage cliff | **High** | Calendar subscriptions, recurring events |
 | R2: Low visitor traffic | Medium | WhatsApp sharing loop, SEO, Go Pray endorsement |
 | R4: AI parsing inaccuracy | Medium | User confirmation step, prompt iteration |
-| R10: Sectarian tensions | Medium | Agnostic positioning, de-list on request |
+| R9: Netlify function timeout | Medium | Reduced image size, `maxDuration`, upgrade to Pro |
+| R11: Sectarian tensions | Medium | Agnostic positioning, de-list on request |
 | R3: Mosque pushback | Low | De-list on request |
 | R6: Spam submissions | Low | Rate limiting, AI as natural barrier |
 | R7: Groq API changes | Low | Gemini fallback, abstraction layer |
 | R8: Supabase limits | Low | Well within free tier |
-| R9: Netlify build limits | Low | Well within free tier |
-| R11: Privacy concerns | Low | All info already public, removal on request |
+| R10: Netlify build limits | Low | Well within free tier |
+| R12: Privacy concerns | Low | All info already public, removal on request |

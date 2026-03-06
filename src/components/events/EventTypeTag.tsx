@@ -43,3 +43,19 @@ export function EventTypeTag({ type }: { type: EventType }) {
     </span>
   );
 }
+
+export function AudienceTag({ kind }: { kind: 'kids' | 'family' }) {
+  const styles = {
+    kids: { bg: 'rgba(107, 140, 206, 0.12)', text: '#4A6BA8', label: 'Kids' },
+    family: { bg: 'rgba(122, 168, 154, 0.12)', text: '#5A8A7A', label: 'Family' },
+  };
+  const s = styles[kind];
+  return (
+    <span
+      className="inline-block text-[11px] font-semibold uppercase tracking-wider px-2.5 py-[3px] rounded-tag"
+      style={{ backgroundColor: s.bg, color: s.text }}
+    >
+      {s.label}
+    </span>
+  );
+}

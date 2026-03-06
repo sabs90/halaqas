@@ -1,4 +1,6 @@
+import { cache } from 'react';
 import { getServiceClient } from '@/lib/supabase';
+import { trackServerEvent } from '@/lib/tracking-server';
 import { EventCard } from '@/components/events/EventCard';
 import { Button } from '@/components/ui/Button';
 import { SubscribeCalendarButton } from './SubscribeCalendarButton';
@@ -6,13 +8,13 @@ import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import type { Metadata } from 'next';
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300;
 
 interface Props {
   params: Promise<{ id: string }>;
 }
 
-async function getMosque(id: string) {
+const getMosque = cache(async (id: string) => {
   const supabase = getServiceClient();
   const { data } = await supabase
     .from('mosques')
@@ -20,7 +22,7 @@ async function getMosque(id: string) {
     .eq('id', id)
     .single();
   return data;
-}
+});
 
 async function getMosqueEvents(mosqueId: string) {
   const supabase = getServiceClient();
@@ -47,10 +49,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 
 export default async function MosqueDetailPage({ params }: Props) {
   const { id } = await params;
-  const mosque = await getMosque(id);
+  const [mosque, events] = await Promise.all([getMosque(id), getMosqueEvents(id)]);
   if (!mosque) notFound();
 
-  const events = await getMosqueEvents(id);
+  void trackServerEvent('mosque_view', { mosque_id: id });
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://halaqas.com';
   const icsHttpUrl = `${siteUrl}/api/mosques/${id}/calendar.ics`;
 
@@ -74,7 +76,7 @@ export default async function MosqueDetailPage({ params }: Props) {
         <p className="mt-1 text-xs text-stone">{mosque.suburb}, {mosque.state}</p>
 
         <div className="mt-4 flex flex-wrap gap-3">
-          <SubscribeCalendarButton mosqueName={mosque.name} icsHttpUrl={icsHttpUrl} />
+          <SubscribeCalendarButton mosqueName={mosque.name} mosqueId={mosque.id} icsHttpUrl={icsHttpUrl} />
           <Button variant="outline" href={`/submit?mosque=${mosque.id}`}>
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />

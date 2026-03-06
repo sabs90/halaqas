@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServiceClient } from '@/lib/supabase';
+import { trackServerEvent } from '@/lib/tracking-server';
 
 export async function POST(request: NextRequest) {
   const body = await request.json();
@@ -22,6 +23,8 @@ export async function POST(request: NextRequest) {
   if (error) {
     return NextResponse.json({ error: error.message }, { status: 500 });
   }
+
+  void trackServerEvent('mosque_suggestion');
 
   return NextResponse.json({ success: true }, { status: 201 });
 }

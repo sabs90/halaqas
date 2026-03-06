@@ -3,6 +3,8 @@ import { isAdmin } from '@/lib/admin-auth';
 import { parseImageWithGroqMulti } from '@/lib/groq';
 import { uploadToR2 } from '@/lib/r2';
 
+export const maxDuration = 60;
+
 export async function POST(request: NextRequest) {
   if (!(await isAdmin())) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });

@@ -77,6 +77,8 @@ interface FormData {
   recurrence_pattern: string;
   recurrence_end_date: string;
   description: string;
+  is_kids: boolean;
+  is_family: boolean;
   submitter_contact: string;
   flyer_image_url: string;
 }
@@ -100,6 +102,8 @@ const INITIAL_FORM: FormData = {
   is_recurring: false,
   recurrence_pattern: '',
   recurrence_end_date: '',
+  is_kids: false,
+  is_family: false,
   description: '',
   submitter_contact: '',
   flyer_image_url: '',
@@ -134,7 +138,7 @@ function SubmitPageContent() {
   const [pasteText, setPasteText] = useState('');
   const [error, setError] = useState('');
   const [duplicates, setDuplicates] = useState<DuplicateEvent[]>([]);
-  const [successType, setSuccessType] = useState<'submitted' | 'amended'>('submitted');
+  const [successType, setSuccessType] = useState<'submitted' | 'amended' | 'duplicate_ok'>('submitted');
   const [geocodeStatus, setGeocodeStatus] = useState<'idle' | 'loading' | 'found' | 'not_found'>('idle');
   const [nearbyMosques, setNearbyMosques] = useState<Mosque[]>([]);
   const [suggestStatus, setSuggestStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
@@ -197,6 +201,8 @@ function SubmitPageContent() {
     }
     if (parsed.venue_address) updates.venue_address = parsed.venue_address;
     if (parsed.flyer_image_url) updates.flyer_image_url = parsed.flyer_image_url;
+    if (parsed.is_kids) updates.is_kids = true;
+    if (parsed.is_family) updates.is_family = true;
     updateForm(updates);
     setStep('confirm');
   }
@@ -404,12 +410,14 @@ function SubmitPageContent() {
       <div className="max-w-xl mx-auto text-center py-16 space-y-4">
         <div className="text-5xl">✅</div>
         <h1 className="text-[28px] font-bold text-charcoal">
-          {successType === 'amended' ? 'Update Submitted!' : 'Event Submitted!'}
+          {successType === 'amended' ? 'Update Submitted!' : successType === 'duplicate_ok' ? 'No Submission Needed' : 'Submitted for Review!'}
         </h1>
         <p className="text-warm-gray">
           {successType === 'amended'
             ? 'Your suggested changes will be reviewed shortly. Thank you for helping keep things accurate!'
-            : 'Your event is now live on Halaqas. Thank you for contributing!'}
+            : successType === 'duplicate_ok'
+            ? 'Looks like this event is already listed. Thanks for checking!'
+            : 'Your event has been submitted for review and will appear on the site once approved. Thank you for contributing!'}
         </p>
         <div className="flex justify-center gap-3 mt-6">
           <Button variant="primary" href="/events">View Events</Button>
@@ -458,6 +466,9 @@ function SubmitPageContent() {
             disabled={submitting}
           >
             {submitting ? 'Submitting...' : 'This is different — submit anyway'}
+          </Button>
+          <Button variant="primary" onClick={() => { setSuccessType('duplicate_ok'); setStep('success'); }}>
+            OK — no need to submit
           </Button>
           <Button variant="outline" onClick={() => { setStep('confirm'); setDuplicates([]); }}>
             Cancel — go back to editing
@@ -701,6 +712,28 @@ function SubmitPageContent() {
             </div>
           </div>
 
+          {/* Audience tags */}
+          <div className="flex gap-6">
+            <label className="flex items-center gap-2 text-sm text-charcoal cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.is_kids}
+                onChange={(e) => updateForm({ is_kids: e.target.checked })}
+                className="rounded border-sand-dark text-primary focus:ring-primary"
+              />
+              Kids event
+            </label>
+            <label className="flex items-center gap-2 text-sm text-charcoal cursor-pointer">
+              <input
+                type="checkbox"
+                checked={form.is_family}
+                onChange={(e) => updateForm({ is_family: e.target.checked })}
+                className="rounded border-sand-dark text-primary focus:ring-primary"
+              />
+              Family event
+            </label>
+          </div>
+
           {/* Speaker */}
           <div>
             <label className="block text-sm font-semibold text-charcoal mb-1">Speaker</label>
@@ -735,21 +768,20 @@ function SubmitPageContent() {
               </button>
             </div>
 
+            <input
+              type="date"
+              value={form.fixed_date}
+              onChange={(e) => updateForm({ fixed_date: e.target.value })}
+              className="w-full text-sm rounded-button border border-sand-dark p-2.5 bg-white text-charcoal mb-2"
+            />
+
             {form.time_mode === 'fixed' ? (
-              <div className="grid gap-2 sm:grid-cols-2">
-                <input
-                  type="date"
-                  value={form.fixed_date}
-                  onChange={(e) => updateForm({ fixed_date: e.target.value })}
-                  className="text-sm rounded-button border border-sand-dark p-2.5 bg-white text-charcoal"
-                />
-                <input
-                  type="time"
-                  value={form.fixed_time}
-                  onChange={(e) => updateForm({ fixed_time: e.target.value })}
-                  className="text-sm rounded-button border border-sand-dark p-2.5 bg-white text-charcoal"
-                />
-              </div>
+              <input
+                type="time"
+                value={form.fixed_time}
+                onChange={(e) => updateForm({ fixed_time: e.target.value })}
+                className="w-full text-sm rounded-button border border-sand-dark p-2.5 bg-white text-charcoal"
+              />
             ) : (
               <div className="grid gap-2 sm:grid-cols-2">
                 <select

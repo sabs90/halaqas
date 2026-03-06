@@ -3,7 +3,7 @@ export type Language = 'english' | 'arabic' | 'urdu' | 'turkish' | 'bahasa' | 'm
 export type Gender = 'brothers' | 'sisters' | 'mixed';
 export type TimeMode = 'fixed' | 'prayer_anchored';
 export type PrayerName = 'fajr' | 'dhuhr' | 'asr' | 'maghrib' | 'isha';
-export type EventStatus = 'active' | 'archived' | 'delisted';
+export type EventStatus = 'active' | 'archived' | 'delisted' | 'pending_review';
 export type AmendmentReason = 'ended' | 'wrong_date' | 'wrong_details' | 'duplicate' | 'other';
 export type AmendmentStatus = 'pending' | 'approved' | 'rejected';
 
@@ -44,6 +44,8 @@ export interface Event {
   recurrence_end_date: string | null;
   flyer_image_url: string | null;
   submitter_contact: string | null;
+  is_kids: boolean;
+  is_family: boolean;
   status: EventStatus;
   last_confirmed_at: string | null;
   created_at: string;
@@ -83,6 +85,8 @@ export interface ParsedEventData {
   description: string | null;
   venue_address: string | null;
   flyer_image_url: string | null;
+  is_kids: boolean;
+  is_family: boolean;
   confidence: number;
 }
 
@@ -111,4 +115,13 @@ export interface SuburbData {
   name: string;
   latitude: number;
   longitude: number;
+}
+
+export interface AnalyticsEvent {
+  id: string;
+  event_name: string;
+  mosque_id: string | null;
+  event_id: string | null;
+  metadata: Record<string, unknown>;
+  created_at: string;
 }

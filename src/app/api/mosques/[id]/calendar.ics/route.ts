@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServiceClient } from '@/lib/supabase';
+import { trackServerEvent } from '@/lib/tracking-server';
 import { generateICS } from '@/lib/ics-generator';
 
 export async function GET(
@@ -25,14 +26,14 @@ export async function GET(
     .eq('status', 'active')
     .or(`is_recurring.eq.true,fixed_date.is.null,fixed_date.gte.${today}`);
 
+  void trackServerEvent('calendar_feed_fetch', { mosque_id: id });
+
   const icsContent = generateICS(events || [], mosque);
 
-  const filename = mosque.name.replace(/[^a-zA-Z0-9]/g, '_') + '.ics';
   return new NextResponse(icsContent, {
     headers: {
       'Content-Type': 'text/calendar; charset=utf-8',
-      'Content-Disposition': `attachment; filename="${filename}"`,
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Cache-Control': 'public, max-age=3600',
     },
   });
 }

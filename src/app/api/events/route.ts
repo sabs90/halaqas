@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServiceClient } from '@/lib/supabase';
+import { trackServerEvent } from '@/lib/tracking-server';
 import { geocodeAddress } from '@/lib/geocoding';
 
 export async function GET(request: NextRequest) {
@@ -9,7 +10,7 @@ export async function GET(request: NextRequest) {
   const today = new Date().toISOString().split('T')[0];
   let query = supabase
     .from('events')
-    .select('*, mosque:mosques(*)')
+    .select('id, title, event_type, status, is_recurring, recurrence_pattern, last_confirmed_at, time_mode, prayer_anchor, prayer_offset_minutes, fixed_time, fixed_date, language, gender, speaker, is_kids, is_family, venue_name, venue_latitude, venue_longitude, description, mosque_id, mosque:mosques(id, name, suburb, nicknames, latitude, longitude)')
     .eq('status', 'active')
     .or(`is_recurring.eq.true,fixed_date.is.null,fixed_date.gte.${today}`)
     .order('created_at', { ascending: false });
@@ -19,16 +20,24 @@ export async function GET(request: NextRequest) {
   const gender = searchParams.get('gender');
   const mosqueId = searchParams.get('mosque');
   const limit = searchParams.get('limit');
+  const isKids = searchParams.get('is_kids');
+  const isFamily = searchParams.get('is_family');
 
   if (type) query = query.eq('event_type', type);
   if (language) query = query.eq('language', language);
   if (gender) query = query.eq('gender', gender);
   if (mosqueId) query = query.eq('mosque_id', mosqueId);
-  if (limit) query = query.limit(parseInt(limit));
+  if (isKids === 'true') query = query.eq('is_kids', true);
+  if (isFamily === 'true') query = query.eq('is_family', true);
+  query = query.limit(limit ? parseInt(limit) : 50);
 
   const { data, error } = await query;
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-  return NextResponse.json(data);
+  return NextResponse.json(data, {
+    headers: {
+      'Cache-Control': 'public, max-age=60, stale-while-revalidate=300',
+    },
+  });
 }
 
 export async function POST(request: NextRequest) {
@@ -40,7 +49,7 @@ export async function POST(request: NextRequest) {
     let dupQuery = supabase
       .from('events')
       .select('id, title, mosque_id, venue_name, fixed_date, event_type, speaker')
-      .eq('status', 'active')
+      .in('status', ['active', 'pending_review'])
       .ilike('title', body.title);
 
     if (body.mosque_id) {
@@ -96,13 +105,21 @@ export async function POST(request: NextRequest) {
       recurrence_pattern: body.recurrence_pattern || null,
       recurrence_end_date: body.recurrence_end_date || null,
       flyer_image_url: body.flyer_image_url || null,
+      is_kids: body.is_kids || false,
+      is_family: body.is_family || false,
       submitter_contact: body.submitter_contact || null,
-      status: 'active',
-      last_confirmed_at: new Date().toISOString(),
+      status: 'pending_review',
     })
     .select()
     .single();
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+
+  void trackServerEvent('event_submission', {
+    event_id: data.id,
+    mosque_id: data.mosque_id || undefined,
+    metadata: { event_type: data.event_type },
+  });
+
   return NextResponse.json(data, { status: 201 });
 }

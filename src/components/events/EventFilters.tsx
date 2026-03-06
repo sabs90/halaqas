@@ -3,7 +3,7 @@
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useCallback, useState, useEffect, useRef } from 'react';
 import { FilterPill } from '@/components/ui/FilterPill';
-import type { EventType, Language, Gender } from '@/lib/types';
+import type { EventType, Gender } from '@/lib/types';
 
 const LEARNING_TYPES: { value: EventType; label: string }[] = [
   { value: 'talk', label: 'Talk' },
@@ -26,14 +26,6 @@ const COMMUNITY_TYPES: { value: EventType; label: string }[] = [
   { value: 'competition', label: 'Competition' },
 ];
 
-const LANGUAGES: { value: Language; label: string }[] = [
-  { value: 'english', label: 'English' },
-  { value: 'arabic', label: 'Arabic' },
-  { value: 'urdu', label: 'Urdu' },
-  { value: 'turkish', label: 'Turkish' },
-  { value: 'mixed', label: 'Mixed' },
-];
-
 const GENDERS: { value: Gender; label: string }[] = [
   { value: 'mixed', label: 'Mixed' },
   { value: 'brothers', label: 'Brothers' },
@@ -46,8 +38,9 @@ export function EventFilters() {
   const searchParams = useSearchParams();
 
   const currentType = searchParams.get('type');
-  const currentLanguage = searchParams.get('language');
   const currentGender = searchParams.get('gender');
+  const currentKids = searchParams.get('kids');
+  const currentFamily = searchParams.get('family');
   const currentSearch = searchParams.get('q') || '';
 
   const [searchValue, setSearchValue] = useState(currentSearch);
@@ -129,17 +122,16 @@ export function EventFilters() {
         ))}
       </div>
 
-      {/* Gender & Language */}
+      {/* Gender, Language & Audience */}
       <div className="flex flex-wrap items-center gap-2">
         <span className="text-[11px] font-semibold uppercase tracking-wider text-stone mr-0.5">Gender</span>
         {GENDERS.map(({ value, label }) => (
           <FilterPill key={value} label={label} active={currentGender === value} onClick={() => setFilter('gender', value)} />
         ))}
         <span className="w-px h-5 bg-sand-dark self-center mx-1" />
-        <span className="text-[11px] font-semibold uppercase tracking-wider text-stone mr-0.5">Language</span>
-        {LANGUAGES.map(({ value, label }) => (
-          <FilterPill key={value} label={label} active={currentLanguage === value} onClick={() => setFilter('language', value)} />
-        ))}
+        <span className="text-[11px] font-semibold uppercase tracking-wider text-stone mr-0.5">Audience</span>
+        <FilterPill label="Kids" active={currentKids === 'true'} onClick={() => setFilter('kids', currentKids === 'true' ? null : 'true')} />
+        <FilterPill label="Family" active={currentFamily === 'true'} onClick={() => setFilter('family', currentFamily === 'true' ? null : 'true')} />
       </div>
     </div>
   );

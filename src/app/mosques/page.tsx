@@ -4,6 +4,8 @@ import Link from 'next/link';
 import type { Metadata } from 'next';
 import { MapWrapper } from '@/components/map/MapWrapper';
 import { MosqueSearch } from './MosqueSearch';
+import { SYDNEY_SUBURBS } from '@/data/sydney-suburbs';
+import { haversineDistance } from '@/lib/haversine';
 import type { Mosque } from '@/lib/types';
 
 export const metadata: Metadata = {
@@ -11,7 +13,7 @@ export const metadata: Metadata = {
   description: 'Browse Australian mosques and discover their upcoming events and programs.',
 };
 
-export const dynamic = 'force-dynamic';
+export const revalidate = 300;
 
 const STATE_NAMES: Record<string, string> = {
   NSW: 'New South Wales',
@@ -50,15 +52,27 @@ async function getMosquesAndEvents(query?: string, state?: string) {
     filteredMosques = filteredMosques.filter(m => m.state === state);
   }
 
-  // Then filter by search query
+  // Then filter by search query (text match + 5km radius for suburb matches)
   if (query) {
     const q = query.toLowerCase();
-    filteredMosques = filteredMosques.filter(mosque =>
-      mosque.name.toLowerCase().includes(q) ||
-      mosque.suburb.toLowerCase().includes(q) ||
-      mosque.address.toLowerCase().includes(q) ||
-      (mosque.nicknames || []).some((n: string) => n.toLowerCase().includes(q))
-    );
+    const matchedSuburb = SYDNEY_SUBURBS.find(s => s.name.toLowerCase().includes(q));
+
+    filteredMosques = filteredMosques.filter(mosque => {
+      // Text match on name, suburb, address, nicknames
+      if (
+        mosque.name.toLowerCase().includes(q) ||
+        mosque.suburb.toLowerCase().includes(q) ||
+        mosque.address.toLowerCase().includes(q) ||
+        (mosque.nicknames || []).some((n: string) => n.toLowerCase().includes(q))
+      ) return true;
+
+      // 5km radius match if query matches a known suburb
+      if (matchedSuburb && mosque.latitude && mosque.longitude) {
+        return haversineDistance(matchedSuburb.latitude, matchedSuburb.longitude, mosque.latitude, mosque.longitude) <= 5;
+      }
+
+      return false;
+    });
   }
 
   return { mosques: filteredMosques, allMosques: mosques || [], events: events || [] };
@@ -73,11 +87,19 @@ export default async function MosquesPage({ searchParams }: Props) {
   return (
     <div className="space-y-6">
       <h1 className="text-[28px] font-bold text-charcoal">Mosques</h1>
-      <p className="text-sm text-warm-gray">
-        {stateName
-          ? `Browse mosques in ${stateName} and discover their upcoming events.`
-          : 'Browse Australian mosques and discover their upcoming events.'}
-      </p>
+      <div className="flex items-start justify-between gap-4">
+        <p className="text-sm text-warm-gray">
+          {stateName
+            ? `Browse mosques in ${stateName} and discover their upcoming events.`
+            : 'Browse Australian mosques and discover their upcoming events.'}
+        </p>
+        <Link
+          href="/mosques/suggest"
+          className="shrink-0 text-sm font-semibold bg-primary text-white px-4 py-2 rounded-button hover:bg-primary-light transition-colors"
+        >
+          + Suggest a Mosque
+        </Link>
+      </div>
 
       <Suspense fallback={<div className="h-10 bg-sand rounded-card animate-pulse" />}>
         <MosqueSearch />
