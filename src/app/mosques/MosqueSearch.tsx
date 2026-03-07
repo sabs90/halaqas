@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useRef, useEffect } from 'react';
 
 const STATES = [
-  { code: '', label: 'All' },
+  { code: 'all', label: 'All' },
   { code: 'NSW', label: 'NSW' },
   { code: 'VIC', label: 'VIC' },
   { code: 'QLD', label: 'QLD' },
@@ -19,7 +19,7 @@ export function MosqueSearch() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const currentSearch = searchParams.get('q') || '';
-  const currentState = searchParams.get('state') || '';
+  const currentState = searchParams.get('state') || 'NSW';
   const [value, setValue] = useState(currentSearch);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 

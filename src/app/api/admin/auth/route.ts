@@ -1,5 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { isAdmin } from '@/lib/admin-auth';
+
+export async function GET() {
+  const authenticated = await isAdmin();
+  if (!authenticated) return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });
+  return NextResponse.json({ authenticated: true });
+}
 
 export async function POST(request: NextRequest) {
   const { password } = await request.json();

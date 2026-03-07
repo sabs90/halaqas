@@ -12,7 +12,7 @@ export default function AdminPage() {
 
   useEffect(() => {
     // Check if already authenticated by trying to fetch admin data
-    fetch('/api/admin/events')
+    fetch('/api/admin/auth')
       .then(r => { if (r.ok) setAuthenticated(true); })
       .finally(() => setChecking(false));
   }, []);

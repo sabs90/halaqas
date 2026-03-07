@@ -4,6 +4,43 @@ This file is the persistent memory between Claude Code sessions. Each entry summ
 
 ---
 
+## Session 20 — Performance Fixes, Event Correction, UI Cleanup (2026-03-07)
+
+### Completed
+- **Mosques page performance overhaul:**
+  - Removed events query entirely — mosques page was fetching all events with mosque joins just for map popup text. Map popups now link to mosque page instead.
+  - Default to NSW on initial load (29 mosques instead of 66) — users click "All" to see nationwide.
+  - State filter pushed to DB query level (was fetching all then filtering in JS).
+- **Admin page speed fix:** Auth check was calling `/api/admin/events` (full event list query) just to verify login. Added lightweight `GET /api/admin/auth` that only checks the session cookie — no DB query.
+- **Mosque search 5km radius:** Suburb searches on mosques page now return mosques within 5km radius (matching home page behaviour), not just text matches.
+- **Suggest a Mosque button:** Changed from plain text link to solid teal button for stronger contrast.
+- **Removed language filter:** Removed Language pills from EventFilters to reduce clutter — data and API filtering still available.
+- **Parramatta Mosque tahajjud fix:** Deleted incorrect event (wrong time: "15min after Isha" instead of 3:00 AM, wrong date: 18 Feb instead of 19 Feb). Created two correct replacement events:
+  - Daily Tahajjud Prayer (Mon–Fri) at 3:00 AM
+  - Daily Tahajjud Prayer (Sat & Sun) at 2:30 AM
+  - Both with recurrence_end_date 2026-03-19
+- **Committed and pushed** sessions 12–19 (73 files, had been uncommitted).
+
+### Decisions Made
+- Mosques page defaults to NSW (not "All") since most users are in Sydney and loading 66 mosques + map is slow
+- Events query removed from mosques page entirely — not worth a full table scan for map popup labels
+- Language filter hidden from UI but preserved in data model and API — can be re-added later if needed
+- Tahajjud split into weekday/weekend events using `daily_ramadan` pattern with descriptions clarifying which days apply (data model lacks weekday/weekend recurrence patterns)
+
+### Issues / Bugs
+- None
+
+### Next Session
+- Run migration 011 on Supabase production (carried over)
+- Seed some test events with kids/family tags (carried over)
+- Consider adding kids/family to the admin batch review form's editable fields (carried over)
+- Commit and push this session's changes
+
+### Open Questions
+- None
+
+---
+
 ## Session 19 — Performance Optimisation (2026-03-07)
 
 ### Completed

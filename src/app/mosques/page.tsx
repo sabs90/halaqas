@@ -30,29 +30,28 @@ interface Props {
   searchParams: Promise<{ q?: string; state?: string }>;
 }
 
-async function getMosquesAndEvents(query?: string, state?: string) {
+async function getMosques(query?: string, state?: string) {
   const supabase = getServiceClient();
-  const { data: mosques } = await supabase
+
+  // Default to NSW on initial load
+  const effectiveState = state ?? 'NSW';
+
+  let mosqueQuery = supabase
     .from('mosques')
     .select('*')
     .eq('active', true)
     .order('name');
 
-  const today = new Date().toISOString().split('T')[0];
-  const { data: events } = await supabase
-    .from('events')
-    .select('*, mosque:mosques(*)')
-    .eq('status', 'active')
-    .or(`is_recurring.eq.true,fixed_date.is.null,fixed_date.gte.${today}`);
+  // Push state filter to DB level (unless "all")
+  if (effectiveState !== 'all') {
+    mosqueQuery = mosqueQuery.eq('state', effectiveState);
+  }
+
+  const { data: mosques } = await mosqueQuery;
 
   let filteredMosques: Mosque[] = mosques || [];
 
-  // Filter by state first
-  if (state) {
-    filteredMosques = filteredMosques.filter(m => m.state === state);
-  }
-
-  // Then filter by search query (text match + 5km radius for suburb matches)
+  // Filter by search query (text match + 5km radius for suburb matches)
   if (query) {
     const q = query.toLowerCase();
     const matchedSuburb = SYDNEY_SUBURBS.find(s => s.name.toLowerCase().includes(q));
@@ -75,14 +74,14 @@ async function getMosquesAndEvents(query?: string, state?: string) {
     });
   }
 
-  return { mosques: filteredMosques, allMosques: mosques || [], events: events || [] };
+  return { mosques: filteredMosques, effectiveState };
 }
 
 export default async function MosquesPage({ searchParams }: Props) {
   const params = await searchParams;
-  const { mosques, events } = await getMosquesAndEvents(params.q, params.state);
+  const { mosques, effectiveState } = await getMosques(params.q, params.state);
 
-  const stateName = params.state ? STATE_NAMES[params.state] || params.state : null;
+  const stateName = effectiveState !== 'all' ? STATE_NAMES[effectiveState] || effectiveState : null;
 
   return (
     <div className="space-y-6">
@@ -106,7 +105,7 @@ export default async function MosquesPage({ searchParams }: Props) {
       </Suspense>
 
       <Suspense fallback={<div className="h-[350px] bg-sand rounded-card animate-pulse" />}>
-        <MapWrapper mosques={mosques} events={events} />
+        <MapWrapper mosques={mosques} events={[]} />
       </Suspense>
 
       {mosques.length > 0 ? (
