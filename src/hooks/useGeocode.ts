@@ -16,7 +16,7 @@ const cache = new Map<string, GeoCoords | null>();
 export function useGeocode(
   query: string,
   textMatchCount: number,
-  debounceMs = 500
+  debounceMs = 150
 ): { coords: GeoCoords | null; isGeocoding: boolean } {
   const [coords, setCoords] = useState<GeoCoords | null>(null);
   const [isGeocoding, setIsGeocoding] = useState(false);

@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { MapWrapper } from '@/components/map/MapWrapper';
 import { useGeocode } from '@/hooks/useGeocode';
 import { haversineDistance } from '@/lib/haversine';
+import { SUBURB_COORDS } from '@/lib/suburb-coords';
 import type { Mosque } from '@/lib/types';
 
 const STATES = [
@@ -30,6 +31,22 @@ export function MosqueSearch({ mosques }: Props) {
   const currentState = searchParams.get('state') || 'NSW';
   const [search, setSearch] = useState('');
 
+  // Build suburb → coords map: static lookup first, then overlay mosque-derived (more precise)
+  const suburbCoords = useMemo(() => {
+    const map = new Map<string, { latitude: number; longitude: number }>(
+      Object.entries(SUBURB_COORDS)
+    );
+    for (const mosque of mosques) {
+      const suburb = mosque.suburb?.toLowerCase();
+      const lat = mosque.latitude;
+      const lng = mosque.longitude;
+      if (suburb && lat && lng) {
+        map.set(suburb, { latitude: lat, longitude: lng });
+      }
+    }
+    return map;
+  }, [mosques]);
+
   // Text-match mosques client-side
   const textMatched = useMemo(() => {
     if (!search) return mosques;
@@ -42,19 +59,45 @@ export function MosqueSearch({ mosques }: Props) {
     );
   }, [mosques, search]);
 
-  // Geocode fallback — only fires when text matching found nothing
-  const { coords, isGeocoding } = useGeocode(search, textMatched.length);
+  // Suburb-radius matching — if search matches a known suburb, find mosques within 5km
+  const suburbRadiusMatched = useMemo(() => {
+    if (!search) return [];
+    const q = search.toLowerCase().trim();
+    const center = suburbCoords.get(q);
+    if (!center) return [];
+    return mosques.filter(mosque => {
+      if (!mosque.latitude || !mosque.longitude) return false;
+      return haversineDistance(center.latitude, center.longitude, mosque.latitude, mosque.longitude) <= 5;
+    });
+  }, [mosques, search, suburbCoords]);
 
-  // Combine: use text matches if any, otherwise use geo-proximity matches
+  // Merge text + suburb-radius matches, deduplicated
+  const localMatched = useMemo(() => {
+    if (!search) return mosques;
+    const ids = new Set(textMatched.map(m => m.id));
+    const merged = [...textMatched];
+    for (const m of suburbRadiusMatched) {
+      if (!ids.has(m.id)) {
+        merged.push(m);
+        ids.add(m.id);
+      }
+    }
+    return merged;
+  }, [mosques, search, textMatched, suburbRadiusMatched]);
+
+  // Geocode fallback — only fires when both text and suburb-coord matching found nothing
+  const { coords, isGeocoding } = useGeocode(search, localMatched.length);
+
+  // Combine: use local matches if any, otherwise use geo-proximity matches
   const filtered = useMemo(() => {
     if (!search) return mosques;
-    if (textMatched.length > 0) return textMatched;
+    if (localMatched.length > 0) return localMatched;
     if (!coords) return [];
     return mosques.filter(mosque =>
       mosque.latitude && mosque.longitude &&
       haversineDistance(coords.latitude, coords.longitude, mosque.latitude, mosque.longitude) <= 5
     );
-  }, [mosques, search, textMatched, coords]);
+  }, [mosques, search, localMatched, coords]);
 
   function handleStateChange(state: string) {
     const params = new URLSearchParams();

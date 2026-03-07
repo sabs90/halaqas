@@ -26,7 +26,7 @@ The roadmap is split into three phases. Only Phase 1 needs to be complete before
 ### Milestone 1.2 — Event Directory & Mosque Pages (Week 2–3)
 
 - [x] Event listing page with filters (mosque, suburb/radius, date, event type, language, gender) — *moved to home page in Session 2*
-- [x] Suburb selector with 5km radius filtering (Haversine query) — *implemented as search bar with 5km radius matching*
+- [x] Suburb selector with 5km radius filtering (Haversine query) — *implemented as search bar with 5km radius matching, upgraded to live Nominatim geocoding in Session 23 (replaces hardcoded suburb list), further optimised in Session 24 with static ~130-suburb coordinate lookup for instant results*
 - [x] Individual mosque pages showing all events for that mosque
 - [x] Individual event detail pages with all fields displayed
 - [x] Prayer time calculation integrated (Adhan.js, Shafi'i method, Sydney coordinates)
@@ -48,6 +48,7 @@ The roadmap is split into three phases. Only Phase 1 needs to be complete before
 - [x] Recurring event options (pattern selector)
 - [ ] Image upload to Cloudflare R2 *(pipeline wired up in Session 9: compress → upload → store URL → display. Uses data URL fallback until R2 credentials configured)*
 - [x] Event published to database on confirmation *(now goes to `pending_review` — admin approval required before public visibility, added Session 16)*
+- [x] Auto-create mosque suggestion when event submitted for unknown venue *(added Session 21 — closes gap where events were created for mosques not in the database, but no mosque suggestion was generated for admin review)*
 
 **Deliverable:** End-to-end submission flow working — upload flyer, confirm details, event goes live.
 
@@ -100,7 +101,7 @@ The roadmap is split into three phases. Only Phase 1 needs to be complete before
 
 ### Milestone 2.1 — Ramadan Launch Push
 
-- [ ] Share launch via personal networks, WhatsApp groups, mosque contacts
+- [x] Share launch via personal networks, WhatsApp groups, mosque contacts — *launched Session 23, WhatsApp messages sent with personal intro + shareable forwarding message*
 - [ ] Leverage Go Pray's community and reputation (if endorsement secured)
 - [ ] Engage mosque social media pages to share Halaqas
 - [ ] Monitor submissions, fix bugs, respond to feedback quickly

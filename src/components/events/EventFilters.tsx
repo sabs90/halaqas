@@ -6,6 +6,7 @@ import { FilterPill } from '@/components/ui/FilterPill';
 import { EventCard } from '@/components/events/EventCard';
 import { useGeocode } from '@/hooks/useGeocode';
 import { haversineDistance } from '@/lib/haversine';
+import { SUBURB_COORDS } from '@/lib/suburb-coords';
 import type { Event, EventType, Gender } from '@/lib/types';
 
 const LEARNING_TYPES: { value: EventType; label: string }[] = [
@@ -69,6 +70,22 @@ export function EventFilters({ events, hasFilters }: Props) {
     [router, searchParams, basePath]
   );
 
+  // Build suburb → coords map: static lookup first, then overlay mosque-derived (more precise)
+  const suburbCoords = useMemo(() => {
+    const map = new Map<string, { latitude: number; longitude: number }>(
+      Object.entries(SUBURB_COORDS)
+    );
+    for (const event of events) {
+      const suburb = event.mosque?.suburb?.toLowerCase();
+      const lat = event.mosque?.latitude;
+      const lng = event.mosque?.longitude;
+      if (suburb && lat && lng) {
+        map.set(suburb, { latitude: lat, longitude: lng });
+      }
+    }
+    return map;
+  }, [events]);
+
   // Text-match events client-side
   const textMatched = useMemo(() => {
     if (!searchValue) return events;
@@ -90,13 +107,41 @@ export function EventFilters({ events, hasFilters }: Props) {
     });
   }, [events, searchValue]);
 
-  // Geocode fallback — only fires when text matching found nothing
-  const { coords, isGeocoding } = useGeocode(searchValue, textMatched.length);
+  // Suburb-radius matching — if search matches a known suburb, find events within 5km
+  const suburbRadiusMatched = useMemo(() => {
+    if (!searchValue) return [];
+    const q = searchValue.toLowerCase().trim();
+    const center = suburbCoords.get(q);
+    if (!center) return [];
+    return events.filter(event => {
+      const lat = event.mosque?.latitude || event.venue_latitude;
+      const lng = event.mosque?.longitude || event.venue_longitude;
+      if (!lat || !lng) return false;
+      return haversineDistance(center.latitude, center.longitude, lat, lng) <= 5;
+    });
+  }, [events, searchValue, suburbCoords]);
 
-  // Combine: use text matches if any, otherwise use geo-proximity matches
+  // Merge text + suburb-radius matches, deduplicated
+  const localMatched = useMemo(() => {
+    if (!searchValue) return events;
+    const ids = new Set(textMatched.map(e => e.id));
+    const merged = [...textMatched];
+    for (const e of suburbRadiusMatched) {
+      if (!ids.has(e.id)) {
+        merged.push(e);
+        ids.add(e.id);
+      }
+    }
+    return merged;
+  }, [events, searchValue, textMatched, suburbRadiusMatched]);
+
+  // Geocode fallback — only fires when both text and suburb-coord matching found nothing
+  const { coords, isGeocoding } = useGeocode(searchValue, localMatched.length);
+
+  // Combine: use local matches if any, otherwise use geo-proximity matches
   const filtered = useMemo(() => {
     if (!searchValue) return events;
-    if (textMatched.length > 0) return textMatched;
+    if (localMatched.length > 0) return localMatched;
     if (!coords) return [];
     return events.filter(event => {
       const lat = event.mosque?.latitude || event.venue_latitude;
@@ -104,7 +149,7 @@ export function EventFilters({ events, hasFilters }: Props) {
       if (!lat || !lng) return false;
       return haversineDistance(coords.latitude, coords.longitude, lat, lng) <= 5;
     });
-  }, [events, searchValue, textMatched, coords]);
+  }, [events, searchValue, localMatched, coords]);
 
   return (
     <div className="space-y-3">

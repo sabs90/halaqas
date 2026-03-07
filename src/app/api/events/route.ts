@@ -115,6 +115,38 @@ export async function POST(request: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
 
+  // Auto-create mosque suggestion if venue_name is set without mosque_id
+  if (data.venue_name && !data.mosque_id) {
+    try {
+      const { data: existingSuggestion } = await supabase
+        .from('mosque_suggestions')
+        .select('id')
+        .ilike('name', data.venue_name)
+        .in('status', ['pending', 'approved'])
+        .limit(1);
+
+      if (!existingSuggestion || existingSuggestion.length === 0) {
+        const { data: existingMosque } = await supabase
+          .from('mosques')
+          .select('id')
+          .ilike('name', data.venue_name)
+          .limit(1);
+
+        if (!existingMosque || existingMosque.length === 0) {
+          await supabase.from('mosque_suggestions').insert({
+            name: data.venue_name,
+            address: data.venue_address || null,
+            latitude: data.venue_latitude || null,
+            longitude: data.venue_longitude || null,
+            suggested_by_contact: data.submitter_contact || null,
+          });
+        }
+      }
+    } catch {
+      // Auto-suggestion failure must not break event submission
+    }
+  }
+
   void trackServerEvent('event_submission', {
     event_id: data.id,
     mosque_id: data.mosque_id || undefined,

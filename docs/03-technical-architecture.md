@@ -168,7 +168,7 @@ No PII stored. RLS: public insert only, reads via service role (admin). Indexes 
 | Route | Method | Purpose |
 |-------|--------|---------|
 | `/api/events` | GET | List events with filters (mosque, suburb, date, type, language, gender) |
-| `/api/events` | POST | Submit a new event (after user confirmation) |
+| `/api/events` | POST | Submit a new event (after user confirmation). Auto-creates a mosque suggestion if venue_name is set without mosque_id. |
 | `/api/events/[id]` | GET | Single event details |
 | `/api/events/[id]/report` | POST | Submit an amendment/report |
 | `/api/parse-image` | POST | Upload flyer image, return AI-extracted event data |

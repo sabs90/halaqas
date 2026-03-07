@@ -4,6 +4,122 @@ This file is the persistent memory between Claude Code sessions. Each entry summ
 
 ---
 
+## Session 24 — Static Suburb Coords for Instant Search (2026-03-08)
+
+### Completed
+- **Eliminated geocode API latency for common suburb searches** — suburbs without a mosque (e.g. "narwee", "beverly hills") previously fell through to the Nominatim geocode API (500ms debounce + network round-trip). Now resolved instantly via a static lookup.
+- **Created `src/lib/suburb-coords.ts`** — static `Record<string, { latitude, longitude }>` with ~130 pre-computed coordinates covering Canterbury-Bankstown, Greater Western Sydney, South-West, Hills, Inner West, North Shore, plus key suburbs in VIC/QLD/WA/SA/ACT/NT/TAS
+- **Updated `EventFilters.tsx` and `MosqueSearch.tsx`** — suburb coord map now seeds with static entries first, then overlays mosque-derived coords (which take precedence as they're more precise from actual mosque locations)
+- **Created `scripts/generate-suburb-coords.mjs`** — Nominatim-based generation script to regenerate the static file if more suburbs are needed
+
+### Decisions Made
+- Static coords are seeded first, mosque-derived coords overlay on top (mosque coords are more precise since they're the actual mosque location within a suburb)
+- ~130 suburbs covers the vast majority of searches from users near our 66 mosques
+- Geocode API still fires as last-resort fallback for suburbs not in either lookup (static or mosque-derived)
+- Search priority: text match → suburb-radius (static + mosque coords) → merge/dedup → geocode API fallback
+
+### Issues / Bugs
+- Migration 012 still needs to be run on Supabase production (carried over)
+- Migration 011 still needs to be run on Supabase production (carried over)
+
+### Next Session
+- Run migrations 011 + 012 on Supabase production (carried over)
+- Commit and push all changes
+- Seed some test events with kids/family tags (carried over)
+- Monitor analytics and community submissions
+- Consider adding kids/family to the admin batch review form's editable fields (carried over)
+
+### Open Questions
+- None
+
+---
+
+## Session 23 — Launch & Geocoded Search (2026-03-07 / 2026-03-08)
+
+### Completed
+- **Launched the site** — sent WhatsApp messages to personal groups and a shareable forwarding message timed for the last 10 nights of Ramadan
+- **Verified analytics** — confirmed both Umami Cloud and custom Supabase analytics are live and tracking (12 event types, 23 integration points, admin dashboard at `/admin/analytics`)
+- **Replaced static suburb list with live geocoding** — searching any Australian suburb now works, not just the 34 hardcoded ones:
+  - Created `src/hooks/useGeocode.ts` — debounced (500ms) geocoding hook with in-memory cache, only fires when text matching finds nothing
+  - Updated `MosqueSearch.tsx` and `EventFilters.tsx` to use geocode fallback with "Searching nearby..." loading state
+  - Updated `src/lib/geocoding.ts` — removed "Sydney" hardcoding so it works for all Australian suburbs
+  - Deleted `src/data/sydney-suburbs.ts` and `SuburbData` type — no longer needed
+- **Renamed gender label** "Mixed" → "Both" (Session 22, same day)
+
+### Decisions Made
+- Geocoding only fires when text-based search (name, suburb, address, nicknames) returns zero results — avoids unnecessary API calls
+- 5km radius kept for proximity matching (Narwee → Punchbowl is ~3km, well within range)
+- Nominatim geocoding called via existing `/api/geocode` POST endpoint — keeps rate limiting server-side with proper User-Agent
+- Results cached in a client-side Map to avoid re-geocoding the same term
+
+### Issues / Bugs
+- Migration 012 still needs to be run on Supabase production (carried over)
+- Migration 011 still needs to be run on Supabase production (carried over)
+
+### Next Session
+- Run migrations 011 + 012 on Supabase production (carried over)
+- Commit and push all changes
+- Seed some test events with kids/family tags (carried over)
+- Monitor analytics and community submissions
+- Consider adding kids/family to the admin batch review form's editable fields (carried over)
+
+### Open Questions
+- None
+
+---
+
+## Session 22 — Rename Gender Label "Mixed" → "Both" (2026-03-08)
+
+### Completed
+- **Renamed gender display label** from "Mixed" to "Both" across all 7 UI touchpoints: filter pills, event cards, event detail page, submit form, admin batch page, admin review page, and AI parsing prompt. DB value stays `mixed` — only the user-facing label changed.
+
+### Decisions Made
+- "Mixed" implies intermingling between genders, which is culturally inaccurate for the Muslim community. "Both" correctly conveys the event is open to brothers and sisters without implying they intermingle.
+- Language "Mixed" label left unchanged (that correctly describes a multilingual event)
+- AI prompt updated to clarify `mixed` means "open to both brothers and sisters" — LLM still outputs `mixed` as the DB value
+
+### Issues / Bugs
+- Migration 012 still needs to be run on Supabase production (carried over)
+
+### Next Session
+- Run migration 012 on Supabase production (carried over)
+- Run migration 011 on Supabase production (carried over)
+- Commit and push auto-create mosque suggestion changes from Session 21 (`src/app/api/events/route.ts`)
+- Seed some test events with kids/family tags (carried over)
+- Consider adding kids/family to the admin batch review form's editable fields (carried over)
+
+### Open Questions
+- None
+
+---
+
+## Session 21 — Auto Mosque Suggestion on Event Submission (2026-03-07)
+
+### Completed
+- **Added Quakers Hill Masjid** to the database via migration 012 (37 Douglas Rd, Quakers Hill NSW 2763). Linked the orphaned event `ab9b7d1b-40b3-485e-8318-675083b6aebb` to the new mosque and cleared its venue fields.
+- **Fixed orphaned venue gap:** When a user submits an event for a mosque not in the database, the event was created with `venue_name` but no `mosque_id`, and no mosque suggestion was generated. The admin would see the event in the review queue but have no corresponding mosque to approve — the mosque would never get added to the system.
+- **Auto-create mosque suggestion:** Added logic to `POST /api/events` that automatically creates a `mosque_suggestions` entry when an event is created with `venue_name` but no `mosque_id`. Checks for duplicate suggestions (case-insensitive) and existing mosques before inserting. Fire-and-forget pattern (failure doesn't break event submission).
+
+### Decisions Made
+- Auto-suggestion does NOT filter out non-mosque venues — admin already has approve/reject for suggestions, and the cost of a false positive (rejecting "Sydney Convention Centre") is one click, while the cost of a false negative (missing a real mosque) is the exact problem we're fixing
+- Duplicate prevention uses `ilike` (case-insensitive) on both `mosque_suggestions` and `mosques` tables
+- Suggestion inherits `venue_name`, `venue_address`, `venue_latitude`, `venue_longitude`, and `submitter_contact` from the event
+
+### Issues / Bugs
+- Migration 012 needs to be run on Supabase production
+
+### Next Session
+- Run migration 012 on Supabase production
+- Run migration 011 on Supabase production (carried over)
+- Seed some test events with kids/family tags (carried over)
+- Consider adding kids/family to the admin batch review form's editable fields (carried over)
+- Commit and push this session's changes
+
+### Open Questions
+- None
+
+---
+
 ## Session 20 — Performance Fixes, Event Correction, UI Cleanup (2026-03-07)
 
 ### Completed

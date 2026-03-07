@@ -83,7 +83,7 @@
 | **Impact** | Medium |
 | **Overall** | Low |
 | **Description** | Without user accounts, anyone can submit events. This could be exploited for spam, joke submissions, or inappropriate content. |
-| **Mitigation** | All public submissions land in `pending_review` status and require admin approval before appearing on the site (added Session 16). Rate limiting on submission endpoints. AI parsing adds a natural barrier (random text/images won't produce valid event data). Mosque dropdown constrains venue selection. Community reporting for inappropriate content. Admin can delete immediately. |
+| **Mitigation** | All public submissions land in `pending_review` status and require admin approval before appearing on the site (added Session 16). Events for unknown venues now auto-create mosque suggestions for admin review (added Session 21). Rate limiting on submission endpoints. AI parsing adds a natural barrier (random text/images won't produce valid event data). Mosque dropdown constrains venue selection. Community reporting for inappropriate content. Admin can delete immediately. |
 | **Contingency** | If spam becomes a problem, add simple CAPTCHA or require an email confirmation step before publishing. |
 
 ---
