@@ -1,9 +1,12 @@
 'use client';
 
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
-import { useCallback, useState, useEffect, useRef } from 'react';
+import { useCallback, useState, useMemo } from 'react';
 import { FilterPill } from '@/components/ui/FilterPill';
-import type { EventType, Gender } from '@/lib/types';
+import { EventCard } from '@/components/events/EventCard';
+import { SYDNEY_SUBURBS } from '@/data/sydney-suburbs';
+import { haversineDistance } from '@/lib/haversine';
+import type { Event, EventType, Gender } from '@/lib/types';
 
 const LEARNING_TYPES: { value: EventType; label: string }[] = [
   { value: 'talk', label: 'Talk' },
@@ -32,7 +35,12 @@ const GENDERS: { value: Gender; label: string }[] = [
   { value: 'sisters', label: 'Sisters' },
 ];
 
-export function EventFilters() {
+interface Props {
+  events: Event[];
+  hasFilters: boolean;
+}
+
+export function EventFilters({ events, hasFilters }: Props) {
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -41,20 +49,15 @@ export function EventFilters() {
   const currentGender = searchParams.get('gender');
   const currentKids = searchParams.get('kids');
   const currentFamily = searchParams.get('family');
-  const currentSearch = searchParams.get('q') || '';
 
-  const [searchValue, setSearchValue] = useState(currentSearch);
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
-
-  useEffect(() => {
-    setSearchValue(currentSearch);
-  }, [currentSearch]);
+  const [searchValue, setSearchValue] = useState('');
 
   const basePath = pathname === '/' ? '/' : pathname;
 
   const setFilter = useCallback(
     (key: string, value: string | null) => {
       const params = new URLSearchParams(searchParams.toString());
+      params.delete('q'); // q is now client-side only
       if (value && params.get(key) !== value) {
         params.set(key, value);
       } else {
@@ -66,18 +69,38 @@ export function EventFilters() {
     [router, searchParams, basePath]
   );
 
-  function handleSearchChange(value: string) {
-    setSearchValue(value);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      setFilter('q', value || null);
-    }, 300);
-  }
+  // Filter events client-side by search text
+  const filtered = useMemo(() => {
+    if (!searchValue) return events;
+    const q = searchValue.toLowerCase();
+    const matchedSuburb = SYDNEY_SUBURBS.find(s => s.name.toLowerCase().includes(q));
 
-  function handleSearchClear() {
-    setSearchValue('');
-    setFilter('q', null);
-  }
+    return events.filter(event => {
+      const mosqueName = (event.mosque?.name || event.venue_name || '').toLowerCase();
+      const mosqueSuburb = (event.mosque?.suburb || '').toLowerCase();
+      const title = event.title.toLowerCase();
+      const speaker = (event.speaker || '').toLowerCase();
+      const description = (event.description || '').toLowerCase();
+
+      if (
+        mosqueName.includes(q) ||
+        mosqueSuburb.includes(q) ||
+        title.includes(q) ||
+        speaker.includes(q) ||
+        description.includes(q) ||
+        (event.mosque?.nicknames || []).some((n: string) => n.toLowerCase().includes(q))
+      ) return true;
+
+      if (matchedSuburb) {
+        const lat = event.mosque?.latitude || event.venue_latitude;
+        const lng = event.mosque?.longitude || event.venue_longitude;
+        if (lat && lng) {
+          return haversineDistance(matchedSuburb.latitude, matchedSuburb.longitude, lat, lng) <= 5;
+        }
+      }
+      return false;
+    });
+  }, [events, searchValue]);
 
   return (
     <div className="space-y-3">
@@ -89,13 +112,13 @@ export function EventFilters() {
         <input
           type="text"
           value={searchValue}
-          onChange={(e) => handleSearchChange(e.target.value)}
+          onChange={(e) => setSearchValue(e.target.value)}
           placeholder="Search suburb, mosque, speaker, or topic..."
           className="w-full text-sm font-medium pl-10 pr-8 py-2.5 rounded-card border border-sand-dark bg-white text-charcoal placeholder:text-stone focus:border-primary focus:outline-none transition-colors"
         />
         {searchValue && (
           <button
-            onClick={handleSearchClear}
+            onClick={() => setSearchValue('')}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-stone hover:text-charcoal"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -133,6 +156,26 @@ export function EventFilters() {
         <FilterPill label="Kids" active={currentKids === 'true'} onClick={() => setFilter('kids', currentKids === 'true' ? null : 'true')} />
         <FilterPill label="Family" active={currentFamily === 'true'} onClick={() => setFilter('family', currentFamily === 'true' ? null : 'true')} />
       </div>
+
+      {/* Event list */}
+      {filtered.length > 0 ? (
+        <div className="grid gap-4 sm:grid-cols-2">
+          {filtered.map((event) => (
+            <EventCard key={event.id} event={event} />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-12 bg-sand rounded-card">
+          {hasFilters || searchValue ? (
+            <>
+              <p className="text-warm-gray">No events match your search.</p>
+              <p className="text-sm text-stone mt-1">Try a different search term or clear your filters.</p>
+            </>
+          ) : (
+            <p className="text-warm-gray text-sm">No events yet. Be the first to submit one!</p>
+          )}
+        </div>
+      )}
     </div>
   );
 }
