@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 
 const STATES = [
   { code: 'all', label: 'All' },
@@ -23,10 +23,6 @@ export function MosqueSearch() {
   const [value, setValue] = useState(currentSearch);
   const debounceRef = useRef<NodeJS.Timeout | null>(null);
 
-  useEffect(() => {
-    setValue(currentSearch);
-  }, [currentSearch]);
-
   function buildUrl(q: string, state: string) {
     const params = new URLSearchParams();
     if (q) params.set('q', q);
@@ -39,13 +35,13 @@ export function MosqueSearch() {
     setValue(v);
     if (debounceRef.current) clearTimeout(debounceRef.current);
     debounceRef.current = setTimeout(() => {
-      router.push(buildUrl(v, currentState));
+      router.replace(buildUrl(v, currentState), { scroll: false });
     }, 300);
   }
 
   function handleClear() {
     setValue('');
-    router.push(buildUrl('', currentState));
+    router.replace(buildUrl('', currentState), { scroll: false });
   }
 
   function handleStateChange(state: string) {

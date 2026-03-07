@@ -19,8 +19,28 @@ interface ActivityItem {
   created_at: string;
 }
 
+interface DailyActivity {
+  date: string;
+  views: number;
+  shares: number;
+  calendar: number;
+}
+
+interface ActionBreakdown {
+  event_name: string;
+  count: number;
+}
+
 interface AnalyticsData {
-  overview: { page_views: number; period_days: number };
+  overview: {
+    page_views: number;
+    shares: number;
+    calendar_actions: number;
+    submissions: number;
+    period_days: number;
+  };
+  daily_activity: DailyActivity[];
+  action_breakdown: ActionBreakdown[];
   top_mosques: MosqueStat[];
   recent_activity: ActivityItem[];
 }
@@ -79,11 +99,86 @@ export default function AdminAnalyticsPage() {
         </select>
       </div>
 
-      {/* Overview card */}
-      <div className="bg-white border border-sand-dark rounded-card p-6 text-center">
-        <p className="text-3xl font-bold text-primary">{data.overview.page_views}</p>
-        <p className="text-sm text-warm-gray mt-1">Page views ({data.overview.period_days} days)</p>
+      {/* Summary stat cards */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+        {[
+          { label: 'Page Views', value: data.overview.page_views, color: 'text-primary' },
+          { label: 'WhatsApp Shares', value: data.overview.shares, color: 'text-terracotta' },
+          { label: 'Calendar Actions', value: data.overview.calendar_actions, color: 'text-sage-dark' },
+          { label: 'Submissions', value: data.overview.submissions, color: 'text-charcoal' },
+        ].map(card => (
+          <div key={card.label} className="bg-white border border-sand-dark rounded-card p-4 text-center">
+            <p className={`text-2xl font-bold ${card.color}`}>{card.value}</p>
+            <p className="text-xs text-warm-gray mt-1">{card.label}</p>
+          </div>
+        ))}
       </div>
+
+      {/* Daily activity bar chart */}
+      {data.daily_activity.length > 0 && (
+        <div className="bg-white border border-sand-dark rounded-card p-6">
+          <h2 className="text-lg font-bold text-charcoal mb-4">Daily Activity</h2>
+          <div className="flex items-end gap-[2px] h-40">
+            {(() => {
+              const maxTotal = Math.max(...data.daily_activity.map(d => d.views + d.shares + d.calendar), 1);
+              return data.daily_activity.map(day => {
+                const total = day.views + day.shares + day.calendar;
+                const pct = (total / maxTotal) * 100;
+                const viewsPct = total > 0 ? (day.views / total) * pct : 0;
+                const sharesPct = total > 0 ? (day.shares / total) * pct : 0;
+                const calPct = total > 0 ? (day.calendar / total) * pct : 0;
+                const dateLabel = new Date(day.date + 'T00:00:00').toLocaleDateString('en-AU', { day: 'numeric', month: 'short' });
+                return (
+                  <div key={day.date} className="flex-1 flex flex-col items-center min-w-0" title={`${dateLabel}: ${total} events`}>
+                    <div className="w-full flex flex-col justify-end" style={{ height: '128px' }}>
+                      <div className="w-full rounded-t-sm bg-[#7C9A8E]" style={{ height: `${calPct}%` }} />
+                      <div className="w-full bg-[#C4704B]" style={{ height: `${sharesPct}%` }} />
+                      <div className="w-full rounded-b-sm bg-[#1E5248]" style={{ height: `${viewsPct}%` }} />
+                    </div>
+                    <span className="text-[9px] text-stone mt-1 truncate w-full text-center leading-tight">
+                      {data.daily_activity.length <= 14 ? dateLabel : (
+                        // Show every nth label for longer periods
+                        data.daily_activity.indexOf(day) % Math.ceil(data.daily_activity.length / 10) === 0 ? dateLabel : ''
+                      )}
+                    </span>
+                  </div>
+                );
+              });
+            })()}
+          </div>
+          <div className="flex gap-4 mt-3 text-xs text-warm-gray">
+            <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-sm bg-[#1E5248]" /> Views</span>
+            <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-sm bg-[#C4704B]" /> Shares</span>
+            <span className="flex items-center gap-1"><span className="inline-block w-3 h-3 rounded-sm bg-[#7C9A8E]" /> Calendar</span>
+          </div>
+        </div>
+      )}
+
+      {/* Action breakdown */}
+      {data.action_breakdown.length > 0 && (
+        <div className="bg-white border border-sand-dark rounded-card p-6">
+          <h2 className="text-lg font-bold text-charcoal mb-4">Action Breakdown</h2>
+          <div className="space-y-2">
+            {(() => {
+              const maxCount = data.action_breakdown[0]?.count || 1;
+              return data.action_breakdown.map(item => (
+                <div key={item.event_name} className="flex items-center gap-3 text-sm">
+                  <span className="w-40 shrink-0 text-charcoal truncate">
+                    {EVENT_LABELS[item.event_name] || item.event_name}
+                  </span>
+                  <div className="flex-1 h-5 bg-sand rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-primary rounded-full"
+                      style={{ width: `${(item.count / maxCount) * 100}%` }}
+                    />
+                  </div>
+                  <span className="text-xs text-warm-gray w-8 text-right">{item.count}</span>
+                </div>
+              ));
+            })()}
+          </div>
+        </div>
+      )}
 
       {/* Most popular mosques */}
       <div className="bg-white border border-sand-dark rounded-card p-6">
