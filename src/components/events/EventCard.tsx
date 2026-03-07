@@ -109,7 +109,7 @@ export const EventCard = memo(function EventCard({ event }: EventCardProps) {
             <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
             </svg>
-            {event.gender.charAt(0).toUpperCase() + event.gender.slice(1)}
+            {{ mixed: 'Both', brothers: 'Brothers', sisters: 'Sisters' }[event.gender] || event.gender}
           </span>
         </div>
 

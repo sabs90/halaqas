@@ -705,7 +705,7 @@ function SubmitPageContent() {
               <label className="block text-sm font-semibold text-charcoal mb-1">Gender</label>
               <select value={form.gender} onChange={(e) => updateForm({ gender: e.target.value as Gender })}
                 className="w-full text-sm rounded-button border border-sand-dark p-2.5 bg-white text-charcoal">
-                <option value="mixed">Mixed</option>
+                <option value="mixed">Both</option>
                 <option value="brothers">Brothers</option>
                 <option value="sisters">Sisters</option>
               </select>

@@ -7,7 +7,7 @@ import type { Event } from '@/lib/types';
 import Link from 'next/link';
 
 const GENDER_LABELS: Record<string, string> = {
-  mixed: 'Mixed',
+  mixed: 'Both',
   brothers: 'Brothers',
   sisters: 'Sisters',
 };

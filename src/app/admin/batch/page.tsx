@@ -263,7 +263,7 @@ function EventCard({
               onChange={(e) => onUpdate(event.id, { gender: e.target.value as Gender })}
               className={inputClass}
             >
-              <option value="mixed">Mixed</option>
+              <option value="mixed">Both</option>
               <option value="brothers">Brothers</option>
               <option value="sisters">Sisters</option>
             </select>

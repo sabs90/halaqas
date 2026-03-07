@@ -30,7 +30,7 @@ const COMMUNITY_TYPES: { value: EventType; label: string }[] = [
 ];
 
 const GENDERS: { value: Gender; label: string }[] = [
-  { value: 'mixed', label: 'Mixed' },
+  { value: 'mixed', label: 'Both' },
   { value: 'brothers', label: 'Brothers' },
   { value: 'sisters', label: 'Sisters' },
 ];
