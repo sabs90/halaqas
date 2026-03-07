@@ -4,7 +4,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import { MapWrapper } from '@/components/map/MapWrapper';
-import { SYDNEY_SUBURBS } from '@/data/sydney-suburbs';
+import { useGeocode } from '@/hooks/useGeocode';
 import { haversineDistance } from '@/lib/haversine';
 import type { Mosque } from '@/lib/types';
 
@@ -30,27 +30,31 @@ export function MosqueSearch({ mosques }: Props) {
   const currentState = searchParams.get('state') || 'NSW';
   const [search, setSearch] = useState('');
 
-  // Filter mosques client-side by search text
-  const filtered = useMemo(() => {
+  // Text-match mosques client-side
+  const textMatched = useMemo(() => {
     if (!search) return mosques;
     const q = search.toLowerCase();
-    const matchedSuburb = SYDNEY_SUBURBS.find(s => s.name.toLowerCase().includes(q));
-
-    return mosques.filter(mosque => {
-      if (
-        mosque.name.toLowerCase().includes(q) ||
-        mosque.suburb.toLowerCase().includes(q) ||
-        mosque.address.toLowerCase().includes(q) ||
-        (mosque.nicknames || []).some((n: string) => n.toLowerCase().includes(q))
-      ) return true;
-
-      if (matchedSuburb && mosque.latitude && mosque.longitude) {
-        return haversineDistance(matchedSuburb.latitude, matchedSuburb.longitude, mosque.latitude, mosque.longitude) <= 5;
-      }
-
-      return false;
-    });
+    return mosques.filter(mosque =>
+      mosque.name.toLowerCase().includes(q) ||
+      mosque.suburb.toLowerCase().includes(q) ||
+      mosque.address.toLowerCase().includes(q) ||
+      (mosque.nicknames || []).some((n: string) => n.toLowerCase().includes(q))
+    );
   }, [mosques, search]);
+
+  // Geocode fallback — only fires when text matching found nothing
+  const { coords, isGeocoding } = useGeocode(search, textMatched.length);
+
+  // Combine: use text matches if any, otherwise use geo-proximity matches
+  const filtered = useMemo(() => {
+    if (!search) return mosques;
+    if (textMatched.length > 0) return textMatched;
+    if (!coords) return [];
+    return mosques.filter(mosque =>
+      mosque.latitude && mosque.longitude &&
+      haversineDistance(coords.latitude, coords.longitude, mosque.latitude, mosque.longitude) <= 5
+    );
+  }, [mosques, search, textMatched, coords]);
 
   function handleStateChange(state: string) {
     const params = new URLSearchParams();
@@ -131,8 +135,14 @@ export function MosqueSearch({ mosques }: Props) {
         </>
       ) : (
         <div className="text-center py-12 bg-sand rounded-card">
-          <p className="text-warm-gray">No mosques found matching your search.</p>
-          <p className="text-sm text-stone mt-1">Try a different search term or state filter.</p>
+          {isGeocoding ? (
+            <p className="text-warm-gray">Searching nearby...</p>
+          ) : (
+            <>
+              <p className="text-warm-gray">No mosques found matching your search.</p>
+              <p className="text-sm text-stone mt-1">Try a different search term or state filter.</p>
+            </>
+          )}
         </div>
       )}
     </div>

@@ -111,12 +111,6 @@ export interface Feedback {
   created_at: string;
 }
 
-export interface SuburbData {
-  name: string;
-  latitude: number;
-  longitude: number;
-}
-
 export interface AnalyticsEvent {
   id: string;
   event_name: string;

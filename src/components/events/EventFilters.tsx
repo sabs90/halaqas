@@ -4,7 +4,7 @@ import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { useCallback, useState, useMemo } from 'react';
 import { FilterPill } from '@/components/ui/FilterPill';
 import { EventCard } from '@/components/events/EventCard';
-import { SYDNEY_SUBURBS } from '@/data/sydney-suburbs';
+import { useGeocode } from '@/hooks/useGeocode';
 import { haversineDistance } from '@/lib/haversine';
 import type { Event, EventType, Gender } from '@/lib/types';
 
@@ -69,38 +69,42 @@ export function EventFilters({ events, hasFilters }: Props) {
     [router, searchParams, basePath]
   );
 
-  // Filter events client-side by search text
-  const filtered = useMemo(() => {
+  // Text-match events client-side
+  const textMatched = useMemo(() => {
     if (!searchValue) return events;
     const q = searchValue.toLowerCase();
-    const matchedSuburb = SYDNEY_SUBURBS.find(s => s.name.toLowerCase().includes(q));
-
     return events.filter(event => {
       const mosqueName = (event.mosque?.name || event.venue_name || '').toLowerCase();
       const mosqueSuburb = (event.mosque?.suburb || '').toLowerCase();
       const title = event.title.toLowerCase();
       const speaker = (event.speaker || '').toLowerCase();
       const description = (event.description || '').toLowerCase();
-
-      if (
+      return (
         mosqueName.includes(q) ||
         mosqueSuburb.includes(q) ||
         title.includes(q) ||
         speaker.includes(q) ||
         description.includes(q) ||
         (event.mosque?.nicknames || []).some((n: string) => n.toLowerCase().includes(q))
-      ) return true;
-
-      if (matchedSuburb) {
-        const lat = event.mosque?.latitude || event.venue_latitude;
-        const lng = event.mosque?.longitude || event.venue_longitude;
-        if (lat && lng) {
-          return haversineDistance(matchedSuburb.latitude, matchedSuburb.longitude, lat, lng) <= 5;
-        }
-      }
-      return false;
+      );
     });
   }, [events, searchValue]);
+
+  // Geocode fallback — only fires when text matching found nothing
+  const { coords, isGeocoding } = useGeocode(searchValue, textMatched.length);
+
+  // Combine: use text matches if any, otherwise use geo-proximity matches
+  const filtered = useMemo(() => {
+    if (!searchValue) return events;
+    if (textMatched.length > 0) return textMatched;
+    if (!coords) return [];
+    return events.filter(event => {
+      const lat = event.mosque?.latitude || event.venue_latitude;
+      const lng = event.mosque?.longitude || event.venue_longitude;
+      if (!lat || !lng) return false;
+      return haversineDistance(coords.latitude, coords.longitude, lat, lng) <= 5;
+    });
+  }, [events, searchValue, textMatched, coords]);
 
   return (
     <div className="space-y-3">
@@ -166,7 +170,9 @@ export function EventFilters({ events, hasFilters }: Props) {
         </div>
       ) : (
         <div className="text-center py-12 bg-sand rounded-card">
-          {hasFilters || searchValue ? (
+          {isGeocoding ? (
+            <p className="text-warm-gray">Searching nearby...</p>
+          ) : hasFilters || searchValue ? (
             <>
               <p className="text-warm-gray">No events match your search.</p>
               <p className="text-sm text-stone mt-1">Try a different search term or clear your filters.</p>

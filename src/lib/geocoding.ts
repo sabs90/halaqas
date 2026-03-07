@@ -1,7 +1,7 @@
 export async function geocodeAddress(
   address: string
 ): Promise<{ latitude: number; longitude: number } | null> {
-  const query = encodeURIComponent(`${address}, Sydney, Australia`);
+  const query = encodeURIComponent(`${address}, Australia`);
   const url = `https://nominatim.openstreetmap.org/search?q=${query}&format=json&limit=1&countrycodes=au`;
 
   const response = await fetch(url, {
