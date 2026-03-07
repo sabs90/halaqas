@@ -1,7 +1,12 @@
 'use client';
 
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState, useRef } from 'react';
+import { useState, useMemo } from 'react';
+import Link from 'next/link';
+import { MapWrapper } from '@/components/map/MapWrapper';
+import { SYDNEY_SUBURBS } from '@/data/sydney-suburbs';
+import { haversineDistance } from '@/lib/haversine';
+import type { Mosque } from '@/lib/types';
 
 const STATES = [
   { code: 'all', label: 'All' },
@@ -15,41 +20,48 @@ const STATES = [
   { code: 'TAS', label: 'TAS' },
 ];
 
-export function MosqueSearch() {
+interface Props {
+  mosques: Mosque[];
+}
+
+export function MosqueSearch({ mosques }: Props) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const currentSearch = searchParams.get('q') || '';
   const currentState = searchParams.get('state') || 'NSW';
-  const [value, setValue] = useState(currentSearch);
-  const debounceRef = useRef<NodeJS.Timeout | null>(null);
+  const [search, setSearch] = useState('');
 
-  function buildUrl(q: string, state: string) {
-    const params = new URLSearchParams();
-    if (q) params.set('q', q);
-    if (state) params.set('state', state);
-    const qs = params.toString();
-    return qs ? `/mosques?${qs}` : '/mosques';
-  }
+  // Filter mosques client-side by search text
+  const filtered = useMemo(() => {
+    if (!search) return mosques;
+    const q = search.toLowerCase();
+    const matchedSuburb = SYDNEY_SUBURBS.find(s => s.name.toLowerCase().includes(q));
 
-  function handleChange(v: string) {
-    setValue(v);
-    if (debounceRef.current) clearTimeout(debounceRef.current);
-    debounceRef.current = setTimeout(() => {
-      router.replace(buildUrl(v, currentState), { scroll: false });
-    }, 300);
-  }
+    return mosques.filter(mosque => {
+      if (
+        mosque.name.toLowerCase().includes(q) ||
+        mosque.suburb.toLowerCase().includes(q) ||
+        mosque.address.toLowerCase().includes(q) ||
+        (mosque.nicknames || []).some((n: string) => n.toLowerCase().includes(q))
+      ) return true;
 
-  function handleClear() {
-    setValue('');
-    router.replace(buildUrl('', currentState), { scroll: false });
-  }
+      if (matchedSuburb && mosque.latitude && mosque.longitude) {
+        return haversineDistance(matchedSuburb.latitude, matchedSuburb.longitude, mosque.latitude, mosque.longitude) <= 5;
+      }
+
+      return false;
+    });
+  }, [mosques, search]);
 
   function handleStateChange(state: string) {
-    router.push(buildUrl(value, state));
+    const params = new URLSearchParams();
+    if (state) params.set('state', state);
+    const qs = params.toString();
+    router.push(qs ? `/mosques?${qs}` : '/mosques');
   }
 
   return (
-    <div className="space-y-3">
+    <div className="space-y-6">
+      {/* State pills */}
       <div className="flex flex-wrap gap-1.5">
         {STATES.map((s) => (
           <button
@@ -66,20 +78,21 @@ export function MosqueSearch() {
         ))}
       </div>
 
+      {/* Search input — purely local state, no URL navigation */}
       <div className="relative">
         <svg className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-stone" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" />
         </svg>
         <input
           type="text"
-          value={value}
-          onChange={(e) => handleChange(e.target.value)}
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by name, suburb, or address..."
           className="w-full text-sm font-medium pl-10 pr-8 py-2.5 rounded-card border border-sand-dark bg-white text-charcoal placeholder:text-stone focus:border-primary focus:outline-none transition-colors"
         />
-        {value && (
+        {search && (
           <button
-            onClick={handleClear}
+            onClick={() => setSearch('')}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-stone hover:text-charcoal"
           >
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
@@ -88,6 +101,40 @@ export function MosqueSearch() {
           </button>
         )}
       </div>
+
+      {/* Map */}
+      <MapWrapper mosques={filtered} events={[]} />
+
+      {/* Mosque list */}
+      {filtered.length > 0 ? (
+        <>
+          <p className="text-xs text-stone">{filtered.length} mosque{filtered.length !== 1 ? 's' : ''}</p>
+          <div className="grid gap-4 sm:grid-cols-2">
+            {filtered.map((mosque) => (
+              <Link key={mosque.id} href={`/mosques/${mosque.id}`} className="block">
+                <div className="bg-white border border-sand-dark rounded-card p-5 transition-all hover:border-primary hover:shadow-card-hover">
+                  <div className="flex items-start justify-between gap-2">
+                    <h3 className="text-base font-bold text-charcoal">{mosque.name}</h3>
+                    <span className="shrink-0 text-[10px] font-semibold text-stone bg-sand px-1.5 py-0.5 rounded-pill">{mosque.state}</span>
+                  </div>
+                  <p className="mt-1 text-sm text-warm-gray flex items-center gap-1">
+                    <svg className="w-3.5 h-3.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" /><circle cx="12" cy="10" r="3" />
+                    </svg>
+                    {mosque.address}
+                  </p>
+                  <p className="mt-2 text-xs text-stone">{mosque.suburb}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </>
+      ) : (
+        <div className="text-center py-12 bg-sand rounded-card">
+          <p className="text-warm-gray">No mosques found matching your search.</p>
+          <p className="text-sm text-stone mt-1">Try a different search term or state filter.</p>
+        </div>
+      )}
     </div>
   );
 }
