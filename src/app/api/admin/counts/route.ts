@@ -15,7 +15,7 @@ export async function GET() {
     supabase.from('events').select('id', { count: 'exact', head: true }).eq('status', 'pending_review'),
     supabase.from('amendments').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
     supabase.from('mosque_suggestions').select('id', { count: 'exact', head: true }).eq('status', 'pending'),
-    supabase.from('events').select('id', { count: 'exact', head: true }).is('mosque_id', null).not('venue_name', 'is', null).neq('status', 'rejected'),
+    supabase.from('events').select('id', { count: 'exact', head: true }).is('mosque_id', null).not('venue_name', 'is', null),
     supabase.from('events').select('id', { count: 'exact', head: true }).eq('is_recurring', true).is('recurrence_end_date', null),
     supabase.from('events').select('id', { count: 'exact', head: true }).eq('is_recurring', true).lt('recurrence_end_date', today),
   ]);

@@ -18,7 +18,7 @@ export async function GET() {
   const supabase = getServiceClient();
 
   const [eventsRes, mosquesRes] = await Promise.all([
-    supabase.from('events').select('*, mosque:mosques(id, name)').neq('status', 'rejected'),
+    supabase.from('events').select('*, mosque:mosques(id, name)'),
     supabase.from('mosques').select('*').eq('active', true).order('name'),
   ]);
 
