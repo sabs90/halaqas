@@ -17,7 +17,7 @@ export default function AdminPage() {
   const [authenticated, setAuthenticated] = useState(false);
   const [error, setError] = useState('');
   const [checking, setChecking] = useState(true);
-  const [counts, setCounts] = useState<{ submissions: number; amendments: number; suggestions: number } | null>(null);
+  const [counts, setCounts] = useState<{ submissions: number; amendments: number; suggestions: number; health: number } | null>(null);
 
   useEffect(() => {
     // Check if already authenticated by trying to fetch admin data
@@ -117,6 +117,11 @@ export default function AdminPage() {
         <Link href="/admin/analytics" className="block bg-white border border-sand-dark rounded-card p-6 hover:border-primary hover:shadow-card-hover transition-all">
           <h2 className="text-lg font-bold text-charcoal">Analytics</h2>
           <p className="text-sm text-warm-gray mt-1">View page views, popular mosques, and tracking data.</p>
+        </Link>
+        <Link href="/admin/health" className="block bg-white border border-sand-dark rounded-card p-6 hover:border-primary hover:shadow-card-hover transition-all relative">
+          <h2 className="text-lg font-bold text-charcoal">Data Health</h2>
+          <p className="text-sm text-warm-gray mt-1">Orphaned events, duplicates, and stale recurring events.</p>
+          {counts && counts.health > 0 && <Badge count={counts.health} />}
         </Link>
       </div>
     </div>

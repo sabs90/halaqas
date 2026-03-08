@@ -77,6 +77,7 @@ The roadmap is split into three phases. Only Phase 1 needs to be complete before
 - [x] Admin ability to de-list a mosque
 - [x] Admin ability to view and edit all mosque details (name, address, suburb, state, coordinates, nicknames, active status)
 - [x] Batch flyer processing tool: multi-file upload, sequential AI parsing, editable review table, bulk submission — *added in Session 10, dedup + side-by-side review layout in Session 15*
+- [x] Data health dashboard: orphaned events, duplicate mosques/events, stale recurring — *added in Session 33*
 - [ ] Auto-archive logic: recurring events flagged after 3 months of no confirmation
 
 **Deliverable:** Complete quality management loop — community reports, admin reviews.

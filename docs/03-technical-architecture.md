@@ -178,7 +178,9 @@ No PII stored. RLS: public insert only, reads via service role (admin). Indexes 
 | `/api/mosques/[id]/nicknames` | POST | Add a nickname for a mosque |
 | `/api/geocode` | POST | Geocode an address |
 | `/api/feedback` | POST | Send feedback email via Resend (to halaqas.au@gmail.com, from noreply@halaqas.au) |
-| `/api/admin/counts` | GET | Pending counts for dashboard badges: submissions, amendments, suggestions (protected) |
+| `/api/admin/health` | GET | Data health checks: orphaned events, duplicate mosques/events, stale recurring (protected) |
+| `/api/admin/health` | POST | Health actions: link_event, merge_mosques, set_end_date, archive_event, delete_event (protected) |
+| `/api/admin/counts` | GET | Pending counts for dashboard badges: submissions, amendments, suggestions, health (protected) |
 | `/api/analytics` | POST | Public fire-and-forget analytics event insert (allowlisted event names) |
 | `/api/admin/analytics` | GET | Aggregated analytics: page views, top mosques, recent activity (protected) |
 
