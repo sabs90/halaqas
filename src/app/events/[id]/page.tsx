@@ -85,9 +85,21 @@ export default async function EventDetailPage({ params }: Props) {
 
   const mosqueName = event.mosque?.name || event.venue_name || 'Unknown venue';
   const mosqueAddress = event.mosque?.address || event.venue_address || '';
-  const shareText = `${event.title} at ${mosqueName} — ${getTimeDisplay(event)}`;
   const shareUrl = `${process.env.NEXT_PUBLIC_SITE_URL || 'https://halaqas.com'}/events/${event.id}`;
-  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`${shareText}\n${shareUrl}`)}`;
+  let shareText = `Salaam! Please join me at:\n\n📌 ${event.title}\n🕌 ${mosqueName} — ${getTimeDisplay(event)}`;
+  if (event.fixed_date) {
+    const d = new Date(event.fixed_date + 'T00:00:00');
+    shareText += `\n📅 ${d.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' })}`;
+  }
+  if (event.is_recurring && event.recurrence_pattern) {
+    shareText += `\n🔁 ${event.recurrence_pattern}`;
+  }
+  if (event.gender === 'brothers') {
+    shareText += `\n👥 Brothers only`;
+  } else if (event.gender === 'sisters') {
+    shareText += `\n👥 Sisters only`;
+  }
+  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`${shareText}\n\n${shareUrl}`)}`;
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">

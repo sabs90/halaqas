@@ -4,6 +4,61 @@ This file is the persistent memory between Claude Code sessions. Each entry summ
 
 ---
 
+## Session 34 — WhatsApp Share Message Improvement (2026-03-08)
+
+### Completed
+- **Improved WhatsApp share message** — replaced bare one-liner with a warmer, richer message including greeting, emoji-prefixed event title, venue/time, date (if fixed), recurrence pattern (if recurring), and gender restriction (if not mixed)
+
+### Decisions Made
+- Inline string building (no helper function) — keeps it simple and co-located with the share URL construction
+- Date formatted with `toLocaleDateString('en-AU')` for "Tuesday 10 March" style
+
+### Issues / Bugs
+- None
+
+### Next Session
+1. Verify flyer images load on production — deploy and spot-check event detail pages
+2. Test new event submission — confirm image uploads go to Supabase Storage
+3. Add `RESEND_API_KEY` and `RESEND_TO_EMAIL` to Netlify environment variables before deploying
+4. Test health dashboard against production data
+
+### Open Questions
+- Consider dropping the `feedback` table from Supabase (no longer used, but harmless to leave)
+
+---
+
+## Session 33 — Admin Data Health Dashboard (2026-03-08)
+
+### Completed
+- **Built admin data health dashboard** (`/admin/health`) — surfaces data quality issues for manual review
+- **4 health check sections:**
+  - **Orphaned events** — events with venue_name but no linked mosque_id; admin can link to existing mosque via dropdown
+  - **Possible duplicate mosques** — fuzzy name matching (strips "masjid"/"mosque"/"islamic centre" etc.); admin can merge (reassigns events + deletes dupe)
+  - **Possible duplicate events** — same title (case-insensitive) at same mosque; admin can delete either
+  - **Stale recurring events** — recurring events with no end date or past end date; admin can set end date or archive
+- **API endpoint** (`/api/admin/health`) — GET returns 4 arrays; POST handles 5 actions (link_event, merge_mosques, set_end_date, archive_event, delete_event)
+- **Updated `/api/admin/counts`** — now includes `health` count (orphaned + stale recurring) for dashboard badge
+- **Added "Data Health" card** to admin dashboard with issue count badge
+
+### Decisions Made
+- Health badge only counts orphaned + stale recurring (cheap DB queries) — duplicate detection runs only when visiting the health page
+- Mosque name normalization strips common prefixes and non-alphanumeric chars for fuzzy matching
+- Merge mosque action reassigns both events and amendments before deleting the source mosque
+
+### Issues / Bugs
+- None
+
+### Next Session
+1. Verify flyer images load on production — deploy and spot-check event detail pages
+2. Test new event submission — confirm image uploads go to Supabase Storage
+3. Add `RESEND_API_KEY` and `RESEND_TO_EMAIL` to Netlify environment variables before deploying
+4. Test health dashboard against production data
+
+### Open Questions
+- Consider dropping the `feedback` table from Supabase (no longer used, but harmless to leave)
+
+---
+
 ## Session 32 — Feedback via Email (2026-03-08)
 
 ### Completed
