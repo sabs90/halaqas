@@ -19,7 +19,7 @@ export function Footer() {
           <Link href="/contact" className="hover:text-white transition-colors">Contact</Link>
         </div>
         <p className="mt-6 text-xs text-white/40">
-          &copy; {new Date().getFullYear()} Halaqas. Not affiliated with any mosque or organisation.
+          &copy; {new Date().getFullYear()} <Link href="/admin" className="hover:text-white/60 transition-colors">Halaqas</Link>. Not affiliated with any mosque or organisation.
         </p>
       </div>
     </footer>
