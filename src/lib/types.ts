@@ -1,4 +1,4 @@
-export type EventType = 'talk' | 'class' | 'quran_circle' | 'iftar' | 'taraweeh' | 'tahajjud' | 'itikaf' | 'charity' | 'youth' | 'sisters_circle' | 'competition' | 'workshop' | 'other';
+export type EventType = 'talk' | 'class' | 'quran_circle' | 'iftar' | 'taraweeh' | 'tahajjud' | 'itikaf' | 'charity' | 'youth' | 'halaqa' | 'sisters_circle' | 'competition' | 'workshop' | 'other';
 export type Language = 'english' | 'arabic' | 'urdu' | 'turkish' | 'bahasa' | 'mixed' | 'other';
 export type Gender = 'brothers' | 'sisters' | 'mixed';
 export type TimeMode = 'fixed' | 'prayer_anchored';
@@ -99,15 +99,6 @@ export interface MosqueSuggestion {
   longitude: number | null;
   suggested_by_contact: string | null;
   status: 'pending' | 'approved' | 'rejected';
-  created_at: string;
-}
-
-export interface Feedback {
-  id: string;
-  name: string | null;
-  contact: string | null;
-  message: string;
-  status: 'new' | 'read';
   created_at: string;
 }
 

@@ -17,7 +17,7 @@ The roadmap is split into three phases. Only Phase 1 needs to be complete before
 - [x] Set up GitHub repo, Next.js project, Tailwind CSS
 - [x] Connect hosting for auto-deploy *(deployed on Netlify, not Cloudflare Pages as originally planned)*
 - [x] Set up Supabase project with database schema (mosques, events, amendments tables)
-- [ ] Set up Cloudflare R2 bucket for image storage
+- [x] Set up image storage *(migrated from Cloudflare R2 to Supabase Storage in Session 29)*
 - [ ] Import Go Pray mosque database (names, addresses, coordinates) into Supabase
 - [x] Basic project structure: pages, API routes, layout components
 
@@ -46,9 +46,10 @@ The roadmap is split into three phases. Only Phase 1 needs to be complete before
 - [x] Mosque dropdown selector from database, plus "Other Venue" option with manual address
 - [x] Prayer-anchored time selection (prayer + offset)
 - [x] Recurring event options (pattern selector)
-- [ ] Image upload to Cloudflare R2 *(pipeline wired up in Session 9: compress → upload → store URL → display. Uses data URL fallback until R2 credentials configured)*
+- [x] Image upload to Supabase Storage *(originally wired up in Session 9 with R2 fallback to data URLs; migrated to Supabase Storage in Session 29 — 73 events migrated from base64 to public URLs)*
 - [x] Event published to database on confirmation *(now goes to `pending_review` — admin approval required before public visibility, added Session 16)*
 - [x] Auto-create mosque suggestion when event submitted for unknown venue *(added Session 21 — closes gap where events were created for mosques not in the database, but no mosque suggestion was generated for admin review)*
+- [x] Auto-link events to mosque when mosque suggestion is approved *(added Session 28 — updates all unlinked events with matching venue_name; admin UI shows warning + dropdown for manual linking)*
 
 **Deliverable:** End-to-end submission flow working — upload flyer, confirm details, event goes live.
 
@@ -88,7 +89,7 @@ The roadmap is split into three phases. Only Phase 1 needs to be complete before
 - [x] PWA setup: add-to-home-screen manifest *(icons not yet generated)*
 - [x] SEO basics: meta tags, sitemap, structured data (Event schema)
 - [x] Simple "About" page explaining what Halaqas is and how to contribute
-- [x] Contact / feedback page with form and admin review — *added in Session 3*
+- [x] Contact / feedback page with form — *added in Session 3, switched from Supabase to Resend email in Session 32*
 - [ ] Rate limiting on submission endpoints
 
 **Deliverable:** Halaqas is live with 20+ mosques and real events. Ready for community use.
@@ -117,7 +118,7 @@ The roadmap is split into three phases. Only Phase 1 needs to be complete before
 
 ### Milestone 2.3 — Feedback-Driven Improvements
 
-- [x] Collect and prioritise community feedback — *feedback table + contact page + admin review page built in Session 3*
+- [x] Collect and prioritise community feedback — *feedback table + contact page + admin review page built in Session 3; simplified to email via Resend in Session 32*
 - [ ] Address top usability issues
 - [x] Optimise AI parsing prompt based on real submission data (common flyer formats, edge cases) — *iteratively refined across 8 flyers in Session 4, 85% field accuracy*
 - [ ] Add Gemini Flash as fallback for submissions where Llama 4 Scout parsing confidence is low
@@ -145,15 +146,15 @@ The roadmap is split into three phases. Only Phase 1 needs to be complete before
 
 | Milestone | Estimated Effort | Status | Dependencies |
 |-----------|-----------------|--------|--------------|
-| 1.1 Foundation | 3–5 days | **Mostly done** (R2 + domain pending, Netlify deployed) | Go Pray database access |
+| 1.1 Foundation | 3–5 days | **Mostly done** (domain pending, Netlify deployed) | Go Pray database access |
 | 1.2 Event Directory | 5–7 days | **Done** | 1.1 complete |
-| 1.3 Submission Flow | 5–7 days | **Done** (R2 upload pending) | 1.1 complete, Groq API key |
+| 1.3 Submission Flow | 5–7 days | **Done** | 1.1 complete, Groq API key |
 | 1.4 Calendar/Map/Sharing | 3–5 days | **Done** | 1.2 complete |
 | 1.5 Reporting & Admin | 3–5 days | **Done** (auto-archive pending) | 1.2, 1.3 complete |
 | 1.6 Seeding & Launch | 3–5 days | **Mostly done** (QA + rate limiting pending) | All above complete |
 | **Total Phase 1** | **~5–7 weeks** | **~90% complete** (built in 4 sessions) | |
 
-Milestones 1.1–1.5 were built in a single session using Claude Code. Session 4 completed AI prompt refinement and real event seeding. Session 6 deployed to Netlify and fixed ICS calendar issues for Android. Session 13 cleaned up mosque data (14 deleted, 60 corrected, now 66 mosques). Remaining work is domain setup (halaqas.com), R2 image storage, and polish (QA, rate limiting, PWA icons).
+Milestones 1.1–1.5 were built in a single session using Claude Code. Session 4 completed AI prompt refinement and real event seeding. Session 6 deployed to Netlify and fixed ICS calendar issues for Android. Session 13 cleaned up mosque data (14 deleted, 60 corrected, now 66 mosques). Remaining work is domain setup (halaqas.com) and polish (QA, rate limiting, PWA icons).
 
 ---
 
@@ -164,6 +165,6 @@ Milestones 1.1–1.5 were built in a single session using Claude Code. Session 4
 | Go Pray mosque database access | To be confirmed with friend | Low — strong relationship |
 | Groq API account + key | **Done** — key configured in .env.local | Resolved |
 | halaqas.com domain | Not yet registered | Low — register early |
-| Cloudflare account | Not yet set up | Low — free tier |
+| ~~Cloudflare account~~ | No longer needed | Resolved — using Supabase Storage |
 | Supabase account | **Done** — project created, schema deployed, 66 mosques (8 states) + 29 real events seeded | Resolved |
 | Flyers from top 20 mosques | **Done** — 8 flyers tested, prompt refined, 29 events seeded | Resolved |

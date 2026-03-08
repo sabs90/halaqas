@@ -25,7 +25,7 @@ const PRAYER_TYPES: { value: EventType; label: string }[] = [
 const COMMUNITY_TYPES: { value: EventType; label: string }[] = [
   { value: 'iftar', label: 'Iftar' },
   { value: 'youth', label: 'Youth' },
-  { value: 'sisters_circle', label: 'Sisters Circle' },
+  { value: 'halaqa', label: 'Halaqa' },
   { value: 'charity', label: 'Charity' },
   { value: 'competition', label: 'Competition' },
 ];

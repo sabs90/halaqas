@@ -11,43 +11,23 @@ const supabase = createClient(
   getEnv('SUPABASE_SERVICE_ROLE_KEY')
 );
 
-// ── R2 upload (same logic as src/lib/r2.ts with error fallback) ──────
-async function uploadToR2(fileBuffer, fileName, contentType) {
-  const accountId = getEnv('R2_ACCOUNT_ID');
-  const bucketName = getEnv('R2_BUCKET_NAME') || 'halaqas-images';
+// ── Supabase Storage upload ──────────────────────────────────────────
+const BUCKET = 'flyers';
 
-  if (!accountId) {
-    console.log('    R2 not configured, using data URL fallback');
-    const base64 = Buffer.from(fileBuffer).toString('base64');
-    return `data:${contentType};base64,${base64}`;
+async function uploadFlyer(fileBuffer, fileName, contentType) {
+  const key = `${Date.now()}-${fileName}`;
+
+  const { error } = await supabase.storage
+    .from(BUCKET)
+    .upload(key, fileBuffer, { contentType, upsert: false });
+
+  if (error) {
+    throw new Error(`Supabase Storage upload failed: ${error.message}`);
   }
 
-  const endpoint = `https://${accountId}.r2.cloudflarestorage.com`;
-  const key = `flyers/${Date.now()}-${fileName}`;
-  const url = `${endpoint}/${bucketName}/${key}`;
-
-  try {
-    const response = await fetch(url, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': contentType,
-        'x-amz-content-sha256': 'UNSIGNED-PAYLOAD',
-      },
-      body: fileBuffer,
-    });
-
-    if (!response.ok) {
-      throw new Error(`R2 upload failed: ${response.status}`);
-    }
-
-    const publicUrl = `https://images.halaqas.com/${key}`;
-    console.log(`    Uploaded to R2: ${publicUrl}`);
-    return publicUrl;
-  } catch (err) {
-    console.log(`    R2 upload failed (${err.message}), using data URL fallback`);
-    const base64 = Buffer.from(fileBuffer).toString('base64');
-    return `data:${contentType};base64,${base64}`;
-  }
+  const { data } = supabase.storage.from(BUCKET).getPublicUrl(key);
+  console.log(`    Uploaded: ${data.publicUrl}`);
+  return data.publicUrl;
 }
 
 // ── Load expected events mapping ─────────────────────────────────────
@@ -112,7 +92,7 @@ for (const fileName of files) {
   console.log(`  Mosque: ${mosque.name} (id: ${mosque.id})`);
   console.log(`  Uploading image (${(imageBuffer.length / 1024).toFixed(0)} KB)...`);
 
-  const flyerUrl = await uploadToR2(imageBuffer.buffer, fileName, contentType);
+  const flyerUrl = await uploadFlyer(imageBuffer.buffer, fileName, contentType);
   const isDataUrl = flyerUrl.startsWith('data:');
 
   // Get event titles from this flyer (skip Prayer Cards)

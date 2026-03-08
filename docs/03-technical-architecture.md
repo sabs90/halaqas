@@ -16,7 +16,7 @@
 | **Database** | Supabase (PostgreSQL) | Free tier (500MB, 50K monthly active users), REST API, built-in dashboard, row-level security |
 | **AI Parsing** | Groq API — Llama 4 Scout | Vision + JSON mode, $0.11/$0.34 per million tokens, OpenAI-compatible API |
 | **AI Fallback** | Google Gemini 2.5 Flash | Backup for edge cases where Llama 4 Scout struggles, $0.15/$0.60 per million tokens |
-| **Image Storage** | Cloudflare R2 | 10GB free, S3-compatible API, same Cloudflare ecosystem |
+| **Image Storage** | Supabase Storage | 1GB free (included with Supabase), no extra service needed |
 | **Maps** | Leaflet + OpenStreetMap | Fully free, no API key, lightweight |
 | **Prayer Times** | Adhan.js | Open source, runs client-side or server-side, supports Shafi'i calculation method |
 | **Calendars** | Dynamic .ics generation | No third-party dependency, works with all calendar apps |
@@ -49,16 +49,16 @@
 │                    │              │  └────────────────┘  │
 └──────────────────┘              └──────────────────────┘
 
-┌──────────────────┐              ┌──────────────────────┐
-│  Cloudflare R2    │              │  Client-side          │
-│  (Flyer images)   │              │  ┌────────────────┐  │
-│                    │              │  │  Adhan.js       │  │
-│                    │              │  │  (prayer times) │  │
-│                    │              │  ├────────────────┤  │
-│                    │              │  │  Leaflet        │  │
-│                    │              │  │  (map view)     │  │
-│                    │              │  └────────────────┘  │
-└──────────────────┘              └──────────────────────┘
+                                    ┌──────────────────────┐
+                                    │  Client-side          │
+                                    │  ┌────────────────┐  │
+                                    │  │  Adhan.js       │  │
+                                    │  │  (prayer times) │  │
+                                    │  ├────────────────┤  │
+                                    │  │  Leaflet        │  │
+                                    │  │  (map view)     │  │
+                                    │  └────────────────┘  │
+                                    └──────────────────────┘
 ```
 
 ## 4. Database Schema
@@ -90,7 +90,7 @@
 | venue_longitude | decimal | For non-mosque venues |
 | title | text | Event title |
 | description | text | Optional description |
-| event_type | enum | talk, class, quran_circle, iftar, taraweeh, charity, youth, sisters_circle, other |
+| event_type | enum | talk, class, quran_circle, iftar, taraweeh, charity, youth, halaqa, tahajjud, itikaf, competition, workshop, other |
 | speaker | text | Speaker name(s), nullable |
 | language | enum | english, arabic, urdu, turkish, bahasa, mixed, other |
 | gender | enum | brothers, sisters, mixed |
@@ -102,7 +102,7 @@
 | is_recurring | boolean | |
 | recurrence_pattern | text | e.g. "every_thursday", "every_friday", "daily_ramadan" |
 | recurrence_end_date | date | Optional explicit end date |
-| flyer_image_url | text | URL to stored flyer in R2 |
+| flyer_image_url | text | URL to stored flyer in Supabase Storage |
 | is_kids | boolean | Default false, true if event targets kids/children |
 | is_family | boolean | Default false, true if event is family-oriented |
 | submitter_contact | text | Optional email/phone (not displayed publicly) |
@@ -139,17 +139,6 @@
 | status | enum | pending, approved, rejected |
 | created_at | timestamptz | |
 
-### feedback
-
-| Column | Type | Notes |
-|--------|------|-------|
-| id | uuid | Primary key |
-| name | text | Optional sender name |
-| contact | text | Optional contact info |
-| message | text | Feedback message (required) |
-| status | enum | new, read |
-| created_at | timestamptz | |
-
 ### analytics_events
 
 | Column | Type | Notes |
@@ -180,7 +169,7 @@ No PII stored. RLS: public insert only, reads via service role (admin). Indexes 
 | `/api/admin/events` | GET | List all events (protected) |
 | `/api/admin/events` | PATCH/DELETE | Update or delete events (protected) |
 | `/api/admin/mosques` | GET | List pending mosque suggestions; `?list=all` returns all mosques (protected) |
-| `/api/admin/mosques` | POST | Approve or reject mosque suggestion (protected) |
+| `/api/admin/mosques` | POST | Approve or reject mosque suggestion (protected). On approve, auto-links unlinked events with matching venue_name; returns `linked_events` count. |
 | `/api/admin/mosques` | PATCH | Update mosque details (protected) |
 | `/api/admin/review` | GET | List events pending review (protected) |
 | `/api/admin/review` | POST | Approve or reject a pending event (protected) |
@@ -188,9 +177,8 @@ No PII stored. RLS: public insert only, reads via service role (admin). Indexes 
 | `/api/mosques/suggest` | POST | Submit a mosque suggestion |
 | `/api/mosques/[id]/nicknames` | POST | Add a nickname for a mosque |
 | `/api/geocode` | POST | Geocode an address |
-| `/api/feedback` | POST | Submit feedback/contact message |
-| `/api/admin/feedback` | GET | List new feedback (protected) |
-| `/api/admin/feedback` | POST | Mark feedback as read (protected) |
+| `/api/feedback` | POST | Send feedback email via Resend (to halaqas.au@gmail.com, from noreply@halaqas.au) |
+| `/api/admin/counts` | GET | Pending counts for dashboard badges: submissions, amendments, suggestions (protected) |
 | `/api/analytics` | POST | Public fire-and-forget analytics event insert (allowlisted event names) |
 | `/api/admin/analytics` | GET | Aggregated analytics: page views, top mosques, recent activity (protected) |
 
@@ -249,10 +237,11 @@ Each mosque gets a dynamic .ics endpoint that generates a valid iCalendar feed:
 
 ## 9. Image Storage
 
-- Flyer images uploaded during event submission are stored in Cloudflare R2
+- Flyer images uploaded during event submission are stored in Supabase Storage (`flyers` bucket, public)
 - Images are compressed client-side before upload (no `sharp` — compatible with edge runtime)
-- Served via Cloudflare's CDN for fast delivery
+- Served via Supabase's CDN (public bucket URLs)
 - URL stored in the `flyer_image_url` column of the events table
+- Upload function: `uploadFlyer()` in `src/lib/storage.ts`
 
 ## 10. Suburb / Radius Filtering
 
@@ -283,8 +272,7 @@ Each mosque gets a dynamic .ics endpoint that generates a valid iCalendar feed:
 | Service | Free Tier Limit | Expected Usage | Monthly Cost |
 |---------|----------------|----------------|-------------|
 | Netlify | 100GB bandwidth, 300 build minutes/month | Well within limits | $0 |
-| Supabase | 500MB database, 1GB file storage, 50K MAU | Well within limits | $0 |
-| Cloudflare R2 | 10GB storage, 10M reads/month | ~1GB images in year one | $0 |
+| Supabase | 500MB database, 1GB file storage, 2GB bandwidth, 50K MAU | Well within limits (images ~3-9MB total) | $0 |
 | Groq API | Pay per token | ~500 submissions/month peak | ~$0.10 |
 | Gemini Flash (fallback) | Free tier available | Occasional use | $0 |
 | Domain name | N/A | halaqas.com or similar | ~$12/year |

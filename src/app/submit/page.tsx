@@ -18,7 +18,7 @@ const EVENT_TYPES: { value: EventType; label: string }[] = [
   { value: 'youth', label: 'Youth' },
   { value: 'tahajjud', label: 'Tahajjud' },
   { value: 'itikaf', label: "I'tikaf" },
-  { value: 'sisters_circle', label: 'Sisters Circle' },
+  { value: 'halaqa', label: 'Halaqa' },
   { value: 'competition', label: 'Competition' },
   { value: 'workshop', label: 'Workshop' },
   { value: 'other', label: 'Other' },

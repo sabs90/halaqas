@@ -40,6 +40,7 @@ export async function POST(request: NextRequest) {
   }
 
   const supabase = getServiceClient();
+  let linkedEvents = 0;
 
   if (action === 'approve') {
     // Fetch the suggestion
@@ -69,6 +70,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: insertError.message }, { status: 500 });
     }
 
+    // Auto-link events with matching venue_name to the new mosque
+    const { data: newMosque } = await supabase
+      .from('mosques')
+      .select('id')
+      .ilike('name', suggestion.name)
+      .single();
+
+    if (newMosque) {
+      const { data: linked } = await supabase
+        .from('events')
+        .update({ mosque_id: newMosque.id })
+        .is('mosque_id', null)
+        .ilike('venue_name', suggestion.name)
+        .select('id');
+      linkedEvents = linked?.length || 0;
+    }
+
     // Mark suggestion as approved
     const { error: updateError } = await supabase
       .from('mosque_suggestions')
@@ -90,7 +108,7 @@ export async function POST(request: NextRequest) {
     }
   }
 
-  return NextResponse.json({ success: true });
+  return NextResponse.json({ success: true, linked_events: action === 'approve' ? linkedEvents : 0 });
 }
 
 const ALLOWED_FIELDS = ['name', 'address', 'suburb', 'state', 'latitude', 'longitude', 'nicknames', 'active'];

@@ -19,11 +19,17 @@ export default function AdminMosquesPage() {
   }
 
   async function handleAction(id: string, action: 'approve' | 'reject') {
-    await fetch('/api/admin/mosques', {
+    const res = await fetch('/api/admin/mosques', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, action }),
     });
+    if (res.ok && action === 'approve') {
+      const data = await res.json();
+      if (data.linked_events > 0) {
+        alert(`Mosque approved! ${data.linked_events} event(s) auto-linked.`);
+      }
+    }
     loadSuggestions();
   }
 

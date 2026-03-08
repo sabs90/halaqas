@@ -142,8 +142,8 @@ export async function POST(request: NextRequest) {
           });
         }
       }
-    } catch {
-      // Auto-suggestion failure must not break event submission
+    } catch (err) {
+      console.error('Auto-create mosque suggestion failed:', err);
     }
   }
 

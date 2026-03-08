@@ -111,7 +111,7 @@
 | **Impact** | Medium |
 | **Overall** | Low |
 | **Description** | Supabase free tier allows 500MB database storage and 1GB file storage. If the platform grows significantly, these limits could be reached. |
-| **Mitigation** | At expected scale (hundreds of events, not thousands), 500MB is enormous. Image storage is on Cloudflare R2 (separate 10GB free tier). Monitor usage via Supabase dashboard. |
+| **Mitigation** | At expected scale (hundreds of events, not thousands), 500MB is enormous. Image storage is on Supabase Storage (1GB free, current usage ~3-9MB). Monitor usage via Supabase dashboard. |
 | **Contingency** | Supabase Pro is $25/month if needed — a very manageable step up if the platform has grown enough to hit limits. |
 
 ### R9: Netlify serverless function timeout

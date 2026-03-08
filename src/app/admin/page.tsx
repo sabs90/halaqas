@@ -4,16 +4,30 @@ import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import Link from 'next/link';
 
+function Badge({ count }: { count: number }) {
+  return (
+    <span className="absolute top-3 right-3 inline-flex items-center justify-center min-w-[22px] h-[22px] px-1.5 text-xs font-bold text-white bg-secondary rounded-full">
+      {count}
+    </span>
+  );
+}
+
 export default function AdminPage() {
   const [password, setPassword] = useState('');
   const [authenticated, setAuthenticated] = useState(false);
   const [error, setError] = useState('');
   const [checking, setChecking] = useState(true);
+  const [counts, setCounts] = useState<{ submissions: number; amendments: number; suggestions: number } | null>(null);
 
   useEffect(() => {
     // Check if already authenticated by trying to fetch admin data
     fetch('/api/admin/auth')
-      .then(r => { if (r.ok) setAuthenticated(true); })
+      .then(r => {
+        if (r.ok) {
+          setAuthenticated(true);
+          fetch('/api/admin/counts').then(r => r.ok ? r.json() : null).then(setCounts);
+        }
+      })
       .finally(() => setChecking(false));
   }, []);
 
@@ -26,6 +40,7 @@ export default function AdminPage() {
     });
     if (res.ok) {
       setAuthenticated(true);
+      fetch('/api/admin/counts').then(r => r.ok ? r.json() : null).then(setCounts);
     } else {
       setError('Invalid password');
     }
@@ -72,13 +87,15 @@ export default function AdminPage() {
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
-        <Link href="/admin/review" className="block bg-white border border-amber-300 rounded-card p-6 hover:border-primary hover:shadow-card-hover transition-all">
+        <Link href="/admin/review" className="block bg-white border border-amber-300 rounded-card p-6 hover:border-primary hover:shadow-card-hover transition-all relative">
           <h2 className="text-lg font-bold text-charcoal">Review Submissions</h2>
           <p className="text-sm text-warm-gray mt-1">Approve or reject user-submitted events before they go live.</p>
+          {counts && counts.submissions > 0 && <Badge count={counts.submissions} />}
         </Link>
-        <Link href="/admin/amendments" className="block bg-white border border-sand-dark rounded-card p-6 hover:border-primary hover:shadow-card-hover transition-all">
+        <Link href="/admin/amendments" className="block bg-white border border-sand-dark rounded-card p-6 hover:border-primary hover:shadow-card-hover transition-all relative">
           <h2 className="text-lg font-bold text-charcoal">Review Amendments</h2>
           <p className="text-sm text-warm-gray mt-1">Review and approve or reject reported issues.</p>
+          {counts && counts.amendments > 0 && <Badge count={counts.amendments} />}
         </Link>
         <Link href="/admin/events" className="block bg-white border border-sand-dark rounded-card p-6 hover:border-primary hover:shadow-card-hover transition-all">
           <h2 className="text-lg font-bold text-charcoal">Manage Events</h2>
@@ -88,13 +105,10 @@ export default function AdminPage() {
           <h2 className="text-lg font-bold text-charcoal">Manage Mosques</h2>
           <p className="text-sm text-warm-gray mt-1">View and edit mosque details, addresses, and status.</p>
         </Link>
-        <Link href="/admin/mosques" className="block bg-white border border-sand-dark rounded-card p-6 hover:border-primary hover:shadow-card-hover transition-all">
+        <Link href="/admin/mosques" className="block bg-white border border-sand-dark rounded-card p-6 hover:border-primary hover:shadow-card-hover transition-all relative">
           <h2 className="text-lg font-bold text-charcoal">Mosque Suggestions</h2>
           <p className="text-sm text-warm-gray mt-1">Review and approve suggested mosques from users.</p>
-        </Link>
-        <Link href="/admin/feedback" className="block bg-white border border-sand-dark rounded-card p-6 hover:border-primary hover:shadow-card-hover transition-all">
-          <h2 className="text-lg font-bold text-charcoal">Feedback</h2>
-          <p className="text-sm text-warm-gray mt-1">Review messages and feedback from users.</p>
+          {counts && counts.suggestions > 0 && <Badge count={counts.suggestions} />}
         </Link>
         <Link href="/admin/batch" className="block bg-white border border-sand-dark rounded-card p-6 hover:border-primary hover:shadow-card-hover transition-all">
           <h2 className="text-lg font-bold text-charcoal">Batch Process Flyers</h2>

@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { isAdmin } from '@/lib/admin-auth';
 import { parseImageWithGroqMulti } from '@/lib/groq';
-import { uploadToR2 } from '@/lib/r2';
+import { uploadFlyer } from '@/lib/storage';
 
 export const maxDuration = 60;
 
@@ -24,7 +24,7 @@ export async function POST(request: NextRequest) {
 
     const [events, flyer_image_url] = await Promise.all([
       parseImageWithGroqMulti(base64, mimeType),
-      uploadToR2(bytes, image.name || 'flyer.jpg', mimeType),
+      uploadFlyer(bytes, image.name || 'flyer.jpg', mimeType),
     ]);
 
     return NextResponse.json({ events, flyer_image_url });

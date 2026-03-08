@@ -3,55 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/Button';
 import type { Mosque, EventType, Language, Gender, PrayerName, ParsedEventData } from '@/lib/types';
-
-const EVENT_TYPES: { value: EventType; label: string }[] = [
-  { value: 'talk', label: 'Talk' },
-  { value: 'class', label: 'Class' },
-  { value: 'quran_circle', label: 'Quran Circle' },
-  { value: 'iftar', label: 'Iftar' },
-  { value: 'taraweeh', label: 'Taraweeh' },
-  { value: 'charity', label: 'Charity' },
-  { value: 'youth', label: 'Youth' },
-  { value: 'tahajjud', label: 'Tahajjud' },
-  { value: 'itikaf', label: "I'tikaf" },
-  { value: 'sisters_circle', label: 'Sisters Circle' },
-  { value: 'competition', label: 'Competition' },
-  { value: 'workshop', label: 'Workshop' },
-  { value: 'other', label: 'Other' },
-];
-
-const LANGUAGES: { value: Language; label: string }[] = [
-  { value: 'english', label: 'English' },
-  { value: 'arabic', label: 'Arabic' },
-  { value: 'urdu', label: 'Urdu' },
-  { value: 'turkish', label: 'Turkish' },
-  { value: 'mixed', label: 'Mixed' },
-  { value: 'other', label: 'Other' },
-];
-
-const PRAYERS: { value: PrayerName; label: string }[] = [
-  { value: 'fajr', label: 'Fajr' },
-  { value: 'dhuhr', label: 'Dhuhr' },
-  { value: 'asr', label: 'Asr' },
-  { value: 'maghrib', label: 'Maghrib' },
-  { value: 'isha', label: 'Isha' },
-];
-
-const RECURRENCE_PATTERNS = [
-  { value: '', label: 'Not recurring' },
-  { value: 'every_monday', label: 'Every Monday' },
-  { value: 'every_tuesday', label: 'Every Tuesday' },
-  { value: 'every_wednesday', label: 'Every Wednesday' },
-  { value: 'every_thursday', label: 'Every Thursday' },
-  { value: 'every_friday', label: 'Every Friday' },
-  { value: 'every_saturday', label: 'Every Saturday' },
-  { value: 'every_sunday', label: 'Every Sunday' },
-  { value: 'daily', label: 'Daily' },
-  { value: 'daily_ramadan', label: 'Daily (Ramadan)' },
-  { value: 'weekly', label: 'Weekly' },
-  { value: 'fortnightly', label: 'Fortnightly' },
-  { value: 'monthly', label: 'Monthly' },
-];
+import { EVENT_TYPES, LANGUAGES, PRAYERS, RECURRENCE_PATTERNS } from '@/lib/event-constants';
 
 type Step = 'upload' | 'review' | 'submit';
 

@@ -4,6 +4,217 @@ This file is the persistent memory between Claude Code sessions. Each entry summ
 
 ---
 
+## Session 32 — Feedback via Email (2026-03-08)
+
+### Completed
+- **Replaced Supabase feedback with Resend email** — contact form now sends email to halaqas.au@gmail.com from noreply@halaqas.au instead of writing to `feedback` table
+- Installed `resend` package, updated `/api/feedback` route to use Resend API
+- Deleted admin feedback page (`/admin/feedback`) and admin feedback API route (`/api/admin/feedback`)
+- Removed feedback card from admin dashboard and feedback count from `/api/admin/counts`
+- Removed `Feedback` type interface from `types.ts`
+- Emails include reply-to header when user provides contact info
+
+### Decisions Made
+- Email is simpler than a database table + admin UI for low-volume feedback — no admin page needed, notifications are automatic
+- Used Resend (free tier: 100 emails/day) with halaqas.au domain verification
+
+### Issues / Bugs
+- None
+
+### Next Session
+1. Verify flyer images load on production — deploy and spot-check event detail pages
+2. Test new event submission — confirm image uploads go to Supabase Storage
+3. Add `RESEND_API_KEY` and `RESEND_TO_EMAIL` to Netlify environment variables before deploying
+
+### Open Questions
+- Consider dropping the `feedback` table from Supabase (no longer used, but harmless to leave)
+
+---
+
+## Session 31 — Production Migrations & Cleanup (2026-03-08)
+
+### Completed
+- **Ran migration 003 on Supabase production** — `mosque_suggestions` table now exists; the suggest endpoint, auto-suggestion from event submission, and mosque suggestions admin page are all functional
+- **Ran migration 014 on Supabase production** — updated existing `sisters_circle` events to `halaqa`
+- **Created Masjid Abu Bakr** in previous session (Session 28) — confirmed linked to orphaned Taraweeh event
+
+### Decisions Made
+- No code changes this session — focused on production database alignment and verifying the event-mosque linking flow
+
+### Issues / Bugs
+- None
+
+### Next Session
+1. Verify flyer images load on production — deploy and spot-check event detail pages
+2. Test new event submission — confirm image uploads go to Supabase Storage
+
+### Open Questions
+- None
+
+---
+
+## Session 30 — Rename sisters_circle to halaqa (2026-03-08)
+
+### Completed
+- **Renamed event type `sisters_circle` → `halaqa`** — gender is already handled by the gender dropdown, so a gendered event type was redundant
+- Updated all code: `types.ts`, `event-constants.ts`, `EventTypeTag.tsx`, `EventFilters.tsx`, `submit/page.tsx`, `groq.ts`, `test-parse-flyers.mjs`
+- Kept `sisters_circle` in TypeScript union + EventTypeTag for backwards compatibility with unmigrated data
+- **Migration 013** — adds `halaqa` enum value (must be committed first)
+- **Migration 014** — updates existing rows from `sisters_circle` to `halaqa` (separate transaction required by PostgreSQL)
+- Both migrations run successfully on production
+
+### Decisions Made
+- Split into two migrations because PostgreSQL requires new enum values to be committed before they can be used in queries
+- AI prompt updated to map halaqas, sisters circles, brothers circles, and study circles to `halaqa` type
+
+### Issues / Bugs
+- None
+
+### Next Session
+1. **Verify flyer images load on production** — deploy and spot-check event detail pages
+2. **Test new event submission** — confirm image uploads go to Supabase Storage
+
+### Open Questions
+- None
+
+---
+
+## Session 29 — Migrate Flyer Images to Supabase Storage (2026-03-08)
+
+### Completed
+- **Migrated image storage from Cloudflare R2 to Supabase Storage** — R2 was never configured; all 73 events had flyer images stored as base64 data URLs in the database
+- **Created `src/lib/storage.ts`** — new `uploadFlyer()` function using Supabase Storage `flyers` bucket, replaces `src/lib/r2.ts`
+- **Updated API routes** — `parse-image` and `admin/parse-flyers` routes now import from `storage.ts` instead of `r2.ts`
+- **Deleted `src/lib/r2.ts`** — no longer needed
+- **Created migration script `scripts/migrate-flyers-to-supabase.mjs`** — decoded base64 data URLs, uploaded to Supabase Storage, updated DB rows with public URLs; all 73 events migrated successfully
+- **Updated `scripts/update-flyer-images.mjs`** — replaced inline R2 upload code with Supabase Storage equivalent
+
+### Decisions Made
+- Used Supabase Storage instead of Cloudflare R2 — already using Supabase, no new service/credentials needed, 1GB free tier is sufficient (~3-9MB for current images)
+- No silent fallback to data URLs — `uploadFlyer()` throws on error instead of falling back (the old R2 fallback is what caused the bloat)
+- Bucket name: `flyers`, public, 5MB file size limit
+
+### Issues / Bugs
+- None
+
+### Next Session
+1. **Verify flyer images load on production** — deploy and spot-check event detail pages
+2. **Test new event submission** — confirm image uploads go to Supabase Storage
+
+### Open Questions
+- None
+
+---
+
+## Session 28 — Event-Mosque Linking (2026-03-08)
+
+### Completed
+- **Auto-link events when mosque suggestion is approved** — `POST /api/admin/mosques` now queries for unlinked events with matching `venue_name` (ilike) and sets their `mosque_id` to the newly created mosque; returns `linked_events` count in response
+- **Log auto-suggestion errors** — replaced silent `catch {}` in `POST /api/events` with `console.error` so failures appear in Netlify function logs
+- **"New venue" warning on Review Submissions page** — amber banner with mosque assignment dropdown for events with `venue_name` but no `mosque_id`
+- **"(unlinked)" indicator on Manage Events page** — amber text label next to venue name + compact dropdown to link to an existing mosque
+- **Auto-linked count alert on Mosque Suggestions page** — after approving a suggestion, shows alert with count of auto-linked events
+- **Created Masjid Abu Bakr** — added to mosques table (Auburn, NSW) and linked the orphaned Taraweeh event (`3d10d8a5-...`)
+
+### Decisions Made
+- No new API endpoints needed — reused existing `PATCH /api/admin/events` for mosque assignment
+- Mosque dropdowns fetch from public `/api/mosques` endpoint (active mosques only)
+- Auto-link uses ilike match on `venue_name` = `suggestion.name` — covers exact and case-insensitive matches
+- `mosque_suggestions` table doesn't exist in remote Supabase — migration 003 was never applied; worked around by creating mosque directly
+
+### Issues / Bugs
+- All migrations (003, 011, 012) confirmed applied to production.
+
+### Next Session
+1. **Evaluate analytics approach** — review whether self-hosted analytics via Supabase is sustainable
+
+### Open Questions
+- None
+
+---
+
+## Session 27 — Admin Dashboard Notification Badges (2026-03-08)
+
+### Completed
+- **Admin dashboard notification badges** — pending/unread counts now display as terracotta badges on the top-right corner of actionable admin cards (Review Submissions, Review Amendments, Mosque Suggestions, Feedback)
+- **New `/api/admin/counts` endpoint** — single API call returns all 4 pending counts in parallel using Supabase `head: true` count queries (no data transferred)
+- **Fixed pre-existing type error** in `/api/admin/mosques` route — `.select()` was called with invalid arguments after `.update()`
+
+### Decisions Made
+- Badges only shown when count > 0 — cards without pending items (Manage Events, Manage Mosques, Batch, Analytics) never show badges
+- Counts fetched on both session restore and fresh login
+- Used `bg-secondary` (terracotta) for badge colour to stand out against white cards
+- Used `head: true` count queries for efficiency — no row data fetched, just counts
+
+### Issues / Bugs
+- Migration 012 still needs to be run on Supabase production (carried over)
+- Migration 011 still needs to be run on Supabase production (carried over)
+
+### Next Session
+1. **Reduce events database size** — images likely stored as data URLs in DB, move to external storage or remove inline image data
+2. **Evaluate analytics approach** — review whether self-hosted analytics via Supabase is sustainable
+3. Run migrations 011 + 012 on Supabase production (carried over)
+
+### Open Questions
+- None
+
+---
+
+## Session 26 — Admin Inline Event Editing (2026-03-08)
+
+### Completed
+- **Shared event constants** — extracted `EVENT_TYPES`, `LANGUAGES`, `PRAYERS`, `RECURRENCE_PATTERNS`, `GENDER_OPTIONS` from batch page into `src/lib/event-constants.ts`
+- **Reusable `EventEditForm` component** — `src/components/admin/EventEditForm.tsx` with `eventToFormData()` and `formDataToPayload()` helpers for null↔empty-string conversion
+- **Admin events page inline editing** — added "Edit" button to each event card on `/admin/events`; clicking swaps read-only row for full edit form, save PATCHes via existing API
+- **Admin review page edit-before-approve** — added "Edit & Review" button on `/admin/review`; opens inline edit form with "Save & Approve" (PATCH edits → POST approve); quick approve/reject unchanged
+- **Batch page dedup** — replaced inline constant arrays with imports from shared `event-constants.ts`
+
+### Decisions Made
+- No API changes needed — existing `PATCH /api/admin/events` already accepts arbitrary field updates
+- Time mode toggle clears irrelevant fields when switching (fixed clears prayer fields, prayer clears date/time)
+- Followed inline edit pattern from mosque manage page (expand/collapse within card)
+
+### Issues / Bugs
+- Migration 012 still needs to be run on Supabase production (carried over)
+- Migration 011 still needs to be run on Supabase production (carried over)
+
+### Next Session
+1. **Reduce events database size** — images likely stored as data URLs in DB, move to external storage or remove inline image data
+2. **Admin dashboard notification badges** — show pending/unread counts on each admin panel box
+3. **Evaluate analytics approach** — review whether self-hosted analytics via Supabase is sustainable
+4. Run migrations 011 + 012 on Supabase production (carried over)
+
+### Open Questions
+- None
+
+---
+
+## Session 25 — Netlify Usage Limits (2026-03-08)
+
+### Completed
+- **Diagnosed Netlify site pause** — 300/300 free credits consumed, 285 from 19 production deploys (~15 credits/deploy for Next.js builds)
+- **Upgraded to Netlify Personal plan** ($9/month, 1,000 credits) to keep site live for remainder of Ramadan
+
+### Decisions Made
+- Personal plan gives ~66 deploys/month — sufficient headroom
+- Consider batching commits before pushing to reduce deploy burn
+
+### Issues / Bugs
+- Migration 012 still needs to be run on Supabase production (carried over)
+- Migration 011 still needs to be run on Supabase production (carried over)
+
+### Next Session
+1. **Reduce events database size** — images are likely stored as data URLs in the DB, bloating it. Move to external storage (Cloudflare R2) or remove inline image data
+2. **Evaluate analytics approach** — review whether self-hosted analytics via Supabase `analytics_events` table is sustainable, or if a free external service (e.g. Umami, Plausible, or Netlify Analytics) would be better to avoid burning Supabase free tier
+3. **Admin event review/editing** — build admin UI for reviewing and editing submitted events
+4. **Admin dashboard notification badges** — show pending/unread counts on each admin panel box (e.g. pending mosque suggestions, events awaiting review, unread feedback) like an inbox
+5. Run migrations 011 + 012 on Supabase production (carried over)
+
+### Open Questions
+- None
+
+---
+
 ## Session 24 — Static Suburb Coords for Instant Search (2026-03-08)
 
 ### Completed
