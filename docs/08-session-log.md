@@ -9,7 +9,7 @@ This file is the persistent memory between Claude Code sessions. Each entry summ
 ### Completed
 - **Tahajjud page** (`/tahajjud`) — server component with `revalidate=60`, fetches active tahajjud events from Supabase, sorted by time (earliest first), grouped by state
 - **Hero banner** — matches home page style with `IslamicPattern`, teal background, "Ramadan 2026" label, event count
-- **Compact shareable table** — screenshot-friendly table at top of tahajjud page with teal header bar, state groupings, alternating row stripes, mosque/suburb/time columns, `halaqas.au` watermark. Rows are clickable links to event detail pages
+- **Compact shareable table** — screenshot-friendly table at top of tahajjud page with teal header bar, state groupings, alternating row stripes, mosque/suburb/time columns (sorted by mosque name), `halaqas.au` watermark. Rows are clickable links to event detail pages. Mobile-optimised with smaller text, tighter padding, wrapping mosque names, and horizontal scroll fallback
 - **Featured event config** — `site_settings` database table (key-value JSONB) with RLS public read. Stores `featured_event` config (enabled, type, label, href)
 - **Admin settings page** (`/admin/settings`) — toggle on/off, event type dropdown (tahajjud/taraweeh/itikaf/eid prayers/eid event/iftar), editable label and URL, live preview
 - **Admin API** (`/api/admin/settings/featured-event`) — GET/POST for reading/updating featured event config
@@ -25,7 +25,7 @@ This file is the persistent memory between Claude Code sessions. Each entry summ
 - Featured event page always accessible via direct URL even when nav link is disabled
 
 ### Issues / Bugs
-- Migration 018 needs to be run manually via Supabase SQL Editor (no automated migration runner)
+- ~~Migration 018 needs to be run manually via Supabase SQL Editor~~ — Done
 
 ### Next Session
 1. Run migration 018 on production Supabase

@@ -90,6 +90,9 @@ function groupByState(events: Event[]): { state: string; events: Event[] }[] {
 export default async function TahajjudPage() {
   const events = await getTahajjudEvents();
   const groups = groupByState(events);
+  const tableGroups = groupByState([...events].sort((a, b) =>
+    (a.mosque?.name || a.venue_name || '').localeCompare(b.mosque?.name || b.venue_name || '')
+  ));
 
   return (
     <div className="space-y-8">
@@ -113,44 +116,46 @@ export default async function TahajjudPage() {
       {/* Compact shareable table */}
       {events.length > 0 && (
         <section className="bg-white border border-sand-dark rounded-2xl overflow-hidden">
-          <div className="bg-primary px-5 py-3 flex items-center justify-between">
-            <h2 className="text-sm font-bold text-white uppercase tracking-wider">Tahajjud Times — Ramadan 2026</h2>
-            <span className="text-xs font-medium text-white/60">halaqas.au</span>
+          <div className="bg-primary px-3 sm:px-5 py-3 flex items-center justify-between">
+            <h2 className="text-xs sm:text-sm font-bold text-white uppercase tracking-wider">Tahajjud Times — Ramadan 2026</h2>
+            <span className="text-[10px] sm:text-xs font-medium text-white/60">halaqas.au</span>
           </div>
-          <table className="w-full">
-            <tbody>
-              {groups.map(({ state, events: stateEvents }) => {
-                let rowIndex = 0;
-                return [
-                  <tr key={`state-${state}`}>
-                    <td colSpan={3} className="bg-primary/[0.05] px-5 py-1.5 border-b border-sand-dark">
-                      <span className="text-xs font-bold text-primary uppercase tracking-wider">{state}</span>
-                    </td>
-                  </tr>,
-                  ...stateEvents.map((event) => {
-                    const mosqueName = event.mosque?.name || event.venue_name || 'Unknown';
-                    const suburb = event.mosque?.suburb;
-                    const stripe = rowIndex++ % 2 === 0 ? 'bg-white' : 'bg-sand/30';
-                    const href = `/events/${event.id}`;
-                    return (
-                      <tr key={event.id} className={`${stripe} hover:bg-primary/[0.04] transition-colors`}>
-                        <td className="pl-5 pr-3 py-2 text-[13px] font-semibold text-charcoal whitespace-nowrap">
-                          <Link href={href}>{mosqueName}</Link>
-                        </td>
-                        <td className="px-3 py-2 text-[13px] text-warm-gray">
-                          <Link href={href}>{suburb}</Link>
-                        </td>
-                        <td className="pl-3 pr-5 py-2 text-[13px] font-bold text-primary text-right whitespace-nowrap">
-                          <Link href={href}>{getTimeDisplay(event)}</Link>
-                        </td>
-                      </tr>
-                    );
-                  }),
-                ];
-              })}
-            </tbody>
-          </table>
-          <div className="bg-sand/40 px-5 py-2 border-t border-sand-dark text-center">
+          <div className="overflow-x-auto">
+            <table className="w-full min-w-0">
+              <tbody>
+                {tableGroups.map(({ state, events: stateEvents }) => {
+                  let rowIndex = 0;
+                  return [
+                    <tr key={`state-${state}`}>
+                      <td colSpan={3} className="bg-primary/[0.05] px-3 sm:px-5 py-1.5 border-b border-sand-dark">
+                        <span className="text-xs font-bold text-primary uppercase tracking-wider">{state}</span>
+                      </td>
+                    </tr>,
+                    ...stateEvents.map((event) => {
+                      const mosqueName = event.mosque?.name || event.venue_name || 'Unknown';
+                      const suburb = event.mosque?.suburb;
+                      const stripe = rowIndex++ % 2 === 0 ? 'bg-white' : 'bg-sand/30';
+                      const href = `/events/${event.id}`;
+                      return (
+                        <tr key={event.id} className={`${stripe} hover:bg-primary/[0.04] transition-colors`}>
+                          <td className="pl-3 sm:pl-5 pr-2 sm:pr-3 py-1.5 sm:py-2 text-[11px] sm:text-[13px] font-semibold text-charcoal">
+                            <Link href={href}>{mosqueName}</Link>
+                          </td>
+                          <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-[11px] sm:text-[13px] text-warm-gray whitespace-nowrap">
+                            <Link href={href}>{suburb}</Link>
+                          </td>
+                          <td className="pl-2 sm:pl-3 pr-3 sm:pr-5 py-1.5 sm:py-2 text-[11px] sm:text-[13px] font-bold text-primary text-right whitespace-nowrap">
+                            <Link href={href}>{getTimeDisplay(event)}</Link>
+                          </td>
+                        </tr>
+                      );
+                    }),
+                  ];
+                })}
+              </tbody>
+            </table>
+          </div>
+          <div className="bg-sand/40 px-3 sm:px-5 py-2 border-t border-sand-dark text-center">
             <p className="text-[11px] text-stone">Visit <span className="font-semibold text-primary">halaqas.au/tahajjud</span> for details &amp; more</p>
           </div>
         </section>
