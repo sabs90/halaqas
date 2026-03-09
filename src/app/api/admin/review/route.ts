@@ -23,13 +23,27 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { id, action } = await request.json();
+  const { id, ids, action } = await request.json();
 
-  if (!id || !['approve', 'reject'].includes(action)) {
-    return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
+  if (!['approve', 'reject'].includes(action)) {
+    return NextResponse.json({ error: 'Invalid action' }, { status: 400 });
   }
 
   const supabase = getServiceClient();
+
+  // Bulk approve
+  if (ids && Array.isArray(ids) && ids.length > 0 && action === 'approve') {
+    const { error } = await supabase
+      .from('events')
+      .update({ status: 'active', last_confirmed_at: new Date().toISOString() })
+      .in('id', ids);
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+    return NextResponse.json({ success: true, count: ids.length });
+  }
+
+  if (!id) {
+    return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
+  }
 
   if (action === 'approve') {
     const { error } = await supabase

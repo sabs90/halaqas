@@ -127,6 +127,10 @@ export default function AdminPage() {
           <p className="text-sm text-warm-gray mt-1">Orphaned events, duplicates, and stale recurring events.</p>
           {counts && counts.health > 0 && <Badge count={counts.health} />}
         </Link>
+        <Link href="/admin/settings" className="block bg-white border border-primary/30 rounded-card p-6 hover:border-primary hover:shadow-card-hover transition-all">
+          <h2 className="text-lg font-bold text-charcoal">Site Settings</h2>
+          <p className="text-sm text-warm-gray mt-1">Featured event toggle, nav configuration, and site-wide settings.</p>
+        </Link>
       </div>
     </div>
   );

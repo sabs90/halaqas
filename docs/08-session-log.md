@@ -4,6 +4,41 @@ This file is the persistent memory between Claude Code sessions. Each entry summ
 
 ---
 
+## Session 38 — Tahajjud Page, Featured Event Admin & Shareable Table (2026-03-10)
+
+### Completed
+- **Tahajjud page** (`/tahajjud`) — server component with `revalidate=60`, fetches active tahajjud events from Supabase, sorted by time (earliest first), grouped by state
+- **Hero banner** — matches home page style with `IslamicPattern`, teal background, "Ramadan 2026" label, event count
+- **Compact shareable table** — screenshot-friendly table at top of tahajjud page with teal header bar, state groupings, alternating row stripes, mosque/suburb/time columns, `halaqas.au` watermark. Rows are clickable links to event detail pages
+- **Featured event config** — `site_settings` database table (key-value JSONB) with RLS public read. Stores `featured_event` config (enabled, type, label, href)
+- **Admin settings page** (`/admin/settings`) — toggle on/off, event type dropdown (tahajjud/taraweeh/itikaf/eid prayers/eid event/iftar), editable label and URL, live preview
+- **Admin API** (`/api/admin/settings/featured-event`) — GET/POST for reading/updating featured event config
+- **Public API** (`/api/settings/featured-event`) — GET endpoint for Header to fetch config dynamically
+- **Dynamic Header** — nav link now fetched from database on mount instead of static import; conditionally renders when enabled
+- **Admin dashboard** — added "Site Settings" card
+- **Migration 018** — `site_settings` table with RLS and seed data
+
+### Decisions Made
+- Used key-value JSONB table (`site_settings`) rather than typed columns — flexible for future settings without migrations
+- Header fetches config client-side on mount (brief flash acceptable) rather than adding server component wrapper complexity
+- Tahajjud page uses a single `<table>` with state header rows as `colSpan` dividers so columns align across state groups
+- Featured event page always accessible via direct URL even when nav link is disabled
+
+### Issues / Bugs
+- Migration 018 needs to be run manually via Supabase SQL Editor (no automated migration runner)
+
+### Next Session
+1. Run migration 018 on production Supabase
+2. Deploy and verify tahajjud page + admin settings on production
+3. Do first round of Facebook outreach checks
+4. Consider adding Eid prayer times for Eid al-Fitr (approx 2026-03-20)
+5. Test featured event toggle end-to-end on production
+
+### Open Questions
+- None
+
+---
+
 ## Session 37 — Mosque Links Data & Facebook Outreach Page (2026-03-09)
 
 ### Completed

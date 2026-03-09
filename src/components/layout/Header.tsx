@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import type { FeaturedEventConfig } from '@/lib/featured-event';
 
-const NAV_ITEMS = [
+const BASE_NAV_ITEMS = [
   { href: '/mosques', label: 'Mosques' },
   { href: '/submit', label: 'Submit Event' },
   { href: '/about', label: 'About' },
@@ -14,6 +15,18 @@ const NAV_ITEMS = [
 export function Header() {
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [featured, setFeatured] = useState<FeaturedEventConfig | null>(null);
+
+  useEffect(() => {
+    fetch('/api/settings/featured-event')
+      .then(r => r.ok ? r.json() : null)
+      .then(data => { if (data) setFeatured(data); });
+  }, []);
+
+  const navItems = [
+    ...(featured?.enabled ? [{ href: featured.href, label: featured.label }] : []),
+    ...BASE_NAV_ITEMS,
+  ];
 
   return (
     <header className="sticky top-0 z-50 bg-cream/95 backdrop-blur-sm border-b border-sand-dark">
@@ -25,7 +38,7 @@ export function Header() {
 
         {/* Desktop nav */}
         <nav className="hidden md:flex items-center gap-1">
-          {NAV_ITEMS.map(({ href, label }) => (
+          {navItems.map(({ href, label }) => (
             <Link
               key={href}
               href={href}
@@ -64,7 +77,7 @@ export function Header() {
       {/* Mobile nav */}
       {mobileOpen && (
         <nav className="md:hidden border-t border-sand-dark bg-cream px-4 py-2">
-          {NAV_ITEMS.map(({ href, label }) => (
+          {navItems.map(({ href, label }) => (
             <Link
               key={href}
               href={href}

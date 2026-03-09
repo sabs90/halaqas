@@ -34,6 +34,7 @@ export default function ReviewPage() {
   const [saving, setSaving] = useState(false);
   const [editError, setEditError] = useState('');
   const [search, setSearch] = useState('');
+  const [approvingAll, setApprovingAll] = useState(false);
 
   useEffect(() => { loadEvents(); loadMosques(); }, []);
 
@@ -92,6 +93,21 @@ export default function ReviewPage() {
     loadEvents();
   }
 
+  async function handleApproveAll() {
+    const target = filtered.length < events.length ? 'filtered' : 'all';
+    const count = filtered.length;
+    if (!confirm(`Approve ${target} ${count} submission${count === 1 ? '' : 's'}?`)) return;
+    setApprovingAll(true);
+    const ids = filtered.map(e => e.id);
+    await fetch('/api/admin/review', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ids, action: 'approve' }),
+    });
+    setApprovingAll(false);
+    loadEvents();
+  }
+
   async function handleAction(id: string, action: 'approve' | 'reject') {
     if (action === 'reject' && !confirm('Reject and permanently delete this submission?')) return;
     setActing(id);
@@ -140,9 +156,18 @@ export default function ReviewPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 flex-wrap">
         <Link href="/admin" className="text-sm text-warm-gray hover:text-primary">&larr; Admin</Link>
         <h1 className="text-[28px] font-bold text-charcoal">Review Submissions ({filtered.length})</h1>
+        {filtered.length > 1 && (
+          <Button
+            variant="primary"
+            onClick={handleApproveAll}
+            disabled={approvingAll}
+          >
+            {approvingAll ? 'Approving...' : `Approve All (${filtered.length})`}
+          </Button>
+        )}
       </div>
 
       {events.length > 0 && (

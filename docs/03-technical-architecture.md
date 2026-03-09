@@ -155,6 +155,16 @@
 
 No PII stored. RLS: public insert only, reads via service role (admin). Indexes on `event_name`, `mosque_id`, `created_at`, and composite `(event_name, created_at)`.
 
+### site_settings
+
+| Column | Type | Notes |
+|--------|------|-------|
+| key | text | Primary key (e.g. `featured_event`) |
+| value | jsonb | Setting value (default `{}`) |
+| updated_at | timestamptz | Last modified |
+
+RLS: public read, no public write. Admin writes via service role.
+
 ## 5. Key API Routes
 
 | Route | Method | Purpose |
@@ -187,6 +197,8 @@ No PII stored. RLS: public insert only, reads via service role (admin). Indexes 
 | `/api/admin/mosques/outreach` | GET | All mosques with event counts, latest event date, last_checked_at (protected) |
 | `/api/admin/mosques/outreach` | POST | Mark a mosque as checked (sets last_checked_at to now) (protected) |
 | `/api/admin/counts` | GET | Pending counts for dashboard badges: submissions, amendments, suggestions, health (protected) |
+| `/api/admin/settings/featured-event` | GET/POST | Read/update featured event config (protected) |
+| `/api/settings/featured-event` | GET | Public read of featured event config (for Header nav link) |
 | `/api/analytics` | POST | Public fire-and-forget analytics event insert (allowlisted event names) |
 | `/api/admin/analytics` | GET | Aggregated analytics: page views, top mosques, recent activity (protected) |
 
