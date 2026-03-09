@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
 
-  const { id, action } = await request.json();
+  const { id, action, overrides } = await request.json();
   if (!id || !['approve', 'reject'].includes(action)) {
     return NextResponse.json({ error: 'Invalid request' }, { status: 400 });
   }
@@ -54,17 +54,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Suggestion not found' }, { status: 404 });
     }
 
-    // Insert into mosques table
-    const { error: insertError } = await supabase.from('mosques').insert({
-      name: suggestion.name,
-      address: suggestion.address || '',
-      suburb: suggestion.suburb || '',
-      state: suggestion.state || 'NSW',
-      latitude: suggestion.latitude || 0,
-      longitude: suggestion.longitude || 0,
-      nicknames: [],
+    // Use overrides if provided, otherwise fall back to suggestion data
+    const mosqueData = {
+      name: overrides?.name || suggestion.name,
+      address: overrides?.address ?? suggestion.address ?? '',
+      suburb: overrides?.suburb ?? suggestion.suburb ?? '',
+      state: overrides?.state || suggestion.state || 'NSW',
+      latitude: overrides?.latitude ?? suggestion.latitude ?? 0,
+      longitude: overrides?.longitude ?? suggestion.longitude ?? 0,
+      nicknames: overrides?.nicknames || [],
       active: true,
-    });
+    };
+
+    // Insert into mosques table
+    const { error: insertError } = await supabase.from('mosques').insert(mosqueData);
 
     if (insertError) {
       return NextResponse.json({ error: insertError.message }, { status: 500 });
@@ -74,7 +77,7 @@ export async function POST(request: NextRequest) {
     const { data: newMosque } = await supabase
       .from('mosques')
       .select('id')
-      .ilike('name', suggestion.name)
+      .ilike('name', mosqueData.name)
       .single();
 
     if (newMosque) {
@@ -111,7 +114,7 @@ export async function POST(request: NextRequest) {
   return NextResponse.json({ success: true, linked_events: action === 'approve' ? linkedEvents : 0 });
 }
 
-const ALLOWED_FIELDS = ['name', 'address', 'suburb', 'state', 'latitude', 'longitude', 'nicknames', 'active'];
+const ALLOWED_FIELDS = ['name', 'address', 'suburb', 'state', 'latitude', 'longitude', 'nicknames', 'active', 'facebook_url', 'website_url'];
 
 export async function PATCH(request: NextRequest) {
   if (!(await isAdmin())) {
@@ -137,4 +140,34 @@ export async function PATCH(request: NextRequest) {
 
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   return NextResponse.json({ success: true });
+}
+
+export async function PUT(request: NextRequest) {
+  if (!(await isAdmin())) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
+  const body = await request.json();
+  const { name, address, suburb, state, latitude, longitude, nicknames, active, facebook_url, website_url } = body;
+
+  if (!name?.trim()) {
+    return NextResponse.json({ error: 'Name is required' }, { status: 400 });
+  }
+
+  const supabase = getServiceClient();
+  const { data, error } = await supabase.from('mosques').insert({
+    name: name.trim(),
+    address: address?.trim() || '',
+    suburb: suburb?.trim() || '',
+    state: state || 'NSW',
+    latitude: latitude || 0,
+    longitude: longitude || 0,
+    nicknames: nicknames || [],
+    active: active ?? true,
+    facebook_url: facebook_url?.trim() || null,
+    website_url: website_url?.trim() || null,
+  }).select('id').single();
+
+  if (error) return NextResponse.json({ error: error.message }, { status: 500 });
+  return NextResponse.json({ success: true, id: data.id }, { status: 201 });
 }

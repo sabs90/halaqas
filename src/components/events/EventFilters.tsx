@@ -20,6 +20,7 @@ const PRAYER_TYPES: { value: EventType; label: string }[] = [
   { value: 'taraweeh', label: 'Taraweeh' },
   { value: 'tahajjud', label: 'Tahajjud' },
   { value: 'itikaf', label: "I'tikaf" },
+  { value: 'eid_prayers', label: 'Eid Prayers' },
 ];
 
 const COMMUNITY_TYPES: { value: EventType; label: string }[] = [
@@ -28,6 +29,7 @@ const COMMUNITY_TYPES: { value: EventType; label: string }[] = [
   { value: 'halaqa', label: 'Halaqa' },
   { value: 'charity', label: 'Charity' },
   { value: 'competition', label: 'Competition' },
+  { value: 'eid_event', label: 'Eid Event' },
 ];
 
 const GENDERS: { value: Gender; label: string }[] = [

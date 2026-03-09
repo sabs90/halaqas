@@ -21,7 +21,7 @@ The roadmap is split into three phases. Only Phase 1 needs to be complete before
 - [ ] Import Go Pray mosque database (names, addresses, coordinates) into Supabase
 - [x] Basic project structure: pages, API routes, layout components
 
-**Deliverable:** Empty but deployed website at halaqas.netlify.app with mosque data loaded. Domain halaqas.com pending DNS setup.
+**Deliverable:** Empty but deployed website at halaqas.au with mosque data loaded.
 
 ### Milestone 1.2 — Event Directory & Mosque Pages (Week 2–3)
 
@@ -75,7 +75,8 @@ The roadmap is split into three phases. Only Phase 1 needs to be complete before
 - [x] Admin review queue: old details vs new details, approve/reject
 - [x] Admin ability to edit, delete, archive events
 - [x] Admin ability to de-list a mosque
-- [x] Admin ability to view and edit all mosque details (name, address, suburb, state, coordinates, nicknames, active status)
+- [x] Admin ability to view and edit all mosque details (name, address, suburb, state, coordinates, nicknames, active status, facebook/website URLs)
+- [x] Admin ability to create mosques directly from manage page — *also supports auto-linking orphaned events when created from health dashboard*
 - [x] Batch flyer processing tool: multi-file upload, sequential AI parsing, editable review table, bulk submission — *added in Session 10, dedup + side-by-side review layout in Session 15*
 - [x] Data health dashboard: orphaned events, duplicate mosques/events, stale recurring — *added in Session 33*
 - [ ] Auto-archive logic: recurring events flagged after 3 months of no confirmation
@@ -105,7 +106,7 @@ The roadmap is split into three phases. Only Phase 1 needs to be complete before
 
 - [x] Share launch via personal networks, WhatsApp groups, mosque contacts — *launched Session 23, WhatsApp messages sent with personal intro + shareable forwarding message*
 - [ ] Leverage Go Pray's community and reputation (if endorsement secured)
-- [ ] Engage mosque social media pages to share Halaqas
+- [x] Engage mosque social media pages to share Halaqas — *Facebook Outreach admin tool built (Session 37), 60+ mosque Facebook pages linked, monthly review workflow established*
 - [ ] Monitor submissions, fix bugs, respond to feedback quickly
 - [ ] Switch prayer time recalculation to daily during Ramadan
 

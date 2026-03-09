@@ -118,6 +118,10 @@ export default function AdminPage() {
           <h2 className="text-lg font-bold text-charcoal">Analytics</h2>
           <p className="text-sm text-warm-gray mt-1">View page views, popular mosques, and tracking data.</p>
         </Link>
+        <Link href="/admin/outreach" className="block bg-white border border-sand-dark rounded-card p-6 hover:border-primary hover:shadow-card-hover transition-all">
+          <h2 className="text-lg font-bold text-charcoal">Facebook Outreach</h2>
+          <p className="text-sm text-warm-gray mt-1">Check mosque Facebook pages for new events to add.</p>
+        </Link>
         <Link href="/admin/health" className="block bg-white border border-sand-dark rounded-card p-6 hover:border-primary hover:shadow-card-hover transition-all relative">
           <h2 className="text-lg font-bold text-charcoal">Data Health</h2>
           <p className="text-sm text-warm-gray mt-1">Orphaned events, duplicates, and stale recurring events.</p>

@@ -12,7 +12,7 @@
 | Layer | Technology | Rationale |
 |-------|-----------|-----------|
 | **Framework** | Next.js (App Router) | React-based, SSR/SSG support, API routes for backend logic, excellent Claude Code support |
-| **Hosting** | Netlify | Free tier with auto-deploy from GitHub, currently at halaqas.netlify.app |
+| **Hosting** | Netlify | Free tier with auto-deploy from GitHub, live at halaqas.au |
 | **Database** | Supabase (PostgreSQL) | Free tier (500MB, 50K monthly active users), REST API, built-in dashboard, row-level security |
 | **AI Parsing** | Groq API — Llama 4 Scout | Vision + JSON mode, $0.11/$0.34 per million tokens, OpenAI-compatible API |
 | **AI Fallback** | Google Gemini 2.5 Flash | Backup for edge cases where Llama 4 Scout struggles, $0.15/$0.60 per million tokens |
@@ -76,6 +76,9 @@
 | longitude | decimal | Geocoded coordinates |
 | active | boolean | Default true, false if de-listed |
 | go_pray_id | text | Reference to Go Pray database |
+| facebook_url | text | Facebook page URL (nullable) |
+| website_url | text | Website URL (nullable) |
+| last_checked_at | timestamptz | When admin last reviewed this mosque's Facebook for new events |
 | created_at | timestamptz | |
 
 ### events
@@ -170,6 +173,7 @@ No PII stored. RLS: public insert only, reads via service role (admin). Indexes 
 | `/api/admin/events` | PATCH/DELETE | Update or delete events (protected) |
 | `/api/admin/mosques` | GET | List pending mosque suggestions; `?list=all` returns all mosques (protected) |
 | `/api/admin/mosques` | POST | Approve or reject mosque suggestion (protected). On approve, auto-links unlinked events with matching venue_name; returns `linked_events` count. |
+| `/api/admin/mosques` | PUT | Create a new mosque directly (protected) |
 | `/api/admin/mosques` | PATCH | Update mosque details (protected) |
 | `/api/admin/review` | GET | List events pending review (protected) |
 | `/api/admin/review` | POST | Approve or reject a pending event (protected) |
@@ -180,6 +184,8 @@ No PII stored. RLS: public insert only, reads via service role (admin). Indexes 
 | `/api/feedback` | POST | Send feedback email via Resend (to halaqas.au@gmail.com, from noreply@halaqas.au) |
 | `/api/admin/health` | GET | Data health checks: orphaned events, duplicate mosques/events, stale recurring (protected) |
 | `/api/admin/health` | POST | Health actions: link_event, merge_mosques, set_end_date, archive_event, delete_event (protected) |
+| `/api/admin/mosques/outreach` | GET | All mosques with event counts, latest event date, last_checked_at (protected) |
+| `/api/admin/mosques/outreach` | POST | Mark a mosque as checked (sets last_checked_at to now) (protected) |
 | `/api/admin/counts` | GET | Pending counts for dashboard badges: submissions, amendments, suggestions, health (protected) |
 | `/api/analytics` | POST | Public fire-and-forget analytics event insert (allowlisted event names) |
 | `/api/admin/analytics` | GET | Aggregated analytics: page views, top mosques, recent activity (protected) |
@@ -201,7 +207,7 @@ Given an image of a flyer or a text message about an event, extract the followin
   "prayer_anchor": "string — fajr/dhuhr/asr/maghrib/isha if time is relative to a prayer, or null",
   "prayer_offset": "string — e.g. 'after', '15 min after', '30 min before', or null",
   "speaker": "string — speaker name(s) or null",
-  "event_type": "string — talk/class/quran_circle/iftar/taraweeh/charity/youth/sisters_circle/other",
+  "event_type": "string — talk/class/quran_circle/iftar/taraweeh/tahajjud/itikaf/charity/youth/halaqa/sisters_circle/competition/workshop/eid_event/eid_prayers/other",
   "language": "string — english/arabic/urdu/turkish/bahasa/mixed/other",
   "gender": "string — brothers/sisters/mixed",
   "is_recurring": "boolean",
@@ -256,7 +262,7 @@ Each mosque gets a dynamic .ics endpoint that generates a valid iCalendar feed:
 ## 11. Hosting & Deployment
 
 - Code lives in a GitHub repository
-- Netlify auto-deploys on push to `main` (currently at halaqas.netlify.app)
+- Netlify auto-deploys on push to `main` (live at halaqas.au)
 - Environment variables (Groq API key, Supabase URL/key, admin password, NEXT_PUBLIC_SITE_URL) stored in Netlify settings
 - `NEXT_PUBLIC_SITE_URL` is baked in at build time — must redeploy after changing
 - No CI/CD pipeline needed beyond Netlify's built-in build step

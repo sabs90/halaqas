@@ -33,6 +33,7 @@ interface EventEditFormProps {
   saving: boolean;
   error: string;
   saveLabel?: string;
+  flyerImageUrl?: string | null;
 }
 
 const inputClass = 'w-full text-sm rounded-button border border-sand-dark p-2.5 bg-white text-charcoal';
@@ -114,9 +115,27 @@ export default function EventEditForm({
   saving,
   error,
   saveLabel = 'Save',
+  flyerImageUrl,
 }: EventEditFormProps) {
   return (
     <div className="space-y-3">
+      {/* Flyer Preview */}
+      {flyerImageUrl && (
+        <details className="border border-sand-dark rounded-card overflow-hidden">
+          <summary className="px-4 py-2.5 text-xs font-semibold text-charcoal cursor-pointer bg-sand/30 hover:bg-sand/50 transition-colors">
+            View original flyer
+          </summary>
+          <div className="p-3 bg-white">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={flyerImageUrl}
+              alt="Event flyer"
+              className="w-full rounded-button"
+            />
+          </div>
+        </details>
+      )}
+
       {/* Title */}
       <div>
         <label className="block text-xs font-semibold text-charcoal mb-1">Title</label>

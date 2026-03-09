@@ -7,7 +7,7 @@ A free community website that aggregates Islamic events across Sydney mosques in
 - **Framework:** Next.js 16 (App Router) + React 19 + TypeScript + Tailwind CSS 4
 - **Database:** Supabase (PostgreSQL) — accessed via `@supabase/supabase-js`
 - **AI parsing:** Groq API (Llama 4 Scout) for flyer/text extraction, Gemini Flash as fallback
-- **Hosting:** Netlify (auto-deploy from GitHub, currently at halaqas.netlify.app)
+- **Hosting:** Netlify (auto-deploy from GitHub, live at halaqas.au)
 - **Images:** Cloudflare R2 (not yet configured — data URL fallback)
 - **Maps:** Leaflet + OpenStreetMap + react-leaflet
 - **Prayer times:** Adhan.js (Shafi'i method, Sydney coordinates)

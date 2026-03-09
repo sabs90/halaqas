@@ -14,6 +14,8 @@ const TAG_STYLES: Record<EventType, { bg: string; text: string }> = {
   charity: { bg: 'rgba(196, 154, 60, 0.10)', text: '#C49A3C' },
   competition: { bg: 'rgba(196, 112, 75, 0.09)', text: '#B85C3A' },
   workshop: { bg: 'rgba(90, 122, 110, 0.09)', text: '#5A7A6E' },
+  eid_event: { bg: 'rgba(196, 154, 60, 0.12)', text: '#A07C2A' },
+  eid_prayers: { bg: 'rgba(30, 82, 72, 0.10)', text: '#1E5248' },
   other: { bg: 'rgba(156, 149, 144, 0.10)', text: '#6B6560' },
 };
 
@@ -31,6 +33,8 @@ const LABELS: Record<EventType, string> = {
   charity: 'Charity',
   competition: 'Competition',
   workshop: 'Workshop',
+  eid_event: 'Eid Event',
+  eid_prayers: 'Eid Prayers',
   other: 'Other',
 };
 

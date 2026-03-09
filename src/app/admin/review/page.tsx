@@ -33,6 +33,7 @@ export default function ReviewPage() {
   const [editForm, setEditForm] = useState<EventFormData | null>(null);
   const [saving, setSaving] = useState(false);
   const [editError, setEditError] = useState('');
+  const [search, setSearch] = useState('');
 
   useEffect(() => { loadEvents(); loadMosques(); }, []);
 
@@ -121,6 +122,18 @@ export default function ReviewPage() {
     return label + end;
   }
 
+  const filtered = events.filter(event => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return (
+      event.title.toLowerCase().includes(q) ||
+      (event.mosque?.name || '').toLowerCase().includes(q) ||
+      (event.venue_name || '').toLowerCase().includes(q) ||
+      (event.speaker || '').toLowerCase().includes(q) ||
+      (event.description || '').toLowerCase().includes(q)
+    );
+  });
+
   if (loading) {
     return <div className="text-center py-16 text-warm-gray">Loading submissions...</div>;
   }
@@ -129,16 +142,26 @@ export default function ReviewPage() {
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <Link href="/admin" className="text-sm text-warm-gray hover:text-primary">&larr; Admin</Link>
-        <h1 className="text-[28px] font-bold text-charcoal">Review Submissions ({events.length})</h1>
+        <h1 className="text-[28px] font-bold text-charcoal">Review Submissions ({filtered.length})</h1>
       </div>
 
-      {events.length === 0 ? (
+      {events.length > 0 && (
+        <input
+          type="text"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search by title, venue, speaker..."
+          className="w-full text-sm rounded-button border border-sand-dark p-2.5 bg-white text-charcoal placeholder:text-stone"
+        />
+      )}
+
+      {filtered.length === 0 ? (
         <div className="text-center py-12 bg-sand rounded-card">
-          <p className="text-warm-gray">No submissions to review.</p>
+          <p className="text-warm-gray">{search ? 'No submissions match your search.' : 'No submissions to review.'}</p>
         </div>
       ) : (
         <div className="space-y-4">
-          {events.map(event => (
+          {filtered.map(event => (
             <div key={event.id} className="bg-white border border-sand-dark rounded-card p-5 space-y-3">
               {editingId === event.id && editForm ? (
                 <EventEditForm
@@ -150,6 +173,7 @@ export default function ReviewPage() {
                   saving={saving}
                   error={editError}
                   saveLabel="Save & Approve"
+                  flyerImageUrl={event.flyer_image_url}
                 />
               ) : (
                 <>

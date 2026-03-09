@@ -4,6 +4,99 @@ This file is the persistent memory between Claude Code sessions. Each entry summ
 
 ---
 
+## Session 37 — Mosque Links Data & Facebook Outreach Page (2026-03-09)
+
+### Completed
+- **Populated website & Facebook URLs for 67 mosques** — web-searched all 66 mosques in parallel (6 batches), compiled verified URLs into `scripts/mosque-links-candidates.json`, ran bulk update script. 47 mosques have both website + Facebook, 13 Facebook only, 2 website only, 4 no links found (Blacktown, Kenwick, Fawkner, Rivervale)
+- **Created bulk update script** — `scripts/update-mosque-links.mjs` reads from JSON candidates file, updates Supabase, logs results and verifies
+- **Facebook Outreach admin page** (`/admin/outreach`) — lists all mosques grouped by state, sorted by event count descending, with: mosque name (linked to public page), suburb, event count badge, latest event date, Facebook link (opens in new tab), last checked date with days-ago counter, "Mark checked" button
+- **Outreach page features**: state filter dropdown, "Unchecked only" checkbox, amber highlighting for mosques never checked or >30 days stale, summary stats bar
+- **Migration 017** — added `last_checked_at` column to mosques table
+- **Outreach API** (`/api/admin/mosques/outreach`) — GET returns mosques with event counts and latest event dates; POST marks a mosque as checked
+- **Admin dashboard** — added "Facebook Outreach" card
+
+### Decisions Made
+- Removed questionable Facebook URLs (numeric IDs, school pages) in favour of null — better to have no link than a wrong one
+- Some mosque "websites" are parent org sites (e.g. Islamic Society of SA for 3 SA mosques, AIM for Punchbowl) — acceptable since they're the official managing body
+- Outreach page sorts by event count desc then last-checked asc (unchecked first) to prioritise active mosques that haven't been reviewed
+
+### Issues / Bugs
+- None
+
+### Next Session
+1. Deploy and verify outreach page + mosque links on production
+2. Do first round of Facebook outreach checks
+3. Consider adding Eid prayer times for Eid al-Fitr (approx 2026-03-20)
+4. Test new event submission end-to-end on production
+
+### Open Questions
+- Should the public suggest mosque form also collect state? Currently defaults to NSW on approval
+
+---
+
+## Session 36 — Admin UX Improvements & Eid Event Types (2026-03-09)
+
+### Completed
+- **Mosque suggestion admin review** — expanded to show all proposed fields with editable form (name, address, suburb, state, lat/lng, nicknames); admin can edit before approving
+- **Geocoding on mosque suggestion review** — "Geocode" button next to address field auto-fills lat/lng from address via Nominatim; shows success/not_found/error feedback
+- **Orphaned event → new mosque flow** — "+ New Mosque" link in health dashboard passes event ID; after mosque creation, the orphaned event is automatically linked to the new mosque with success banner
+- **Mosque dropdown grouped by state** — health dashboard orphaned events dropdown uses `<optgroup>` labels sorted by state
+- **Search bars on admin pages** — added search to event review page (admin/review) and manage events page (admin/events); filters by title, venue, speaker, type, status
+- **Eid event types** — added `eid_event` (community events/dinners) and `eid_prayers` (Eid salah) as new event categories; migration 016; updated types, constants, tags, filters, submit form, AI prompts
+- **Recategorised 4 existing Eid events** from 'other' to 'eid_event'
+- **Mosque creation supports facebook_url and website_url** — added to create form and PUT API handler
+
+### Decisions Made
+- Eid Event grouped under Community types in filters; Eid Prayers under Prayer types
+- Eid Event tag styled gold; Eid Prayers styled teal (matches prayer category)
+- Geocode button uses address + suburb + state for better accuracy
+- `ALTER TYPE ADD VALUE` must be run separately from `UPDATE` in Supabase (PostgreSQL limitation within transactions)
+
+### Issues / Bugs
+- None
+
+### Next Session
+1. Deploy and verify all admin changes on production
+2. Seed facebook_url / website_url for mosques with known pages
+3. Test new event submission end-to-end on production
+4. Consider adding Eid prayer times for Eid al-Fitr (approx 2026-03-20)
+
+### Open Questions
+- Should the public suggest mosque form also collect state? Currently defaults to NSW on approval
+
+---
+
+## Session 35 — Mosque Links & Duplicate Events UX (2026-03-09)
+
+### Completed
+- **Added `facebook_url` and `website_url` to mosques** — migration 015, type update, admin PATCH API, admin manage page (two URL inputs after nicknames), mosque detail page (conditional globe/Facebook icon links)
+- **Improved duplicate events UI on admin health dashboard** — each event now in its own labeled card (A/B) with event type, status, date/time, recurrence, speaker, and creation date; delete button sits inside each card instead of grouped at the bottom
+- **Enriched duplicate events API response** — returns all event fields (type, time, prayer anchor, recurrence, speaker, language, gender, description, kids/family, flyer URL, status, created_at)
+- **Added inline "Keep & Edit" for duplicate events** — click "Keep & Edit" on the preferred event, full EventEditForm opens inline, save edits + auto-delete the other event in one action ("Save & Delete Other")
+- **Admin mosque creation** — PUT endpoint on `/api/admin/mosques` for direct mosque creation; manage page supports `?create=name` query param to pre-fill
+
+### Decisions Made
+- Facebook/website links only shown on mosque detail page (not directory listing) to keep the listing clean
+- Empty string → null conversion on URL inputs so blank fields don't store empty strings
+- Duplicate event cards use white background with border to visually separate A vs B within the sand-light container
+- Reused existing EventEditForm component for duplicate event editing (same form as review page)
+- "Save & Delete Other" is a two-step API call (PATCH edits → POST delete) with error handling between steps
+
+### Issues / Bugs
+- None
+
+### Next Session
+1. Verify flyer images load on production — deploy and spot-check event detail pages
+2. Test new event submission — confirm image uploads go to Supabase Storage
+3. Add `RESEND_API_KEY` and `RESEND_TO_EMAIL` to Netlify environment variables before deploying
+4. Test health dashboard against production data
+5. Seed facebook_url / website_url for mosques that have known pages
+
+### Open Questions
+- Consider dropping the `feedback` table from Supabase (no longer used, but harmless to leave)
+
+---
+
 ## Session 34 — WhatsApp Share Message Improvement (2026-03-08)
 
 ### Completed
@@ -824,7 +917,7 @@ This file is the persistent memory between Claude Code sessions. Each entry summ
 - **Mosque "Add All to Calendar" dropdown:** Rewrote `SubscribeCalendarButton.tsx` as a dropdown with two options: Download .ics (one-time import) and Subscribe to calendar (live-updating via `webcal://` protocol). Each option has a subtitle explaining the behaviour.
 - **"Add an Event" button on mosque page:** Added button linking to `/submit?mosque={id}` on mosque detail pages.
 - **Submit page mosque pre-fill:** Added `useSearchParams` to submit page so `?mosque=UUID` query param pre-fills the mosque selector after mosques load.
-- **Deployed to Netlify:** Site now live at `halaqas.netlify.app`. Committed and pushed all changes.
+- **Deployed to Netlify:** Site now live at `halaqas.au`. Committed and pushed all changes.
 
 ### Decisions Made
 - Google Calendar `action=TEMPLATE` works reliably for single events (opens pre-filled form in browser). Google Calendar `cid=` subscription is unreliable for third-party ICS feeds — removed from mosque dropdown.

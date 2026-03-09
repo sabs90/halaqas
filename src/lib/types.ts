@@ -1,4 +1,4 @@
-export type EventType = 'talk' | 'class' | 'quran_circle' | 'iftar' | 'taraweeh' | 'tahajjud' | 'itikaf' | 'charity' | 'youth' | 'halaqa' | 'sisters_circle' | 'competition' | 'workshop' | 'other';
+export type EventType = 'talk' | 'class' | 'quran_circle' | 'iftar' | 'taraweeh' | 'tahajjud' | 'itikaf' | 'charity' | 'youth' | 'halaqa' | 'sisters_circle' | 'competition' | 'workshop' | 'eid_event' | 'eid_prayers' | 'other';
 export type Language = 'english' | 'arabic' | 'urdu' | 'turkish' | 'bahasa' | 'mixed' | 'other';
 export type Gender = 'brothers' | 'sisters' | 'mixed';
 export type TimeMode = 'fixed' | 'prayer_anchored';
@@ -18,6 +18,8 @@ export interface Mosque {
   longitude: number;
   active: boolean;
   go_pray_id: string | null;
+  facebook_url: string | null;
+  website_url: string | null;
   created_at: string;
 }
 

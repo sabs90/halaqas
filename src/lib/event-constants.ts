@@ -13,6 +13,8 @@ export const EVENT_TYPES: { value: EventType; label: string }[] = [
   { value: 'halaqa', label: 'Halaqa' },
   { value: 'competition', label: 'Competition' },
   { value: 'workshop', label: 'Workshop' },
+  { value: 'eid_event', label: 'Eid Event' },
+  { value: 'eid_prayers', label: 'Eid Prayers' },
   { value: 'other', label: 'Other' },
 ];
 

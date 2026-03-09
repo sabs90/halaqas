@@ -16,6 +16,7 @@ export default function AdminEventsPage() {
   const [editForm, setEditForm] = useState<EventFormData | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
+  const [search, setSearch] = useState('');
 
   useEffect(() => { loadEvents(); loadMosques(); }, []);
 
@@ -92,6 +93,19 @@ export default function AdminEventsPage() {
     loadEvents();
   }
 
+  const filtered = events.filter(event => {
+    if (!search) return true;
+    const q = search.toLowerCase();
+    return (
+      event.title.toLowerCase().includes(q) ||
+      (event.mosque?.name || '').toLowerCase().includes(q) ||
+      (event.venue_name || '').toLowerCase().includes(q) ||
+      (event.speaker || '').toLowerCase().includes(q) ||
+      (event.event_type || '').toLowerCase().includes(q) ||
+      (event.status || '').toLowerCase().includes(q)
+    );
+  });
+
   if (loading) {
     return <div className="text-center py-16 text-warm-gray">Loading events...</div>;
   }
@@ -100,11 +114,21 @@ export default function AdminEventsPage() {
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <Link href="/admin" className="text-sm text-warm-gray hover:text-primary">&larr; Admin</Link>
-        <h1 className="text-[28px] font-bold text-charcoal">Events ({events.length})</h1>
+        <h1 className="text-[28px] font-bold text-charcoal">Events ({filtered.length})</h1>
       </div>
 
+      {events.length > 0 && (
+        <input
+          type="text"
+          value={search}
+          onChange={e => setSearch(e.target.value)}
+          placeholder="Search by title, venue, speaker, type, status..."
+          className="w-full text-sm rounded-button border border-sand-dark p-2.5 bg-white text-charcoal placeholder:text-stone"
+        />
+      )}
+
       <div className="space-y-3">
-        {events.map(event => (
+        {filtered.map(event => (
           <div key={event.id} className="bg-white border border-sand-dark rounded-card p-4">
             {editingId === event.id && editForm ? (
               <EventEditForm
@@ -115,6 +139,7 @@ export default function AdminEventsPage() {
                 onCancel={cancelEdit}
                 saving={saving}
                 error={error}
+                flyerImageUrl={event.flyer_image_url}
               />
             ) : (
               <div className="flex items-center gap-4">

@@ -1,0 +1,499 @@
+[
+  {
+    "id": "6afd0210-39b0-4ea5-9278-2e66601d499b",
+    "name": "Canberra Islamic Centre (CIC)",
+    "state": "ACT",
+    "website_url": "https://canberraislamiccentre.org.au/",
+    "facebook_url": "https://www.facebook.com/CICANIL"
+  },
+  {
+    "id": "48daa881-3eff-4e7a-b9ad-525ff23ef3e6",
+    "name": "Gungahlin Mosque",
+    "state": "ACT",
+    "website_url": "https://gungahlinmosque.org.au/",
+    "facebook_url": "https://www.facebook.com/GungahlinMosque"
+  },
+  {
+    "id": "49f35beb-c39a-432f-bb8e-6945eec1f95b",
+    "name": "Abu Hanifa Institute (Lidcombe)",
+    "state": "NSW",
+    "website_url": "https://abuhanifainstitute.com/",
+    "facebook_url": "https://www.facebook.com/AbuHanifaInstitute"
+  },
+  {
+    "id": "6fd828f3-836e-40c7-9467-d564edc489cf",
+    "name": "ASWJ Revesby",
+    "state": "NSW",
+    "website_url": "https://www.aswj.com.au/revesby",
+    "facebook_url": "https://www.facebook.com/revesbyaswj"
+  },
+  {
+    "id": "1e449bfd-7c1a-40b1-b051-2b83ea72917e",
+    "name": "Auburn Gallipoli Mosque",
+    "state": "NSW",
+    "website_url": "https://gallipolimosque.org.au/",
+    "facebook_url": "https://www.facebook.com/gallipolimosque"
+  },
+  {
+    "id": "05ac3335-6e5a-466f-942a-7d1d3101c3a2",
+    "name": "Australian Islamic House",
+    "state": "NSW",
+    "website_url": "https://taih.org.au/",
+    "facebook_url": "https://www.facebook.com/australianislamichouse"
+  },
+  {
+    "id": "1a382ffd-9dc4-4d25-90a2-aef750a402f0",
+    "name": "Blacktown Mosque (Usman Mosque)",
+    "state": "NSW",
+    "website_url": null,
+    "facebook_url": null
+  },
+  {
+    "id": "d2bf63ec-a742-46f7-9414-e5a93dc02034",
+    "name": "CYC Campbelltown",
+    "state": "NSW",
+    "website_url": "https://www.cycaswj.com.au/",
+    "facebook_url": "https://www.facebook.com/cycaswj"
+  },
+  {
+    "id": "860967fd-bb61-4ca2-bee6-f376dd6b4b29",
+    "name": "Daar Ibn Abbas (Condell Park)",
+    "state": "NSW",
+    "website_url": "https://ibnabbas.org.au/",
+    "facebook_url": "https://www.facebook.com/daaribnabbas"
+  },
+  {
+    "id": "cc983a76-48d0-4770-aefb-2af7070cc986",
+    "name": "Dee Why Masjid (ISMW)",
+    "state": "NSW",
+    "website_url": "https://www.ismw.org.au/",
+    "facebook_url": "https://www.facebook.com/DeeWhyMasjid"
+  },
+  {
+    "id": "cb7108f8-93a8-48c9-8877-f3efa04600d7",
+    "name": "Erskineville Mosque",
+    "state": "NSW",
+    "website_url": null,
+    "facebook_url": "https://www.facebook.com/erskinevillemosque1973"
+  },
+  {
+    "id": "750f2d5a-2c2d-4b1a-a75a-6ffd0ed880c6",
+    "name": "Glenwood Community Hub",
+    "state": "NSW",
+    "website_url": null,
+    "facebook_url": "https://www.facebook.com/sydneynorthwestmuslimcommunity/"
+  },
+  {
+    "id": "359d8e3b-9b4b-49c2-b74b-e368e3ed4e73",
+    "name": "Hills District Muslim Society",
+    "state": "NSW",
+    "website_url": "https://hdms.org.au/",
+    "facebook_url": "https://www.facebook.com/HillsDistrictMuslimSociety/"
+  },
+  {
+    "id": "fa654b22-7dcb-4b86-9ce6-9ed43f4696cd",
+    "name": "ICMG Guildford Mosque",
+    "state": "NSW",
+    "website_url": "https://icmgsydney.org/",
+    "facebook_url": "https://www.facebook.com/GuildfordMosque/"
+  },
+  {
+    "id": "1a675ff8-3163-4f3c-a9a3-7d84315520b6",
+    "name": "Imam Hasan Centre (Annangrove)",
+    "state": "NSW",
+    "website_url": "https://www.imamhasancentre.com.au/",
+    "facebook_url": "https://www.facebook.com/imamhasancentre/"
+  },
+  {
+    "id": "423483d6-3b2c-42bb-ae2d-cb50b19fc220",
+    "name": "Lakemba Mosque (Imam Ali bin Abi Talib)",
+    "state": "NSW",
+    "website_url": "https://www.lma.org.au/",
+    "facebook_url": "https://www.facebook.com/lakembamosqueofficial/"
+  },
+  {
+    "id": "0a268f5a-236f-48e9-84e5-0709388b70fe",
+    "name": "Markaz Imam Ahmad (Liverpool)",
+    "state": "NSW",
+    "website_url": "https://mialiverpool.com.au/",
+    "facebook_url": "https://www.facebook.com/mialiverpool/"
+  },
+  {
+    "id": "0e03364c-1ead-4bf2-87fd-640b542c8205",
+    "name": "Masjid Abu Bakr (Auburn)",
+    "state": "NSW",
+    "website_url": "https://www.masjidabubakr.org.au/",
+    "facebook_url": "https://www.facebook.com/MasjidAbuBakr/"
+  },
+  {
+    "id": "470921f5-59f8-4064-afef-1adef5838f94",
+    "name": "Masjid Al-Azhar (Belmore)",
+    "state": "NSW",
+    "website_url": "https://www.aswj.com.au/belmore",
+    "facebook_url": "https://www.facebook.com/alazharbelmore/"
+  },
+  {
+    "id": "75f3e8dc-7211-4dd7-bc33-0dccfd6a8d38",
+    "name": "Masjid Al-Noor",
+    "state": "NSW",
+    "website_url": null,
+    "facebook_url": "https://www.facebook.com/masjidalnoorsydney/"
+  },
+  {
+    "id": "41ec0fd8-4065-445f-b7fb-8af988521f31",
+    "name": "Masjid As-Salaam (Chester Hill)",
+    "state": "NSW",
+    "website_url": null,
+    "facebook_url": "https://www.facebook.com/masjid.salaam.chester.hill/"
+  },
+  {
+    "id": "64809aa6-7684-4e18-9850-2ed5cb4a0c2f",
+    "name": "Masjid As-Sunnah (Lakemba)",
+    "state": "NSW",
+    "website_url": "https://masjidassunnah.com.au/",
+    "facebook_url": "https://www.facebook.com/masjidassunnahlakemba/"
+  },
+  {
+    "id": "a0d163b6-48f0-42f6-be5d-3049bb1d87de",
+    "name": "Masjid Bilal (Hoxton Park Mosque)",
+    "state": "NSW",
+    "website_url": "https://www.masjidbilal.com.au",
+    "facebook_url": "https://www.facebook.com/MasjidBilalHoxtonPark"
+  },
+  {
+    "id": "37d09589-18df-4e7a-b181-7a0a045ff392",
+    "name": "Masjid Darul IMAAN (Arncliffe)",
+    "state": "NSW",
+    "website_url": "https://imaan.com.au",
+    "facebook_url": "https://www.facebook.com/masjiddarulimaan"
+  },
+  {
+    "id": "ee74b4c3-8f3b-4e8a-ae4b-0215ade38aae",
+    "name": "Masjid Omar (Auburn)",
+    "state": "NSW",
+    "website_url": "https://aiccentre.org.au",
+    "facebook_url": "https://www.facebook.com/MasjidOmarSydney"
+  },
+  {
+    "id": "659a16b4-3d01-4a09-8b1e-4f22cfc5b4b1",
+    "name": "Othman Bin Affan Mosque (Cabramatta)",
+    "state": "NSW",
+    "website_url": null,
+    "facebook_url": "https://www.facebook.com/OBA.MOSQUE"
+  },
+  {
+    "id": "7c7373b5-44b3-47b4-8a39-1f697e1e7406",
+    "name": "Parramatta Mosque",
+    "state": "NSW",
+    "website_url": "https://parramattamosque.org.au",
+    "facebook_url": "https://www.facebook.com/ParramattaMosqueAU"
+  },
+  {
+    "id": "a6eb1178-990d-401a-baad-c084c1c0619f",
+    "name": "Punchbowl Mosque",
+    "state": "NSW",
+    "website_url": "https://aim.org.au",
+    "facebook_url": "https://www.facebook.com/punchbowlmosque"
+  },
+  {
+    "id": "78cd693e-8413-4c23-962b-4a6ca4d93717",
+    "name": "Quakers Hill Masjid",
+    "state": "NSW",
+    "website_url": "https://www.quakershillmasjid.org",
+    "facebook_url": "https://www.facebook.com/quakershillmasjid"
+  },
+  {
+    "id": "7c04e81a-f2d6-47ad-b399-815f67d745bb",
+    "name": "Rooty Hill Masjid",
+    "state": "NSW",
+    "website_url": "https://www.rootyhillmasjid.com.au",
+    "facebook_url": "https://www.facebook.com/rootyhillmasjid"
+  },
+  {
+    "id": "a3dc7d40-a258-448f-b6f1-cec5420196df",
+    "name": "Roselands Mosque",
+    "state": "NSW",
+    "website_url": null,
+    "facebook_url": "https://www.facebook.com/RoselandsMosque"
+  },
+  {
+    "id": "32288989-1662-4c59-8d3f-8e9186f23832",
+    "name": "Smithfield Mosque",
+    "state": "NSW",
+    "website_url": null,
+    "facebook_url": "https://www.facebook.com/SmithfieldMosque"
+  },
+  {
+    "id": "ba44999c-a9ed-4333-9a8c-e2cc454e1455",
+    "name": "Surry Hills Mosque",
+    "state": "NSW",
+    "website_url": null,
+    "facebook_url": "https://www.facebook.com/surryhillsmosque"
+  },
+  {
+    "id": "cdef28d6-c740-409b-856a-047b178e7038",
+    "name": "Sydney City Masjid",
+    "state": "NSW",
+    "website_url": "https://masjid.sydney",
+    "facebook_url": "https://www.facebook.com/SydneyCityMasjid"
+  },
+  {
+    "id": "58a970bd-74e7-4bc1-a79c-4527b22aa44d",
+    "name": "Tempe Mosque Masjid Al-Hijrah",
+    "state": "NSW",
+    "website_url": "https://www.cide.org.au",
+    "facebook_url": "https://www.facebook.com/alhijrahcidensw"
+  },
+  {
+    "id": "04c1d12f-b935-4b3c-98a6-91847024ea89",
+    "name": "UNSW ISOC Musallah",
+    "state": "NSW",
+    "website_url": "https://isoc-unsw.org.au",
+    "facebook_url": "https://www.facebook.com/islamicsocietyUNSW"
+  },
+  {
+    "id": "2d886910-ae63-4bfb-9c03-208ae5dbb6f6",
+    "name": "Islamic Society of Darwin",
+    "state": "NT",
+    "website_url": "https://isod.org.au",
+    "facebook_url": "https://www.facebook.com/islamicsocietyofdarwin"
+  },
+  {
+    "id": "f17ff44e-6d46-4491-bb33-e1dd679a6754",
+    "name": "Darra Mosque (Oxley)",
+    "state": "QLD",
+    "website_url": "http://isd.org.au",
+    "facebook_url": "https://www.facebook.com/IslamicSocietyofDarra"
+  },
+  {
+    "id": "d1c41424-0e16-4bf0-ae94-4bb3c996a35c",
+    "name": "Gold Coast Arundel Masjid",
+    "state": "QLD",
+    "website_url": "https://goldcoastmasjid.org.au",
+    "facebook_url": "https://www.facebook.com/gcmosque"
+  },
+  {
+    "id": "69d520a9-4d05-4fa1-bf4a-60cc55ac1f66",
+    "name": "Islamic College of Brisbane",
+    "state": "QLD",
+    "website_url": "https://icb.qld.edu.au",
+    "facebook_url": "https://www.facebook.com/icbbne"
+  },
+  {
+    "id": "1203bf78-5379-4beb-ae65-786b04614eca",
+    "name": "Masjid Al Farooq (Kuraby Mosque)",
+    "state": "QLD",
+    "website_url": "https://www.kurabymosque.org.au",
+    "facebook_url": "https://www.facebook.com/kurabymosque"
+  },
+  {
+    "id": "5bb5e51b-564a-4954-887a-b6d9a229e8c6",
+    "name": "Masjid Al Salam (Logan Mosque)",
+    "state": "QLD",
+    "website_url": null,
+    "facebook_url": "https://www.facebook.com/loganmosque"
+  },
+  {
+    "id": "fb6c3ce8-7f03-4b2b-b733-bc08b6855be7",
+    "name": "Slacks Creek Mosque",
+    "state": "QLD",
+    "website_url": "https://slackscreekmosque.com.au",
+    "facebook_url": "https://www.facebook.com/slackscreekmosque"
+  },
+  {
+    "id": "bd0ab807-c58e-45d9-948f-b5149f4de77e",
+    "name": "Toowoomba Mosque",
+    "state": "QLD",
+    "website_url": "https://toowoombamosque.com.au",
+    "facebook_url": "https://www.facebook.com/ToowoombaMosque"
+  },
+  {
+    "id": "647b4e05-7a8f-4ec8-b957-8ffccdcd1786",
+    "name": "Adelaide City Mosque",
+    "state": "SA",
+    "website_url": "https://adelaidecitymosque.org.au/",
+    "facebook_url": "https://www.facebook.com/adelaidecitymosque"
+  },
+  {
+    "id": "f9e6830f-4b23-45bf-b406-12a60f6a22a1",
+    "name": "Al-Khalil Mosque (Pooraka)",
+    "state": "SA",
+    "website_url": null,
+    "facebook_url": "https://www.facebook.com/AlKhalilMasjid"
+  },
+  {
+    "id": "8907b6e2-3573-4f15-a8d7-4713a6f90b6a",
+    "name": "Marion Mosque (Islamic Society of SA)",
+    "state": "SA",
+    "website_url": "https://islamicsocietysa.org.au/",
+    "facebook_url": "https://www.facebook.com/Islamic.Society.SA"
+  },
+  {
+    "id": "3c49f4b4-358a-4b4b-9780-2ae66d182aeb",
+    "name": "Masjid Othman Bin Affan (Elizabeth Mosque)",
+    "state": "SA",
+    "website_url": "https://islamicsocietysa.org.au/",
+    "facebook_url": "https://www.facebook.com/Islamic.Society.SA"
+  },
+  {
+    "id": "ef2c759a-8a20-4de3-8a95-a7e2a9834bb9",
+    "name": "Murray Bridge Mosque",
+    "state": "SA",
+    "website_url": "https://islamicsocietysa.org.au/",
+    "facebook_url": null
+  },
+  {
+    "id": "f6c53dc0-7a1e-4b58-8b76-b608c570f65d",
+    "name": "Hobart Mosque",
+    "state": "TAS",
+    "website_url": "https://taslim.com.au/",
+    "facebook_url": "https://www.facebook.com/HobartMosque"
+  },
+  {
+    "id": "8b7d7005-0941-41a1-9999-f1e73e04b7eb",
+    "name": "Afghan Islamic Centre & Omar Farooq Mosque (Doveton) - AICOM",
+    "state": "VIC",
+    "website_url": "https://aicom.com.au/",
+    "facebook_url": "https://www.facebook.com/AfghanIslamicCentreOmarFarooqMosqueAICOM"
+  },
+  {
+    "id": "71b5440f-4a68-4d93-957e-7ba81563f799",
+    "name": "Al Siraat College (Epping)",
+    "state": "VIC",
+    "website_url": "https://www.alsiraat.vic.edu.au/",
+    "facebook_url": "https://www.facebook.com/AlSiraatCollege"
+  },
+  {
+    "id": "b6b415cf-cada-43e8-b3c1-5753519205e0",
+    "name": "Albanian Australian Islamic Society – AAIS (Carlton North)",
+    "state": "VIC",
+    "website_url": "https://www.aais.org.au/",
+    "facebook_url": "https://www.facebook.com/aaisocial"
+  },
+  {
+    "id": "19755a67-4e9f-48ca-b2ff-37f32e9bbc2b",
+    "name": "Australian Islamic Centre (Newport)",
+    "state": "VIC",
+    "website_url": "https://australianislamiccentre.org/",
+    "facebook_url": "https://www.facebook.com/australianislamiccentre"
+  },
+  {
+    "id": "790d3843-9180-4d31-9722-c5cfe6c38762",
+    "name": "Broadmeadows Mosque (Turkish)",
+    "state": "VIC",
+    "website_url": "https://www.bticc.org.au/",
+    "facebook_url": null
+  },
+  {
+    "id": "1225ff49-5f29-44dd-848e-db71aa26140f",
+    "name": "Coburg Mosque (Cypriot Turkish Islamic Centre)",
+    "state": "VIC",
+    "website_url": "https://cic.org.au",
+    "facebook_url": "https://www.facebook.com/cic.org.au"
+  },
+  {
+    "id": "90614fd3-ee9a-4959-aebb-05412be24f1c",
+    "name": "Elsedeaq Heidelberg Mosque",
+    "state": "VIC",
+    "website_url": "https://elsedeaq.org",
+    "facebook_url": "https://www.facebook.com/Elsedeaq"
+  },
+  {
+    "id": "425c45d1-c5aa-4065-afb6-a15f1430b066",
+    "name": "Emir Sultan Mosque (Dandenong)",
+    "state": "VIC",
+    "website_url": "https://www.emirsultanmosque.com",
+    "facebook_url": "https://www.facebook.com/EmirSultanMosque"
+  },
+  {
+    "id": "4026a52d-466b-4dbe-84b0-0be8a4136fba",
+    "name": "Fawkner Mosque",
+    "state": "VIC",
+    "website_url": null,
+    "facebook_url": null
+  },
+  {
+    "id": "fb4e1270-8dea-4b39-a6eb-8dc8d2f555fb",
+    "name": "Hallam Masjid (Belgrave)",
+    "state": "VIC",
+    "website_url": "https://iewad.org.au",
+    "facebook_url": "https://www.facebook.com/HallamMasjid"
+  },
+  {
+    "id": "403bdd7b-429d-403b-a6d9-1bf88b87a1a5",
+    "name": "Omar Bin Al Khattab Masjid Preston",
+    "state": "VIC",
+    "website_url": "https://isv.org.au",
+    "facebook_url": "https://www.facebook.com/prestonmosque.au"
+  },
+  {
+    "id": "1fe14aa5-a285-43d8-82e8-46530dcbcb99",
+    "name": "Sunshine Mosque (Ardeer)",
+    "state": "VIC",
+    "website_url": "https://www.sunshinemosque.com.au",
+    "facebook_url": "https://www.facebook.com/SunshineMosque"
+  },
+  {
+    "id": "de5e4094-4df1-4c07-977e-43b989b94974",
+    "name": "Thomastown Mosque",
+    "state": "VIC",
+    "website_url": null,
+    "facebook_url": "https://www.facebook.com/thomastown.mosque"
+  },
+  {
+    "id": "88d544c7-cfb6-4602-bb9e-3f03e6a5e347",
+    "name": "Virgin Mary Mosque",
+    "state": "VIC",
+    "website_url": "https://www.virginmarymosque.org.au",
+    "facebook_url": "https://www.facebook.com/virginmarymosque"
+  },
+  {
+    "id": "600509cc-4f3f-48c0-afe7-ff4302017daf",
+    "name": "Canning Vale Mosque (Iqra Academy Centre)",
+    "state": "WA",
+    "website_url": "https://iqraacademy.org.au",
+    "facebook_url": "https://www.facebook.com/iqraacademyperth"
+  },
+  {
+    "id": "8aa8c52c-6916-415f-980e-99a0143cb2bd",
+    "name": "Kenwick Mosque",
+    "state": "WA",
+    "website_url": null,
+    "facebook_url": null
+  },
+  {
+    "id": "e06536c5-1f30-4424-8afb-51a5a968b6b5",
+    "name": "Masjid Al-Taqwa (Mirrabooka)",
+    "state": "WA",
+    "website_url": null,
+    "facebook_url": "https://www.facebook.com/MasjidAlTaqwa"
+  },
+  {
+    "id": "e3632b33-ef31-4620-8521-a63c6988674c",
+    "name": "Masjid Ibrahim (Southern River)",
+    "state": "WA",
+    "website_url": "https://www.masjidibrahim.com.au",
+    "facebook_url": null
+  },
+  {
+    "id": "b713d475-f903-43e7-9737-2b175f377a1a",
+    "name": "Perth Mosque",
+    "state": "WA",
+    "website_url": null,
+    "facebook_url": "https://www.facebook.com/PerthMosqueAustralia"
+  },
+  {
+    "id": "657f7883-4c65-4012-8f1a-0893e67bc0d6",
+    "name": "Rivervale Mosque",
+    "state": "WA",
+    "website_url": null,
+    "facebook_url": null
+  },
+  {
+    "id": "68881571-f83b-495f-bd62-5f0f719ca347",
+    "name": "Thornlie Masjid (Australian Islamic College)",
+    "state": "WA",
+    "website_url": "https://www.ais.wa.edu.au/school/australian-islamic-college-thornlie",
+    "facebook_url": "https://www.facebook.com/australianislamiccollege"
+  }
+]

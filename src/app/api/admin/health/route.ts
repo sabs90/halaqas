@@ -74,15 +74,40 @@ export async function GET() {
       eventsByMosque[e.mosque_id].push(e);
     }
   }
-  const possible_dupe_events: { event_a: { id: string; title: string; fixed_date: string | null }; event_b: { id: string; title: string; fixed_date: string | null }; mosque_name: string }[] = [];
+  const pickEventFields = (e: typeof events[number]) => ({
+    id: e.id,
+    title: e.title,
+    mosque_id: e.mosque_id,
+    venue_name: e.venue_name,
+    venue_address: e.venue_address,
+    event_type: e.event_type,
+    language: e.language,
+    gender: e.gender,
+    fixed_date: e.fixed_date,
+    fixed_time: e.fixed_time,
+    time_mode: e.time_mode,
+    prayer_anchor: e.prayer_anchor,
+    prayer_offset_minutes: e.prayer_offset_minutes,
+    is_recurring: e.is_recurring,
+    recurrence_pattern: e.recurrence_pattern,
+    recurrence_end_date: e.recurrence_end_date,
+    speaker: e.speaker,
+    description: e.description,
+    is_kids: e.is_kids,
+    is_family: e.is_family,
+    flyer_image_url: e.flyer_image_url,
+    status: e.status,
+    created_at: e.created_at,
+  });
+  const possible_dupe_events: { event_a: ReturnType<typeof pickEventFields>; event_b: ReturnType<typeof pickEventFields>; mosque_name: string }[] = [];
   for (const [mosqueId, mosqueEvents] of Object.entries(eventsByMosque)) {
     for (let i = 0; i < mosqueEvents.length; i++) {
       for (let j = i + 1; j < mosqueEvents.length; j++) {
         if (mosqueEvents[i].title?.toLowerCase() === mosqueEvents[j].title?.toLowerCase()) {
           const mosque = mosques.find(m => m.id === mosqueId);
           possible_dupe_events.push({
-            event_a: { id: mosqueEvents[i].id, title: mosqueEvents[i].title, fixed_date: mosqueEvents[i].fixed_date },
-            event_b: { id: mosqueEvents[j].id, title: mosqueEvents[j].title, fixed_date: mosqueEvents[j].fixed_date },
+            event_a: pickEventFields(mosqueEvents[i]),
+            event_b: pickEventFields(mosqueEvents[j]),
             mosque_name: mosque?.name ?? 'Unknown',
           });
         }

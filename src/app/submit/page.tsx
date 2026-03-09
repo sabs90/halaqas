@@ -21,6 +21,8 @@ const EVENT_TYPES: { value: EventType; label: string }[] = [
   { value: 'halaqa', label: 'Halaqa' },
   { value: 'competition', label: 'Competition' },
   { value: 'workshop', label: 'Workshop' },
+  { value: 'eid_event', label: 'Eid Event' },
+  { value: 'eid_prayers', label: 'Eid Prayers' },
   { value: 'other', label: 'Other' },
 ];
 
@@ -143,6 +145,7 @@ function SubmitPageContent() {
   const [nearbyMosques, setNearbyMosques] = useState<Mosque[]>([]);
   const [suggestStatus, setSuggestStatus] = useState<'idle' | 'sending' | 'sent'>('idle');
   const [dragging, setDragging] = useState(false);
+  const [flyerPreviewUrl, setFlyerPreviewUrl] = useState<string | null>(null);
 
   useEffect(() => {
     fetch('/api/mosques')
@@ -242,6 +245,7 @@ function SubmitPageContent() {
     setError('');
     try {
       const compressed = await compressImage(file);
+      setFlyerPreviewUrl(URL.createObjectURL(compressed));
       const formData = new globalThis.FormData();
       formData.append('image', compressed);
 
@@ -421,7 +425,7 @@ function SubmitPageContent() {
         </p>
         <div className="flex justify-center gap-3 mt-6">
           <Button variant="primary" href="/events">View Events</Button>
-          <Button variant="outline" onClick={() => { setStep('input'); setForm(INITIAL_FORM); setDuplicates([]); setSuccessType('submitted'); }}>
+          <Button variant="outline" onClick={() => { setStep('input'); setForm(INITIAL_FORM); setDuplicates([]); setSuccessType('submitted'); setFlyerPreviewUrl(null); }}>
             Submit Another
           </Button>
         </div>
@@ -577,6 +581,23 @@ function SubmitPageContent() {
           <div className="bg-sand/50 rounded-card p-3 text-sm text-warm-gray">
             Review and edit the details below before submitting.
           </div>
+
+          {/* Flyer Preview */}
+          {flyerPreviewUrl && (
+            <details className="border border-sand-dark rounded-card overflow-hidden">
+              <summary className="px-4 py-3 text-sm font-semibold text-charcoal cursor-pointer bg-sand/30 hover:bg-sand/50 transition-colors">
+                View uploaded flyer
+              </summary>
+              <div className="p-3 bg-white">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={flyerPreviewUrl}
+                  alt="Uploaded flyer"
+                  className="w-full rounded-button"
+                />
+              </div>
+            </details>
+          )}
 
           {/* Title */}
           <div>
