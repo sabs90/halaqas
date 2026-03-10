@@ -236,7 +236,10 @@ export default function AdminEventsPage() {
               />
             ) : (
               <div>
-                <div className="flex items-center gap-4">
+                <div
+                  className="flex items-center gap-4 cursor-pointer"
+                  onClick={() => startEdit(event)}
+                >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-2">
                       <EventTypeTag type={event.event_type} />
@@ -256,10 +259,7 @@ export default function AdminEventsPage() {
                       {event.mosque?.name || event.venue_name || 'Unknown venue'}
                     </p>
                   </div>
-                  <div className="flex gap-2 shrink-0">
-                    <Button variant="outline" onClick={() => startEdit(event)} className="!text-xs !px-3 !py-1.5">
-                      Edit
-                    </Button>
+                  <div className="flex gap-2 shrink-0" onClick={(e) => e.stopPropagation()}>
                     {event.status === 'active' ? (
                       <Button variant="outline" onClick={() => handleArchive(event.id)} className="!text-xs !px-3 !py-1.5">
                         Archive

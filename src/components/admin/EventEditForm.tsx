@@ -132,6 +132,7 @@ export default function EventEditForm({
 }: EventEditFormProps) {
   const [uploading, setUploading] = useState(false);
   const [dragging, setDragging] = useState(false);
+  const [generatingDesc, setGeneratingDesc] = useState(false);
 
   async function uploadFile(file: File) {
     if (!onFlyerChange) return;
@@ -163,54 +164,83 @@ export default function EventEditForm({
     if (file && file.type.startsWith('image/')) uploadFile(file);
   }
 
-  return (
-    <div className="space-y-3">
-      {/* Flyer Image */}
+  const hasFlyerSidebar = flyerImageUrl && onFlyerChange;
+
+  const flyerPanel = (
+    <div className="space-y-2">
       {onFlyerChange ? (
+        flyerImageUrl ? (
+          <div
+            onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={handleDrop}
+            className={`relative border rounded-card overflow-hidden transition-colors ${dragging ? 'border-primary border-2' : 'border-sand-dark'}`}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={flyerImageUrl} alt="Event flyer" className="w-full object-contain bg-sand/20" />
+            <div className="flex gap-2 p-2 bg-sand/30">
+              <label className="text-xs text-primary hover:text-primary-dark font-medium cursor-pointer">
+                Replace
+                <input type="file" accept="image/*" className="hidden" onChange={handleFlyerUpload} disabled={uploading} />
+              </label>
+              <button
+                type="button"
+                onClick={() => onFlyerChange(null)}
+                className="text-xs text-secondary hover:text-secondary-dark font-medium"
+              >
+                Remove
+              </button>
+              {uploading && <span className="text-xs text-warm-gray animate-pulse">Uploading...</span>}
+            </div>
+          </div>
+        ) : (
+          <label
+            onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+            onDragLeave={() => setDragging(false)}
+            onDrop={handleDrop}
+            className={`flex items-center justify-center gap-2 border-2 border-dashed rounded-card p-4 cursor-pointer transition-colors ${
+              dragging ? 'border-primary bg-primary/[0.04]' : 'border-sand-dark hover:border-primary'
+            } ${uploading ? 'opacity-60' : ''}`}
+          >
+            <svg className="w-4 h-4 text-stone" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" />
+            </svg>
+            <span className="text-xs text-warm-gray">{uploading ? 'Uploading...' : 'Drop image or click to upload'}</span>
+            <input type="file" accept="image/*" className="hidden" onChange={handleFlyerUpload} disabled={uploading} />
+          </label>
+        )
+      ) : flyerImageUrl ? (
+        <div className="border border-sand-dark rounded-card overflow-hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={flyerImageUrl} alt="Event flyer" className="w-full rounded-button" />
+        </div>
+      ) : null}
+    </div>
+  );
+
+  return (
+    <div className={hasFlyerSidebar ? 'flex gap-4 flex-col lg:flex-row' : ''}>
+      {/* Flyer sidebar — sticky on large screens */}
+      {hasFlyerSidebar && (
+        <div className="lg:w-72 lg:shrink-0 lg:order-2 lg:sticky lg:top-4 lg:self-start">
+          <label className="block text-xs font-semibold text-charcoal mb-1">Flyer</label>
+          {flyerPanel}
+        </div>
+      )}
+
+      {/* Form fields */}
+      <div className={`space-y-3 ${hasFlyerSidebar ? 'lg:flex-1 lg:min-w-0' : ''}`}>
+
+      {/* Flyer upload when no image yet (inline, not sidebar) */}
+      {!hasFlyerSidebar && onFlyerChange && (
         <div className="space-y-2">
           <label className="block text-xs font-semibold text-charcoal">Flyer Image</label>
-          {flyerImageUrl ? (
-            <div
-              onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-              onDragLeave={() => setDragging(false)}
-              onDrop={handleDrop}
-              className={`relative border rounded-card overflow-hidden transition-colors ${dragging ? 'border-primary border-2' : 'border-sand-dark'}`}
-            >
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={flyerImageUrl} alt="Event flyer" className="w-full max-h-48 object-contain bg-sand/20" />
-              <div className="flex gap-2 p-2 bg-sand/30">
-                <label className="text-xs text-primary hover:text-primary-dark font-medium cursor-pointer">
-                  Replace
-                  <input type="file" accept="image/*" className="hidden" onChange={handleFlyerUpload} disabled={uploading} />
-                </label>
-                <button
-                  type="button"
-                  onClick={() => onFlyerChange(null)}
-                  className="text-xs text-secondary hover:text-secondary-dark font-medium"
-                >
-                  Remove
-                </button>
-                {uploading && <span className="text-xs text-warm-gray animate-pulse">Uploading...</span>}
-              </div>
-            </div>
-          ) : (
-            <label
-              onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
-              onDragLeave={() => setDragging(false)}
-              onDrop={handleDrop}
-              className={`flex items-center justify-center gap-2 border-2 border-dashed rounded-card p-4 cursor-pointer transition-colors ${
-                dragging ? 'border-primary bg-primary/[0.04]' : 'border-sand-dark hover:border-primary'
-              } ${uploading ? 'opacity-60' : ''}`}
-            >
-              <svg className="w-4 h-4 text-stone" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" />
-              </svg>
-              <span className="text-xs text-warm-gray">{uploading ? 'Uploading...' : 'Drop image or click to upload'}</span>
-              <input type="file" accept="image/*" className="hidden" onChange={handleFlyerUpload} disabled={uploading} />
-            </label>
-          )}
+          {flyerPanel}
         </div>
-      ) : flyerImageUrl ? (
+      )}
+
+      {/* Read-only flyer (no onFlyerChange) */}
+      {!onFlyerChange && flyerImageUrl && (
         <details className="border border-sand-dark rounded-card overflow-hidden">
           <summary className="px-4 py-2.5 text-xs font-semibold text-charcoal cursor-pointer bg-sand/30 hover:bg-sand/50 transition-colors">
             View original flyer
@@ -220,7 +250,7 @@ export default function EventEditForm({
             <img src={flyerImageUrl} alt="Event flyer" className="w-full rounded-button" />
           </div>
         </details>
-      ) : null}
+      )}
 
       {/* Title */}
       <div>
@@ -452,7 +482,39 @@ export default function EventEditForm({
 
       {/* Description */}
       <div>
-        <label className="block text-xs font-semibold text-charcoal mb-1">Description</label>
+        <div className="flex items-center gap-2 mb-1">
+          <label className="block text-xs font-semibold text-charcoal">Description</label>
+          {flyerImageUrl && (
+            <button
+              type="button"
+              disabled={generatingDesc}
+              onClick={async () => {
+                setGeneratingDesc(true);
+                try {
+                  const res = await fetch('/api/admin/generate-description', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image_url: flyerImageUrl }),
+                  });
+                  if (!res.ok) throw new Error('Failed');
+                  const { description } = await res.json();
+                  if (description) {
+                    onChange({ description });
+                  } else {
+                    alert('No extra details found on this flyer.');
+                  }
+                } catch {
+                  alert('Failed to generate description from flyer.');
+                } finally {
+                  setGeneratingDesc(false);
+                }
+              }}
+              className="text-[10px] font-medium text-primary hover:text-white bg-primary/10 hover:bg-primary px-2 py-0.5 rounded-pill transition-colors disabled:opacity-50"
+            >
+              {generatingDesc ? 'Reading flyer...' : 'Extract from flyer'}
+            </button>
+          )}
+        </div>
         <textarea
           value={form.description}
           onChange={(e) => onChange({ description: e.target.value })}
@@ -468,8 +530,12 @@ export default function EventEditForm({
           <label className="block text-xs font-semibold text-charcoal">Detail Summary</label>
           <button
             type="button"
-            onClick={() => onChange({ detail_summary: parseDetailSummary(form.description) || '' })}
-            className="text-[10px] text-primary hover:text-primary-dark font-medium"
+            onClick={() => {
+              const generated = parseDetailSummary(form.description);
+              onChange({ detail_summary: generated || '' });
+              if (!generated) alert('No details found in description (rak\'at, juz, time range, etc.)');
+            }}
+            className="text-[10px] font-medium text-primary hover:text-white bg-primary/10 hover:bg-primary px-2 py-0.5 rounded-pill transition-colors"
           >
             Auto-generate
           </button>
@@ -516,6 +582,7 @@ export default function EventEditForm({
           Cancel
         </Button>
       </div>
+      </div>{/* end form fields */}
     </div>
   );
 }
