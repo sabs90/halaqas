@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { getServiceClient } from '@/lib/supabase';
 import { getEventTime } from '@/lib/prayer-times';
+import { parseDetailSummary } from '@/lib/parse-details';
 import { IslamicPattern } from '@/components/ui/IslamicPattern';
 import type { Event } from '@/lib/types';
 import type { Metadata } from 'next';
@@ -54,46 +55,22 @@ function getTimeSort(event: Event): number {
 async function getTahajjudEvents(): Promise<Event[]> {
   const supabase = getServiceClient();
   const today = new Date().toISOString().split('T')[0];
-  const { data } = await supabase
+  const { data, error } = await supabase
     .from('events')
-    .select('id, title, event_type, status, is_recurring, recurrence_pattern, last_confirmed_at, time_mode, prayer_anchor, prayer_offset_minutes, fixed_time, fixed_date, language, gender, speaker, is_kids, is_family, venue_name, venue_latitude, venue_longitude, description, mosque_id, mosque:mosques(id, name, suburb, nicknames, latitude, longitude, state)')
+    .select('id, title, event_type, status, is_recurring, recurrence_pattern, last_confirmed_at, time_mode, prayer_anchor, prayer_offset_minutes, fixed_time, fixed_date, language, gender, speaker, is_kids, is_family, venue_name, venue_latitude, venue_longitude, description, detail_summary, mosque_id, mosque:mosques(id, name, suburb, nicknames, latitude, longitude, state)')
     .eq('status', 'active')
     .eq('event_type', 'tahajjud')
     .or(`is_recurring.eq.true,fixed_date.is.null,fixed_date.gte.${today}`)
     .limit(50);
 
+  if (error) console.error('Tahajjud query error:', error);
   const events = (data || []) as unknown as Event[];
   events.sort((a, b) => getTimeSort(a) - getTimeSort(b));
   return events;
 }
 
-function parseTahajjudDetails(event: Event): string | null {
-  const desc = event.description;
-  if (!desc) return null;
-
-  const nuggets: string[] = [];
-
-  // Rak'at / rakat
-  const rakatMatch = desc.match(/(\d+)\s*(?:rak['\u2019]?at|raka['']?at|rakaat)/i);
-  if (rakatMatch) nuggets.push(`${rakatMatch[1]} rak'at`);
-
-  // Juz / ajza (handles fractions like 1½, 1.5, ½)
-  const juzMatch = desc.match(/([\d½¼¾]+(?:[.\s]?[\d½¼¾]*)?)\s*(?:juz|ajza|juz')/i);
-  if (juzMatch) nuggets.push(`${juzMatch[1].trim()} juz`);
-
-  // "Last 10 nights" or "every night" or "nightly"
-  const nightsMatch = desc.match(/(last\s+\d+\s+nights?|every\s+night|nightly|all\s+\d+\s+nights?)/i);
-  if (nightsMatch) nuggets.push(nightsMatch[1].toLowerCase());
-
-  // Time range like "12am–3am" or "11:30pm - 2:00am"
-  const timeRange = desc.match(/(\d{1,2}(?::\d{2})?\s*(?:am|pm)\s*[-–—to]+\s*\d{1,2}(?::\d{2})?\s*(?:am|pm))/i);
-  if (timeRange) nuggets.push(timeRange[1].replace(/\s+/g, ''));
-
-  // Khatm / completion of Quran
-  if (/khatm|complete.*quran|full.*quran/i.test(desc)) nuggets.push('khatm');
-
-  if (nuggets.length === 0) return null;
-  return nuggets.join(' · ');
+function getDetailSummary(event: Event): string | null {
+  return event.detail_summary || parseDetailSummary(event.description);
 }
 
 function groupByState(events: Event[]): { state: string; events: Event[] }[] {
@@ -163,7 +140,7 @@ export default async function TahajjudPage() {
                     ...stateEvents.map((event) => {
                       const mosqueName = event.mosque?.name || event.venue_name || 'Unknown';
                       const suburb = event.mosque?.suburb;
-                      const details = parseTahajjudDetails(event);
+                      const details = getDetailSummary(event);
                       const stripe = rowIndex++ % 2 === 0 ? 'bg-white' : 'bg-sand/30';
                       const href = `/events/${event.id}`;
                       return (

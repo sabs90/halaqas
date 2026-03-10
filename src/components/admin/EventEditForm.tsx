@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { DayPicker } from '@/components/ui/DayPicker';
 import { EVENT_TYPES, LANGUAGES, PRAYERS, RECURRENCE_PATTERNS, GENDER_OPTIONS } from '@/lib/event-constants';
+import { parseDetailSummary } from '@/lib/parse-details';
 import type { Mosque, EventType, Language, Gender, PrayerName } from '@/lib/types';
 
 export interface EventFormData {
@@ -25,6 +26,7 @@ export interface EventFormData {
   is_kids: boolean;
   is_family: boolean;
   description: string;
+  detail_summary: string;
 }
 
 interface EventEditFormProps {
@@ -63,6 +65,7 @@ export function eventToFormData(event: {
   is_kids: boolean;
   is_family: boolean;
   description: string | null;
+  detail_summary?: string | null;
 }): EventFormData {
   return {
     title: event.title || '',
@@ -85,6 +88,7 @@ export function eventToFormData(event: {
     is_kids: event.is_kids || false,
     is_family: event.is_family || false,
     description: event.description || '',
+    detail_summary: event.detail_summary || parseDetailSummary(event.description) || '',
   };
 }
 
@@ -110,6 +114,7 @@ export function formDataToPayload(form: EventFormData) {
     is_kids: form.is_kids,
     is_family: form.is_family,
     description: form.description || null,
+    detail_summary: form.detail_summary || null,
   };
 }
 
@@ -455,6 +460,28 @@ export default function EventEditForm({
           className={`${inputClass} resize-none`}
           rows={2}
         />
+      </div>
+
+      {/* Detail Summary (one-liner for compact tables) */}
+      <div>
+        <div className="flex items-center gap-2 mb-1">
+          <label className="block text-xs font-semibold text-charcoal">Detail Summary</label>
+          <button
+            type="button"
+            onClick={() => onChange({ detail_summary: parseDetailSummary(form.description) || '' })}
+            className="text-[10px] text-primary hover:text-primary-dark font-medium"
+          >
+            Auto-generate
+          </button>
+        </div>
+        <input
+          type="text"
+          value={form.detail_summary}
+          onChange={(e) => onChange({ detail_summary: e.target.value })}
+          placeholder="e.g. 20 rak'at · 1 juz · khatm"
+          className={inputClass}
+        />
+        <p className="text-[10px] text-stone mt-0.5">Shown in compact tables (tahajjud page, etc.)</p>
       </div>
 
       {/* Checkboxes */}

@@ -45,6 +45,7 @@ export interface Event {
   recurrence_pattern: string | null;
   recurrence_days: number[] | null;
   recurrence_end_date: string | null;
+  detail_summary: string | null;
   flyer_image_url: string | null;
   submitter_contact: string | null;
   is_kids: boolean;
