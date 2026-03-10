@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServiceClient } from '@/lib/supabase';
 import { isAdmin } from '@/lib/admin-auth';
+import { RAMADAN_END_DATE } from '@/lib/event-constants';
 
 export async function GET() {
   if (!(await isAdmin())) {
@@ -24,6 +25,10 @@ export async function PATCH(request: NextRequest) {
 
   const { id, ...updates } = await request.json();
   const supabase = getServiceClient();
+
+  if (updates.recurrence_pattern === 'daily_ramadan' && !updates.recurrence_end_date) {
+    updates.recurrence_end_date = RAMADAN_END_DATE;
+  }
 
   const { error } = await supabase.from('events').update(updates).eq('id', id);
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });

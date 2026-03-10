@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { getServiceClient } from '@/lib/supabase';
 import { trackServerEvent } from '@/lib/tracking-server';
 import { geocodeAddress } from '@/lib/geocoding';
+import { RAMADAN_END_DATE } from '@/lib/event-constants';
 
 export async function GET(request: NextRequest) {
   const supabase = getServiceClient();
@@ -104,7 +105,7 @@ export async function POST(request: NextRequest) {
       is_recurring: body.is_recurring || false,
       recurrence_pattern: body.recurrence_pattern || null,
       recurrence_days: body.recurrence_pattern === 'custom' && body.recurrence_days?.length > 0 ? body.recurrence_days : null,
-      recurrence_end_date: body.recurrence_end_date || null,
+      recurrence_end_date: body.recurrence_end_date || (body.recurrence_pattern === 'daily_ramadan' ? RAMADAN_END_DATE : null),
       flyer_image_url: body.flyer_image_url || null,
       is_kids: body.is_kids || false,
       is_family: body.is_family || false,

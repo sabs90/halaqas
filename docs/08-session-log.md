@@ -4,6 +4,30 @@ This file is the persistent memory between Claude Code sessions. Each entry summ
 
 ---
 
+## Session 42 — Auto-fill Ramadan End Date for Daily Ramadan Events (2026-03-10)
+
+### Completed
+- **RAMADAN_END_DATE constant** — added `2026-03-19` constant to `src/lib/event-constants.ts` for single-source-of-truth Ramadan end date
+- **Client-side auto-fill** — when user selects "Daily (Ramadan)" recurrence pattern in submit form, `recurrence_end_date` auto-fills to Ramadan end date (both manual selection and AI-parsed data)
+- **Server-side safety nets** — public event POST (`/api/events`) and admin PATCH (`/api/admin/events`) both default `recurrence_end_date` to Ramadan end date when `daily_ramadan` pattern is set without an explicit end date
+
+### Decisions Made
+- Auto-fill only sets end date if not already provided — respects explicit user/AI values
+- Safety net applied at both public and admin API layers for completeness
+
+### Issues / Bugs
+- None
+
+### Next Session
+1. Continue with remaining MVP tasks
+2. Consider Eid prayer times for Eid al-Fitr (approx 2026-03-20)
+3. Continue Facebook outreach for Ramadan events
+
+### Open Questions
+- None
+
+---
+
 ## Session 41 — Admin Event Editing UX & AI Description Generation (2026-03-10)
 
 ### Completed

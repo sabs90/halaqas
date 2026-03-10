@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/Button';
 import { DayPicker } from '@/components/ui/DayPicker';
 import { MosqueSearchSelect } from '@/components/ui/MosqueSearchSelect';
 import type { Mosque, EventType, Language, Gender, PrayerName, ParsedEventData } from '@/lib/types';
+import { RAMADAN_END_DATE } from '@/lib/event-constants';
 
 type Tab = 'image' | 'text' | 'manual';
 type Step = 'input' | 'confirm' | 'duplicate_warning' | 'success';
@@ -188,6 +189,8 @@ function SubmitPageContent() {
     }
     if (parsed.recurrence_end_date) {
       updates.recurrence_end_date = parsed.recurrence_end_date;
+    } else if (updates.recurrence_pattern === 'daily_ramadan') {
+      updates.recurrence_end_date = RAMADAN_END_DATE;
     }
     if (parsed.prayer_anchor) {
       updates.time_mode = 'prayer_anchored';
@@ -843,6 +846,7 @@ function SubmitPageContent() {
                 recurrence_pattern: e.target.value,
                 is_recurring: !!e.target.value,
                 recurrence_days: e.target.value === 'custom' ? form.recurrence_days : [],
+                recurrence_end_date: e.target.value === 'daily_ramadan' && !form.recurrence_end_date ? RAMADAN_END_DATE : form.recurrence_end_date,
               })}
               className="w-full text-sm rounded-button border border-sand-dark p-2.5 bg-white text-charcoal"
             >

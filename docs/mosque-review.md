@@ -32,7 +32,7 @@ Leave unchanged lines as-is.
 
 - [ ] **Australian Islamic House** (id: 05ac3335)
   - Name: Australian Islamic House
-  - Nicknames: AIH
+  - Nicknames: AIH, Masjid Al-Bayt Al-Islami
   - Address: 2094 Camden Valley Way, Edmondson Park NSW 2174
 
 - [X] **Bass Hill Mosque** (id: 15344431)

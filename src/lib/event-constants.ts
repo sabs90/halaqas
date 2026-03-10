@@ -1,5 +1,7 @@
 import type { EventType, Language, PrayerName } from './types';
 
+export const RAMADAN_END_DATE = '2026-03-19';
+
 export const EVENT_TYPES: { value: EventType; label: string }[] = [
   { value: 'talk', label: 'Talk' },
   { value: 'class', label: 'Class' },
