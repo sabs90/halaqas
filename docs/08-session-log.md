@@ -4,6 +4,34 @@ This file is the persistent memory between Claude Code sessions. Each entry summ
 
 ---
 
+## Session 41 — Admin Event Editing UX & AI Description Generation (2026-03-10)
+
+### Completed
+- **Editable detail_summary field** — new `detail_summary` column on events table (migration 020), auto-populated from description regex, editable by admin, used in tahajjud compact table with fallback to auto-parsing
+- **Shared parse-details lib** — extracted `parseDetailSummary()` to `src/lib/parse-details.ts`, improved regex to handle ajzaa, uppercase AM/PM, "to approximately" ranges, word numbers like "ten"
+- **Flyer sidebar layout** — when editing an event with a flyer, the image shows in a sticky sidebar on the right so admin can reference it while editing form fields
+- **AI description extraction** — new admin endpoint (`/api/admin/generate-description`) calls Groq LLM to extract a concise description from a flyer image, with "Extract from flyer" button in edit form
+- **Clickable event rows** — clicking anywhere on an event row in admin events page opens the edit form; removed redundant Edit button; Archive/Delete buttons use stopPropagation
+- **Auto-generate button styling** — detail summary auto-generate is now a visible pill button with alert feedback when no patterns found
+
+### Decisions Made
+- Used Groq (Llama 4 Scout) for description generation — same model as flyer parsing, focused prompt for description-only extraction
+- Flyer sidebar is sticky on lg+ screens, stacked on mobile
+- detail_summary stored in DB so admin edits persist; tahajjud page falls back to regex parsing if empty
+
+### Issues / Bugs
+- None
+
+### Next Session
+1. Continue with remaining MVP tasks
+2. Consider Eid prayer times for Eid al-Fitr (approx 2026-03-20)
+3. Continue Facebook outreach for Ramadan events
+
+### Open Questions
+- None
+
+---
+
 ## Session 40 — Searchable Mosque Selector, Admin Flyer Wiring & Tahajjud Details (2026-03-10)
 
 ### Completed
