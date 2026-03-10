@@ -4,6 +4,32 @@ This file is the persistent memory between Claude Code sessions. Each entry summ
 
 ---
 
+## Session 40 — Searchable Mosque Selector, Admin Flyer Wiring & Tahajjud Details (2026-03-10)
+
+### Completed
+- **Searchable mosque selector on submit page** — replaced plain `<select>` dropdown with custom searchable combobox (`src/components/ui/MosqueSearchSelect.tsx`) that groups mosques by state (NSW, VIC, QLD, etc.), allows searching by name/suburb/nickname, shows "Other venue (enter below)" at top, and "+ Mosque not listed? Suggest a new one" at bottom
+- **Admin event flyer management wired up** — connected `onFlyerChange` in admin events edit form so admins can upload a new flyer, replace an existing one, or remove a flyer (UI was already built in `EventEditForm`, just needed to be connected)
+- **Tahajjud table detail parsing** — added `parseTahajjudDetails()` regex parser that extracts key info (rak'at, juz, nights, time ranges, khatm) from event descriptions and displays them as terracotta-colored detail nuggets under mosque names in the compact table
+- **Tahajjud hero text update** — changed subtitle from "Find late-night tahajjud prayers..." to "Find qiyam prayers at mosques across Australia"
+
+### Decisions Made
+- Used regex-based parsing (not LLM) for tahajjud details — fast, free, runs at render time
+- Detail nuggets use terracotta (secondary) color in the compact table for visual distinction
+- Searchable mosque selector is a custom component (no external library dependency)
+
+### Issues / Bugs
+- None
+
+### Next Session
+1. Continue with any remaining MVP tasks
+2. Consider Eid prayer times for Eid al-Fitr (approx 2026-03-20)
+3. Continue Facebook outreach for Ramadan events
+
+### Open Questions
+- None
+
+---
+
 ## Session 39 — Custom Multi-Day Recurrence, Share Dropdown, Flyer Upload & Admin UX (2026-03-10)
 
 ### Completed

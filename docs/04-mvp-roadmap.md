@@ -43,7 +43,7 @@ The roadmap is split into three phases. Only Phase 1 needs to be complete before
 - [x] Groq API integration for AI parsing of flyer images (Llama 4 Scout, vision + JSON mode)
 - [x] Groq API integration for AI parsing of pasted text
 - [x] Editable confirmation screen: AI-extracted fields pre-filled, missing fields highlighted
-- [x] Mosque dropdown selector from database, plus "Other Venue" option with manual address
+- [x] Mosque dropdown selector from database, plus "Other Venue" option with manual address *(upgraded to searchable combobox with state grouping, name/suburb/nickname search, and "suggest new mosque" link in Session 40)*
 - [x] Prayer-anchored time selection (prayer + offset)
 - [x] Recurring event options (pattern selector)
 - [x] Image upload to Supabase Storage *(originally wired up in Session 9 with R2 fallback to data URLs; migrated to Supabase Storage in Session 29 — 73 events migrated from base64 to public URLs)*

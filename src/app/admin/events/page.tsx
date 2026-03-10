@@ -82,6 +82,8 @@ export default function AdminEventsPage() {
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<EventFormData | null>(null);
+  const [editFlyerUrl, setEditFlyerUrl] = useState<string | null>(null);
+  const [flyerChanged, setFlyerChanged] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [search, setSearch] = useState('');
@@ -108,12 +110,16 @@ export default function AdminEventsPage() {
   function startEdit(event: Event) {
     setEditingId(event.id);
     setEditForm(eventToFormData(event));
+    setEditFlyerUrl(event.flyer_image_url ?? null);
+    setFlyerChanged(false);
     setError('');
   }
 
   function cancelEdit() {
     setEditingId(null);
     setEditForm(null);
+    setEditFlyerUrl(null);
+    setFlyerChanged(false);
     setError('');
   }
 
@@ -122,10 +128,15 @@ export default function AdminEventsPage() {
     setSaving(true);
     setError('');
 
+    const payload: Record<string, unknown> = { id: editingId, ...formDataToPayload(editForm) };
+    if (flyerChanged) {
+      payload.flyer_image_url = editFlyerUrl;
+    }
+
     const res = await fetch('/api/admin/events', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: editingId, ...formDataToPayload(editForm) }),
+      body: JSON.stringify(payload),
     });
 
     if (res.ok) {
@@ -220,7 +231,8 @@ export default function AdminEventsPage() {
                 onCancel={cancelEdit}
                 saving={saving}
                 error={error}
-                flyerImageUrl={event.flyer_image_url}
+                flyerImageUrl={editFlyerUrl}
+                onFlyerChange={(url) => { setEditFlyerUrl(url); setFlyerChanged(true); }}
               />
             ) : (
               <div>

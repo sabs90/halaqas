@@ -4,6 +4,7 @@ import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
 import { DayPicker } from '@/components/ui/DayPicker';
+import { MosqueSearchSelect } from '@/components/ui/MosqueSearchSelect';
 import type { Mosque, EventType, Language, Gender, PrayerName, ParsedEventData } from '@/lib/types';
 
 type Tab = 'image' | 'text' | 'manual';
@@ -622,10 +623,10 @@ function SubmitPageContent() {
           {/* Mosque / Venue */}
           <div>
             <label className="block text-sm font-semibold text-charcoal mb-1">Mosque / Venue *</label>
-            <select
+            <MosqueSearchSelect
+              mosques={mosques}
               value={form.mosque_id}
-              onChange={(e) => {
-                const newMosqueId = e.target.value;
+              onChange={(newMosqueId) => {
                 const previousVenue = form.venue_name.trim();
                 updateForm({ mosque_id: newMosqueId, venue_name: '', venue_address: '', venue_latitude: null, venue_longitude: null });
                 setNearbyMosques([]);
@@ -643,13 +644,10 @@ function SubmitPageContent() {
                   }
                 }
               }}
-              className="w-full text-sm rounded-button border border-sand-dark p-2.5 bg-white text-charcoal"
-            >
-              <option value="">Other venue (enter below)</option>
-              {mosques.map(m => (
-                <option key={m.id} value={m.id}>{m.name}</option>
-              ))}
-            </select>
+              onSuggestNew={() => {
+                // Focus will move to venue name input when it renders
+              }}
+            />
             {!form.mosque_id && (
               <div className="mt-2 space-y-2">
                 <input
