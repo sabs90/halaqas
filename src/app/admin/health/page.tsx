@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/Button';
 import EventEditForm, { eventToFormData, formDataToPayload } from '@/components/admin/EventEditForm';
 import type { EventFormData } from '@/components/admin/EventEditForm';
 import type { Mosque as FullMosque } from '@/lib/types';
+import { formatRecurrenceLabel } from '@/lib/recurrence';
 import Link from 'next/link';
 
 interface OrphanedEvent {
@@ -38,6 +39,7 @@ interface DupeEvent {
   prayer_offset_minutes: number | null;
   is_recurring: boolean;
   recurrence_pattern: string | null;
+  recurrence_days: number[] | null;
   recurrence_end_date: string | null;
   speaker: string | null;
   description: string | null;
@@ -107,6 +109,7 @@ export default function HealthPage() {
   // Dupe event editing: tracks which event is being edited and which will be deleted
   const [dupeEdit, setDupeEdit] = useState<{ pairIndex: number; editKey: 'event_a' | 'event_b'; deleteKey: 'event_a' | 'event_b' } | null>(null);
   const [dupeEditForm, setDupeEditForm] = useState<EventFormData | null>(null);
+  const [dupeEditFlyerUrl, setDupeEditFlyerUrl] = useState<string | null>(null);
   const [dupeEditSaving, setDupeEditSaving] = useState(false);
   const [dupeEditError, setDupeEditError] = useState('');
 
@@ -165,12 +168,14 @@ export default function HealthPage() {
     const evt = data!.possible_dupe_events[pairIndex][editKey];
     setDupeEdit({ pairIndex, editKey, deleteKey });
     setDupeEditForm(eventToFormData(evt as Parameters<typeof eventToFormData>[0]));
+    setDupeEditFlyerUrl(evt.flyer_image_url);
     setDupeEditError('');
   }
 
   function cancelDupeEdit() {
     setDupeEdit(null);
     setDupeEditForm(null);
+    setDupeEditFlyerUrl(null);
     setDupeEditError('');
   }
 
@@ -187,7 +192,7 @@ export default function HealthPage() {
     const patchRes = await fetch('/api/admin/events', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: keepId, ...formDataToPayload(dupeEditForm) }),
+      body: JSON.stringify({ id: keepId, ...formDataToPayload(dupeEditForm), flyer_image_url: dupeEditFlyerUrl }),
     });
 
     if (!patchRes.ok) {
@@ -365,7 +370,8 @@ export default function HealthPage() {
                     saving={dupeEditSaving}
                     error={dupeEditError}
                     saveLabel="Save & Delete Other"
-                    flyerImageUrl={pair[dupeEdit.editKey].flyer_image_url}
+                    flyerImageUrl={dupeEditFlyerUrl}
+                    onFlyerChange={setDupeEditFlyerUrl}
                   />
                 </div>
               );
@@ -394,7 +400,7 @@ export default function HealthPage() {
                             {evt.time_mode === 'prayer_anchored' && evt.prayer_anchor ? ` · ${evt.prayer_offset_minutes ?? 0} min after ${evt.prayer_anchor}` : ''}
                           </p>
                           {evt.is_recurring && evt.recurrence_pattern && (
-                            <p>{evt.recurrence_pattern.replace(/_/g, ' ')}{evt.recurrence_end_date ? ` until ${evt.recurrence_end_date}` : ''}</p>
+                            <p>{formatRecurrenceLabel(evt.recurrence_pattern, evt.recurrence_days)}{evt.recurrence_end_date ? ` until ${evt.recurrence_end_date}` : ''}</p>
                           )}
                           {evt.speaker && <p>Speaker: {evt.speaker}</p>}
                           <p className="text-stone">Added {new Date(evt.created_at).toLocaleDateString('en-AU')}</p>

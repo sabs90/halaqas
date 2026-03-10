@@ -1,5 +1,6 @@
 import type { Event, Mosque } from './types';
 import { getEventTime } from './prayer-times';
+import { getRecurrenceRule, getStartDateForPattern } from './recurrence';
 
 const VTIMEZONE = [
   'BEGIN:VTIMEZONE',
@@ -75,40 +76,6 @@ function nextDay(dateStr: string): string {
   return `${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}`;
 }
 
-function getRecurrenceRule(pattern: string): string | null {
-  const rules: Record<string, string> = {
-    'every_monday': 'FREQ=WEEKLY;BYDAY=MO',
-    'every_tuesday': 'FREQ=WEEKLY;BYDAY=TU',
-    'every_wednesday': 'FREQ=WEEKLY;BYDAY=WE',
-    'every_thursday': 'FREQ=WEEKLY;BYDAY=TH',
-    'every_friday': 'FREQ=WEEKLY;BYDAY=FR',
-    'every_saturday': 'FREQ=WEEKLY;BYDAY=SA',
-    'every_sunday': 'FREQ=WEEKLY;BYDAY=SU',
-    'daily': 'FREQ=DAILY',
-    'daily_ramadan': 'FREQ=DAILY',
-    'weekly': 'FREQ=WEEKLY',
-    'fortnightly': 'FREQ=WEEKLY;INTERVAL=2',
-    'monthly': 'FREQ=MONTHLY',
-  };
-  return rules[pattern] || null;
-}
-
-/** For recurring events with no fixed_date, pick a start date that falls on the correct day of the week */
-function getStartDateForPattern(pattern: string): Date {
-  const dayMap: Record<string, number> = {
-    every_sunday: 0, every_monday: 1, every_tuesday: 2, every_wednesday: 3,
-    every_thursday: 4, every_friday: 5, every_saturday: 6,
-  };
-  const targetDay = dayMap[pattern];
-  const now = new Date();
-  if (targetDay !== undefined) {
-    const currentDay = now.getDay();
-    const diff = (targetDay - currentDay + 7) % 7;
-    now.setDate(now.getDate() + diff);
-  }
-  return now;
-}
-
 export function generateICS(events: Event[], mosque: Mosque): string {
   const lines: string[] = [
     'BEGIN:VCALENDAR',
@@ -131,7 +98,7 @@ export function generateICS(events: Event[], mosque: Mosque): string {
     if (event.fixed_date) {
       refDate = new Date(event.fixed_date + 'T12:00:00');
     } else if (event.is_recurring && event.recurrence_pattern) {
-      refDate = getStartDateForPattern(event.recurrence_pattern);
+      refDate = getStartDateForPattern(event.recurrence_pattern, event.recurrence_days);
     } else {
       refDate = new Date();
     }
@@ -180,7 +147,7 @@ export function generateICS(events: Event[], mosque: Mosque): string {
     lines.push(`URL:${process.env.NEXT_PUBLIC_SITE_URL || 'https://halaqas.com'}/events/${event.id}`);
 
     if (event.is_recurring && event.recurrence_pattern) {
-      const rrule = getRecurrenceRule(event.recurrence_pattern);
+      const rrule = getRecurrenceRule(event.recurrence_pattern, event.recurrence_days);
       if (rrule) {
         let rule = rrule;
         if (event.recurrence_end_date) {

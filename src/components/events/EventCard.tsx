@@ -5,25 +5,7 @@ import Link from 'next/link';
 import type { Event } from '@/lib/types';
 import { EventTypeTag, AudienceTag } from './EventTypeTag';
 import { getEventTime, formatPrayerTime } from '@/lib/prayer-times';
-
-function formatRecurrence(pattern: string | null): string | null {
-  if (!pattern) return null;
-  const labels: Record<string, string> = {
-    'every_monday': 'Every Monday',
-    'every_tuesday': 'Every Tuesday',
-    'every_wednesday': 'Every Wednesday',
-    'every_thursday': 'Every Thursday',
-    'every_friday': 'Every Friday',
-    'every_saturday': 'Every Saturday',
-    'every_sunday': 'Every Sunday',
-    'daily': 'Daily',
-    'daily_ramadan': 'Daily (Ramadan)',
-    'weekly': 'Weekly',
-    'fortnightly': 'Fortnightly',
-    'monthly': 'Monthly',
-  };
-  return labels[pattern] || pattern;
-}
+import { formatRecurrenceLabel } from '@/lib/recurrence';
 
 function getTimeDisplay(event: Event): string {
   if (event.time_mode === 'prayer_anchored' && event.prayer_anchor) {
@@ -60,7 +42,7 @@ export const EventCard = memo(function EventCard({ event }: EventCardProps) {
       new Date().getTime() - new Date(event.last_confirmed_at).getTime() > 90 * 24 * 60 * 60 * 1000);
 
   const mosqueName = event.mosque?.name || event.venue_name || 'Unknown venue';
-  const recurrenceLabel = event.is_recurring ? formatRecurrence(event.recurrence_pattern) : null;
+  const recurrenceLabel = event.is_recurring ? formatRecurrenceLabel(event.recurrence_pattern, event.recurrence_days) : null;
   const dateStr = getDateDisplay(event);
 
   return (

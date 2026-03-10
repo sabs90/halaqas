@@ -26,6 +26,8 @@ export default function ManageMosquesPage() {
     loadMosques();
     // Check for ?create=name&link_event=id query params
     const params = new URLSearchParams(window.location.search);
+    const qParam = params.get('q');
+    if (qParam) setSearch(qParam);
     const createName = params.get('create');
     const eventId = params.get('link_event');
     if (createName) {

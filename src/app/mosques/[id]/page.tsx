@@ -3,6 +3,7 @@ import { getServiceClient } from '@/lib/supabase';
 import { trackServerEvent } from '@/lib/tracking-server';
 import { EventCard } from '@/components/events/EventCard';
 import { Button } from '@/components/ui/Button';
+import { ShareButton } from '@/components/ui/ShareButton';
 import { SubscribeCalendarButton } from './SubscribeCalendarButton';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
@@ -55,6 +56,8 @@ export default async function MosqueDetailPage({ params }: Props) {
   void trackServerEvent('mosque_view', { mosque_id: id });
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || 'https://halaqas.com';
   const icsHttpUrl = `${siteUrl}/api/mosques/${id}/calendar.ics`;
+  const mosqueUrl = `${siteUrl}/mosques/${id}`;
+  const mosqueShareText = `Check out upcoming events at ${mosque.name} on Halaqas`;
 
   return (
     <div className="space-y-6">
@@ -98,6 +101,7 @@ export default async function MosqueDetailPage({ params }: Props) {
 
         <div className="mt-4 flex flex-wrap gap-3">
           <SubscribeCalendarButton mosqueName={mosque.name} mosqueId={mosque.id} icsHttpUrl={icsHttpUrl} />
+          <ShareButton url={mosqueUrl} text={mosqueShareText} trackingContext={{ mosque_id: mosque.id }} />
           <Button variant="outline" href={`/submit?mosque=${mosque.id}`}>
             <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="12" y1="5" x2="12" y2="19" /><line x1="5" y1="12" x2="19" y2="12" />
@@ -127,6 +131,13 @@ export default async function MosqueDetailPage({ params }: Props) {
           </div>
         )}
       </section>
+
+      <Link
+        href={`/admin/mosques/manage?q=${encodeURIComponent(mosque.name)}`}
+        className="block text-[11px] text-sand-dark hover:text-stone transition-colors text-right"
+      >
+        admin
+      </Link>
     </div>
   );
 }

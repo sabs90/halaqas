@@ -103,7 +103,8 @@
 | prayer_anchor | enum | fajr, dhuhr, asr, maghrib, isha (nullable) |
 | prayer_offset_minutes | integer | Minutes after prayer (e.g. 15) |
 | is_recurring | boolean | |
-| recurrence_pattern | text | e.g. "every_thursday", "every_friday", "daily_ramadan" |
+| recurrence_pattern | text | e.g. "every_thursday", "every_friday", "daily_ramadan", "custom" |
+| recurrence_days | integer[] | For custom pattern: array of JS getDay() values (0=Sun, 6=Sat). CHECK constraint: values 0–6, non-empty if present |
 | recurrence_end_date | date | Optional explicit end date |
 | flyer_image_url | text | URL to stored flyer in Supabase Storage |
 | is_kids | boolean | Default false, true if event targets kids/children |
@@ -197,6 +198,7 @@ RLS: public read, no public write. Admin writes via service role.
 | `/api/admin/mosques/outreach` | GET | All mosques with event counts, latest event date, last_checked_at (protected) |
 | `/api/admin/mosques/outreach` | POST | Mark a mosque as checked (sets last_checked_at to now) (protected) |
 | `/api/admin/counts` | GET | Pending counts for dashboard badges: submissions, amendments, suggestions, health (protected) |
+| `/api/admin/upload-flyer` | POST | Upload flyer image to Supabase Storage, returns URL (protected) |
 | `/api/admin/settings/featured-event` | GET/POST | Read/update featured event config (protected) |
 | `/api/settings/featured-event` | GET | Public read of featured event config (for Header nav link) |
 | `/api/analytics` | POST | Public fire-and-forget analytics event insert (allowlisted event names) |

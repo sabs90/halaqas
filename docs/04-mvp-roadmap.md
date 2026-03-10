@@ -60,7 +60,7 @@ The roadmap is split into three phases. Only Phase 1 needs to be complete before
 - [x] Map view with Leaflet + OpenStreetMap showing mosques with events — *merged into mosques page in Session 2*
 - [x] Click mosque pin → see upcoming events
 - [x] Geolocation "near me" option
-- [x] WhatsApp share button on each event with Open Graph meta tags for rich preview
+- [x] ~~WhatsApp share button~~ Share dropdown (WhatsApp, Facebook, Copy URL) on each event + mosque page, with Open Graph meta tags for rich preview
 - [x] Source flyer image displayed on event detail page — *wired up end-to-end in Session 9 (was previously always null)*
 - [x] "Add to Calendar" button on individual event detail pages with RRULE for recurring events — *added in Session 2, upgraded to dropdown with .ics/Google Cal/Outlook in Session 6*
 

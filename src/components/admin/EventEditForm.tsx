@@ -1,4 +1,6 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
+import { DayPicker } from '@/components/ui/DayPicker';
 import { EVENT_TYPES, LANGUAGES, PRAYERS, RECURRENCE_PATTERNS, GENDER_OPTIONS } from '@/lib/event-constants';
 import type { Mosque, EventType, Language, Gender, PrayerName } from '@/lib/types';
 
@@ -18,6 +20,7 @@ export interface EventFormData {
   prayer_offset_minutes: number;
   is_recurring: boolean;
   recurrence_pattern: string;
+  recurrence_days: number[];
   recurrence_end_date: string;
   is_kids: boolean;
   is_family: boolean;
@@ -34,6 +37,7 @@ interface EventEditFormProps {
   error: string;
   saveLabel?: string;
   flyerImageUrl?: string | null;
+  onFlyerChange?: (url: string | null) => void;
 }
 
 const inputClass = 'w-full text-sm rounded-button border border-sand-dark p-2.5 bg-white text-charcoal';
@@ -54,6 +58,7 @@ export function eventToFormData(event: {
   prayer_offset_minutes: number | null;
   is_recurring: boolean;
   recurrence_pattern: string | null;
+  recurrence_days?: number[] | null;
   recurrence_end_date: string | null;
   is_kids: boolean;
   is_family: boolean;
@@ -75,6 +80,7 @@ export function eventToFormData(event: {
     prayer_offset_minutes: event.prayer_offset_minutes ?? 15,
     is_recurring: event.is_recurring || false,
     recurrence_pattern: event.recurrence_pattern || '',
+    recurrence_days: event.recurrence_days || [],
     recurrence_end_date: event.recurrence_end_date || '',
     is_kids: event.is_kids || false,
     is_family: event.is_family || false,
@@ -99,6 +105,7 @@ export function formDataToPayload(form: EventFormData) {
     prayer_offset_minutes: form.time_mode === 'prayer_anchored' ? form.prayer_offset_minutes : null,
     is_recurring: form.is_recurring || !!form.recurrence_pattern,
     recurrence_pattern: form.recurrence_pattern || null,
+    recurrence_days: form.recurrence_pattern === 'custom' && form.recurrence_days.length > 0 ? form.recurrence_days : null,
     recurrence_end_date: form.recurrence_end_date || null,
     is_kids: form.is_kids,
     is_family: form.is_family,
@@ -116,25 +123,99 @@ export default function EventEditForm({
   error,
   saveLabel = 'Save',
   flyerImageUrl,
+  onFlyerChange,
 }: EventEditFormProps) {
+  const [uploading, setUploading] = useState(false);
+  const [dragging, setDragging] = useState(false);
+
+  async function uploadFile(file: File) {
+    if (!onFlyerChange) return;
+    setUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append('image', file);
+      const res = await fetch('/api/admin/upload-flyer', { method: 'POST', body: formData });
+      if (!res.ok) throw new Error('Upload failed');
+      const { url } = await res.json();
+      onFlyerChange(url);
+    } catch {
+      // silently fail — user can retry
+    } finally {
+      setUploading(false);
+    }
+  }
+
+  function handleFlyerUpload(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (file) uploadFile(file);
+    e.target.value = '';
+  }
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setDragging(false);
+    const file = e.dataTransfer.files?.[0];
+    if (file && file.type.startsWith('image/')) uploadFile(file);
+  }
+
   return (
     <div className="space-y-3">
-      {/* Flyer Preview */}
-      {flyerImageUrl && (
+      {/* Flyer Image */}
+      {onFlyerChange ? (
+        <div className="space-y-2">
+          <label className="block text-xs font-semibold text-charcoal">Flyer Image</label>
+          {flyerImageUrl ? (
+            <div
+              onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+              onDragLeave={() => setDragging(false)}
+              onDrop={handleDrop}
+              className={`relative border rounded-card overflow-hidden transition-colors ${dragging ? 'border-primary border-2' : 'border-sand-dark'}`}
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={flyerImageUrl} alt="Event flyer" className="w-full max-h-48 object-contain bg-sand/20" />
+              <div className="flex gap-2 p-2 bg-sand/30">
+                <label className="text-xs text-primary hover:text-primary-dark font-medium cursor-pointer">
+                  Replace
+                  <input type="file" accept="image/*" className="hidden" onChange={handleFlyerUpload} disabled={uploading} />
+                </label>
+                <button
+                  type="button"
+                  onClick={() => onFlyerChange(null)}
+                  className="text-xs text-secondary hover:text-secondary-dark font-medium"
+                >
+                  Remove
+                </button>
+                {uploading && <span className="text-xs text-warm-gray animate-pulse">Uploading...</span>}
+              </div>
+            </div>
+          ) : (
+            <label
+              onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+              onDragLeave={() => setDragging(false)}
+              onDrop={handleDrop}
+              className={`flex items-center justify-center gap-2 border-2 border-dashed rounded-card p-4 cursor-pointer transition-colors ${
+                dragging ? 'border-primary bg-primary/[0.04]' : 'border-sand-dark hover:border-primary'
+              } ${uploading ? 'opacity-60' : ''}`}
+            >
+              <svg className="w-4 h-4 text-stone" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+              <span className="text-xs text-warm-gray">{uploading ? 'Uploading...' : 'Drop image or click to upload'}</span>
+              <input type="file" accept="image/*" className="hidden" onChange={handleFlyerUpload} disabled={uploading} />
+            </label>
+          )}
+        </div>
+      ) : flyerImageUrl ? (
         <details className="border border-sand-dark rounded-card overflow-hidden">
           <summary className="px-4 py-2.5 text-xs font-semibold text-charcoal cursor-pointer bg-sand/30 hover:bg-sand/50 transition-colors">
             View original flyer
           </summary>
           <div className="p-3 bg-white">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={flyerImageUrl}
-              alt="Event flyer"
-              className="w-full rounded-button"
-            />
+            <img src={flyerImageUrl} alt="Event flyer" className="w-full rounded-button" />
           </div>
         </details>
-      )}
+      ) : null}
 
       {/* Title */}
       <div>
@@ -308,11 +389,20 @@ export default function EventEditForm({
             onChange={(e) => onChange({
               recurrence_pattern: e.target.value,
               is_recurring: !!e.target.value,
+              recurrence_days: e.target.value === 'custom' ? form.recurrence_days : [],
             })}
             className={inputClass}
           >
             {RECURRENCE_PATTERNS.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
           </select>
+          {form.recurrence_pattern === 'custom' && (
+            <div className="mt-2">
+              <DayPicker
+                selected={form.recurrence_days}
+                onChange={(days) => onChange({ recurrence_days: days })}
+              />
+            </div>
+          )}
         </div>
 
         {/* Recurrence end date */}

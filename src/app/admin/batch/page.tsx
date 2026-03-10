@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/Button';
 import type { Mosque, EventType, Language, Gender, PrayerName, ParsedEventData } from '@/lib/types';
 import { EVENT_TYPES, LANGUAGES, PRAYERS, RECURRENCE_PATTERNS } from '@/lib/event-constants';
+import { DayPicker } from '@/components/ui/DayPicker';
 
 type Step = 'upload' | 'review' | 'submit';
 
@@ -34,6 +35,7 @@ interface BatchEvent {
   prayer_offset_minutes: number;
   is_recurring: boolean;
   recurrence_pattern: string;
+  recurrence_days: number[];
   recurrence_end_date: string;
   is_kids: boolean;
   is_family: boolean;
@@ -118,6 +120,7 @@ function parsedToEvent(parsed: ParsedEventData, flyerIndex: number, flyerUrl: st
     prayer_offset_minutes: parsePrayerOffset(parsed.prayer_offset),
     is_recurring: parsed.is_recurring || false,
     recurrence_pattern: parsed.recurrence_pattern || '',
+    recurrence_days: parsed.recurrence_days || [],
     recurrence_end_date: parsed.recurrence_end_date || '',
     is_kids: parsed.is_kids || false,
     is_family: parsed.is_family || false,
@@ -295,11 +298,22 @@ function EventCard({
               onChange={(e) => onUpdate(event.id, {
                 recurrence_pattern: e.target.value,
                 is_recurring: !!e.target.value,
+                recurrence_days: e.target.value === 'custom' ? event.recurrence_days : [],
               })}
               className={inputClass}
             >
               {RECURRENCE_PATTERNS.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
             </select>
+
+            {/* Day picker for custom recurrence */}
+            {event.recurrence_pattern === 'custom' && (
+              <div className="col-span-full">
+                <DayPicker
+                  selected={event.recurrence_days}
+                  onChange={(days) => onUpdate(event.id, { recurrence_days: days })}
+                />
+              </div>
+            )}
 
             {/* Recurrence end date (only if recurring) */}
             {event.recurrence_pattern && (
@@ -468,6 +482,7 @@ export default function BatchPage() {
             prayer_offset_minutes: ev.prayer_offset_minutes,
             is_recurring: ev.is_recurring || !!ev.recurrence_pattern,
             recurrence_pattern: ev.recurrence_pattern || null,
+            recurrence_days: ev.recurrence_pattern === 'custom' && ev.recurrence_days.length > 0 ? ev.recurrence_days : null,
             recurrence_end_date: ev.recurrence_end_date || null,
             is_kids: ev.is_kids || false,
             is_family: ev.is_family || false,
@@ -533,6 +548,7 @@ export default function BatchPage() {
             prayer_offset_minutes: ev.prayer_offset_minutes,
             is_recurring: ev.is_recurring || !!ev.recurrence_pattern,
             recurrence_pattern: ev.recurrence_pattern || null,
+            recurrence_days: ev.recurrence_pattern === 'custom' && ev.recurrence_days.length > 0 ? ev.recurrence_days : null,
             recurrence_end_date: ev.recurrence_end_date || null,
             is_kids: ev.is_kids || false,
             is_family: ev.is_family || false,

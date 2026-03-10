@@ -63,6 +63,8 @@ export async function POST(request: NextRequest) {
       latitude: overrides?.latitude ?? suggestion.latitude ?? 0,
       longitude: overrides?.longitude ?? suggestion.longitude ?? 0,
       nicknames: overrides?.nicknames || [],
+      facebook_url: overrides?.facebook_url || null,
+      website_url: overrides?.website_url || null,
       active: true,
     };
 

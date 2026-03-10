@@ -30,7 +30,7 @@ export async function POST(
       const details = amendment.new_details as Record<string, unknown>;
       // Only apply known fields
       const allowedFields = ['title', 'description', 'speaker', 'event_type', 'language', 'gender',
-        'fixed_date', 'fixed_time', 'prayer_anchor', 'prayer_offset_minutes', 'is_recurring', 'recurrence_pattern'];
+        'fixed_date', 'fixed_time', 'prayer_anchor', 'prayer_offset_minutes', 'is_recurring', 'recurrence_pattern', 'recurrence_days'];
       for (const field of allowedFields) {
         if (field in details) updates[field] = details[field];
       }

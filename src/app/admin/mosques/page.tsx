@@ -15,6 +15,8 @@ interface EditableSuggestion {
   latitude: string;
   longitude: string;
   nicknames: string;
+  facebook_url: string;
+  website_url: string;
 }
 
 export default function AdminMosquesPage() {
@@ -22,7 +24,7 @@ export default function AdminMosquesPage() {
   const [loading, setLoading] = useState(true);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<EditableSuggestion>({
-    name: '', address: '', suburb: '', state: 'NSW', latitude: '', longitude: '', nicknames: '',
+    name: '', address: '', suburb: '', state: 'NSW', latitude: '', longitude: '', nicknames: '', facebook_url: '', website_url: '',
   });
   const [actionLoading, setActionLoading] = useState<string | null>(null);
   const [geocoding, setGeocoding] = useState(false);
@@ -48,6 +50,8 @@ export default function AdminMosquesPage() {
       latitude: s.latitude != null ? String(s.latitude) : '',
       longitude: s.longitude != null ? String(s.longitude) : '',
       nicknames: '',
+      facebook_url: '',
+      website_url: '',
     });
   }
 
@@ -107,6 +111,8 @@ export default function AdminMosquesPage() {
         nicknames: editForm.nicknames.trim()
           ? editForm.nicknames.split(',').map(n => n.trim()).filter(Boolean)
           : [],
+        facebook_url: editForm.facebook_url.trim() || null,
+        website_url: editForm.website_url.trim() || null,
       };
     }
 
@@ -287,6 +293,29 @@ export default function AdminMosquesPage() {
                         value={editForm.nicknames}
                         onChange={e => setEditForm(f => ({ ...f, nicknames: e.target.value }))}
                       />
+                    </div>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      <div>
+                        <label className="block text-xs font-medium text-charcoal mb-1">Facebook URL</label>
+                        <input
+                          type="url"
+                          className={inputClass}
+                          placeholder="https://facebook.com/mosquepage"
+                          value={editForm.facebook_url}
+                          onChange={e => setEditForm(f => ({ ...f, facebook_url: e.target.value }))}
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-xs font-medium text-charcoal mb-1">Website URL</label>
+                        <input
+                          type="url"
+                          className={inputClass}
+                          placeholder="https://mosque.org.au"
+                          value={editForm.website_url}
+                          onChange={e => setEditForm(f => ({ ...f, website_url: e.target.value }))}
+                        />
+                      </div>
                     </div>
 
                     <div className="flex gap-2 pt-2">

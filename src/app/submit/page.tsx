@@ -3,6 +3,7 @@
 import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { Button } from '@/components/ui/Button';
+import { DayPicker } from '@/components/ui/DayPicker';
 import type { Mosque, EventType, Language, Gender, PrayerName, ParsedEventData } from '@/lib/types';
 
 type Tab = 'image' | 'text' | 'manual';
@@ -57,6 +58,7 @@ const RECURRENCE_PATTERNS = [
   { value: 'weekly', label: 'Weekly' },
   { value: 'fortnightly', label: 'Fortnightly' },
   { value: 'monthly', label: 'Monthly' },
+  { value: 'custom', label: 'Custom days' },
 ];
 
 interface FormData {
@@ -77,6 +79,7 @@ interface FormData {
   prayer_offset_minutes: number;
   is_recurring: boolean;
   recurrence_pattern: string;
+  recurrence_days: number[];
   recurrence_end_date: string;
   description: string;
   is_kids: boolean;
@@ -103,6 +106,7 @@ const INITIAL_FORM: FormData = {
   prayer_offset_minutes: 15,
   is_recurring: false,
   recurrence_pattern: '',
+  recurrence_days: [],
   recurrence_end_date: '',
   is_kids: false,
   is_family: false,
@@ -177,6 +181,9 @@ function SubmitPageContent() {
     if (parsed.is_recurring) updates.is_recurring = true;
     if (parsed.recurrence_pattern) {
       updates.recurrence_pattern = parsed.recurrence_pattern;
+    }
+    if (parsed.recurrence_days && parsed.recurrence_days.length > 0) {
+      updates.recurrence_days = parsed.recurrence_days;
     }
     if (parsed.recurrence_end_date) {
       updates.recurrence_end_date = parsed.recurrence_end_date;
@@ -357,6 +364,7 @@ function SubmitPageContent() {
           prayer_anchor: form.prayer_anchor || null,
           is_recurring: form.is_recurring || !!form.recurrence_pattern,
           recurrence_pattern: form.recurrence_pattern || null,
+          recurrence_days: form.recurrence_pattern === 'custom' && form.recurrence_days.length > 0 ? form.recurrence_days : null,
           force,
         }),
       });
@@ -833,11 +841,23 @@ function SubmitPageContent() {
             <label className="block text-sm font-semibold text-charcoal mb-1">Recurrence</label>
             <select
               value={form.recurrence_pattern}
-              onChange={(e) => updateForm({ recurrence_pattern: e.target.value, is_recurring: !!e.target.value })}
+              onChange={(e) => updateForm({
+                recurrence_pattern: e.target.value,
+                is_recurring: !!e.target.value,
+                recurrence_days: e.target.value === 'custom' ? form.recurrence_days : [],
+              })}
               className="w-full text-sm rounded-button border border-sand-dark p-2.5 bg-white text-charcoal"
             >
               {RECURRENCE_PATTERNS.map(r => <option key={r.value} value={r.value}>{r.label}</option>)}
             </select>
+            {form.recurrence_pattern === 'custom' && (
+              <div className="mt-2">
+                <DayPicker
+                  selected={form.recurrence_days}
+                  onChange={(days) => updateForm({ recurrence_days: days })}
+                />
+              </div>
+            )}
           </div>
 
           {/* Description */}

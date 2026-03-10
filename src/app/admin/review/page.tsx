@@ -6,6 +6,7 @@ import { EventTypeTag } from '@/components/events/EventTypeTag';
 import EventEditForm, { eventToFormData, formDataToPayload } from '@/components/admin/EventEditForm';
 import type { EventFormData } from '@/components/admin/EventEditForm';
 import type { Event, Mosque } from '@/lib/types';
+import { formatRecurrenceLabel } from '@/lib/recurrence';
 import Link from 'next/link';
 
 const GENDER_LABELS: Record<string, string> = {
@@ -31,6 +32,7 @@ export default function ReviewPage() {
   const [acting, setActing] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<EventFormData | null>(null);
+  const [editFlyerUrl, setEditFlyerUrl] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [editError, setEditError] = useState('');
   const [search, setSearch] = useState('');
@@ -53,12 +55,14 @@ export default function ReviewPage() {
   function startEdit(event: Event) {
     setEditingId(event.id);
     setEditForm(eventToFormData(event));
+    setEditFlyerUrl(event.flyer_image_url);
     setEditError('');
   }
 
   function cancelEdit() {
     setEditingId(null);
     setEditForm(null);
+    setEditFlyerUrl(null);
     setEditError('');
   }
 
@@ -67,11 +71,11 @@ export default function ReviewPage() {
     setSaving(true);
     setEditError('');
 
-    // 1. PATCH edits
+    // 1. PATCH edits (include flyer URL change)
     const patchRes = await fetch('/api/admin/events', {
       method: 'PATCH',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ id: editingId, ...formDataToPayload(editForm) }),
+      body: JSON.stringify({ id: editingId, ...formDataToPayload(editForm), flyer_image_url: editFlyerUrl }),
     });
 
     if (!patchRes.ok) {
@@ -133,9 +137,9 @@ export default function ReviewPage() {
 
   function formatRecurrence(event: Event) {
     if (!event.is_recurring || !event.recurrence_pattern) return null;
-    const label = event.recurrence_pattern.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    const label = formatRecurrenceLabel(event.recurrence_pattern, event.recurrence_days);
     const end = event.recurrence_end_date ? ` (until ${event.recurrence_end_date})` : '';
-    return label + end;
+    return (label || '') + end;
   }
 
   const filtered = events.filter(event => {
@@ -198,7 +202,8 @@ export default function ReviewPage() {
                   saving={saving}
                   error={editError}
                   saveLabel="Save & Approve"
-                  flyerImageUrl={event.flyer_image_url}
+                  flyerImageUrl={editFlyerUrl}
+                  onFlyerChange={setEditFlyerUrl}
                 />
               ) : (
                 <>

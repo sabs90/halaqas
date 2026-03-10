@@ -4,6 +4,38 @@ This file is the persistent memory between Claude Code sessions. Each entry summ
 
 ---
 
+## Session 39 — Custom Multi-Day Recurrence, Share Dropdown, Flyer Upload & Admin UX (2026-03-10)
+
+### Completed
+- **Custom multi-day recurrence** — new `recurrence_days INTEGER[]` column (migration 019), `custom` pattern type, shared `src/lib/recurrence.ts` utility consolidating duplicated logic from 6+ files (ics-generator, AddToCalendarButton, EventCard, event detail, admin review, admin health)
+- **DayPicker component** — toggle-pill day picker for selecting days (Sun–Sat), used in submit form, admin edit form, and batch page
+- **Share dropdown** — replaced WhatsApp-only share button with dropdown (`ShareButton.tsx`) offering WhatsApp, Facebook, Copy URL; added to both event detail and mosque detail pages
+- **Flyer upload/remove in admin** — new `/api/admin/upload-flyer` endpoint, drag & drop upload zone in EventEditForm, used in review and health pages
+- **Hidden admin links** — subtle `text-sand-dark` links on public event/mosque detail pages linking to admin edit pages with pre-filled search query
+- **Admin search pre-fill** — events admin and mosque manage pages read `q` URL param to pre-fill search on load
+- **Real event added** — Sisters Quran Reading Circle at UMMA Centre (Mon/Tue/Wed custom recurrence) via Supabase REST API
+- **Mosque admin improvements** (from before session) — facebook_url/website_url fields in mosque create/edit, duplicate event detection in admin events page
+
+### Decisions Made
+- `recurrence_days` uses JS `Date.getDay()` convention (0=Sun, 6=Sat) with PostgreSQL CHECK constraint
+- Shared recurrence utility replaces 6 separate local implementations — single source of truth for RRULE generation, display labels, and start date calculation
+- EventEditForm flyer management is opt-in via `onFlyerChange` prop — backward compatible with pages that don't need it
+- Hidden admin links use `text-[11px] text-sand-dark` — visible to admin but unobtrusive to public users
+
+### Issues / Bugs
+- Migration 019 must be run manually via Supabase SQL Editor (done during session)
+
+### Next Session
+1. Deploy and verify custom recurrence + share dropdown on production
+2. Review and approve Sisters Quran Reading Circle event
+3. Continue Facebook outreach for Ramadan events
+4. Consider Eid prayer times for Eid al-Fitr (approx 2026-03-20)
+
+### Open Questions
+- None
+
+---
+
 ## Session 38 — Tahajjud Page, Featured Event Admin & Shareable Table (2026-03-10)
 
 ### Completed

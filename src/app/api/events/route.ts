@@ -10,7 +10,7 @@ export async function GET(request: NextRequest) {
   const today = new Date().toISOString().split('T')[0];
   let query = supabase
     .from('events')
-    .select('id, title, event_type, status, is_recurring, recurrence_pattern, last_confirmed_at, time_mode, prayer_anchor, prayer_offset_minutes, fixed_time, fixed_date, language, gender, speaker, is_kids, is_family, venue_name, venue_latitude, venue_longitude, description, mosque_id, mosque:mosques(id, name, suburb, nicknames, latitude, longitude)')
+    .select('id, title, event_type, status, is_recurring, recurrence_pattern, recurrence_days, last_confirmed_at, time_mode, prayer_anchor, prayer_offset_minutes, fixed_time, fixed_date, language, gender, speaker, is_kids, is_family, venue_name, venue_latitude, venue_longitude, description, mosque_id, mosque:mosques(id, name, suburb, nicknames, latitude, longitude)')
     .eq('status', 'active')
     .or(`is_recurring.eq.true,fixed_date.is.null,fixed_date.gte.${today}`)
     .order('created_at', { ascending: false });
@@ -103,6 +103,7 @@ export async function POST(request: NextRequest) {
       prayer_offset_minutes: body.prayer_offset_minutes || 0,
       is_recurring: body.is_recurring || false,
       recurrence_pattern: body.recurrence_pattern || null,
+      recurrence_days: body.recurrence_pattern === 'custom' && body.recurrence_days?.length > 0 ? body.recurrence_days : null,
       recurrence_end_date: body.recurrence_end_date || null,
       flyer_image_url: body.flyer_image_url || null,
       is_kids: body.is_kids || false,

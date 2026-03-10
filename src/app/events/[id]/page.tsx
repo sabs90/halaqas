@@ -8,9 +8,10 @@ import Link from 'next/link';
 import Image from 'next/image';
 import type { Metadata } from 'next';
 import type { Event } from '@/lib/types';
+import { formatRecurrenceLabel } from '@/lib/recurrence';
 import { ReportButton } from './ReportButton';
 import { AddToCalendarButton } from './AddToCalendarButton';
-import { WhatsAppShareButton } from './WhatsAppShareButton';
+import { ShareButton } from '@/components/ui/ShareButton';
 
 export const revalidate = 300;
 
@@ -58,20 +59,6 @@ function getTimeDisplay(event: Event): string {
   return 'Time TBA';
 }
 
-const RECURRENCE_LABELS: Record<string, string> = {
-  'every_monday': 'Every Monday',
-  'every_tuesday': 'Every Tuesday',
-  'every_wednesday': 'Every Wednesday',
-  'every_thursday': 'Every Thursday',
-  'every_friday': 'Every Friday',
-  'every_saturday': 'Every Saturday',
-  'every_sunday': 'Every Sunday',
-  'daily': 'Daily',
-  'daily_ramadan': 'Daily (Ramadan)',
-  'weekly': 'Weekly',
-  'fortnightly': 'Fortnightly',
-  'monthly': 'Monthly',
-};
 
 export default async function EventDetailPage({ params }: Props) {
   const { id } = await params;
@@ -92,14 +79,13 @@ export default async function EventDetailPage({ params }: Props) {
     shareText += `\n📅 ${d.toLocaleDateString('en-AU', { weekday: 'long', day: 'numeric', month: 'long' })}`;
   }
   if (event.is_recurring && event.recurrence_pattern) {
-    shareText += `\n🔁 ${event.recurrence_pattern}`;
+    shareText += `\n🔁 ${formatRecurrenceLabel(event.recurrence_pattern, event.recurrence_days)}`;
   }
   if (event.gender === 'brothers') {
     shareText += `\n👥 Brothers only`;
   } else if (event.gender === 'sisters') {
     shareText += `\n👥 Sisters only`;
   }
-  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(`${shareText}\n\n${shareUrl}`)}`;
 
   return (
     <div className="max-w-2xl mx-auto space-y-6">
@@ -119,7 +105,7 @@ export default async function EventDetailPage({ params }: Props) {
           </div>
           {event.is_recurring && event.recurrence_pattern && (
             <span className="text-xs font-medium text-warm-gray">
-              {RECURRENCE_LABELS[event.recurrence_pattern] || event.recurrence_pattern}
+              {formatRecurrenceLabel(event.recurrence_pattern, event.recurrence_days)}
             </span>
           )}
         </div>
@@ -192,7 +178,7 @@ export default async function EventDetailPage({ params }: Props) {
 
         <div className="flex flex-wrap gap-3 pt-2">
           <AddToCalendarButton event={event} />
-          <WhatsAppShareButton url={whatsappUrl} eventId={event.id} mosqueId={event.mosque_id || undefined} />
+          <ShareButton url={shareUrl} text={shareText} trackingContext={{ event_id: event.id, mosque_id: event.mosque_id || undefined }} />
           <ReportButton eventId={event.id} />
         </div>
 
@@ -209,6 +195,13 @@ export default async function EventDetailPage({ params }: Props) {
           </div>
         )}
       </article>
+
+      <Link
+        href={`/admin/events?q=${encodeURIComponent(event.title)}`}
+        className="block text-[11px] text-sand-dark hover:text-stone transition-colors text-right"
+      >
+        admin
+      </Link>
     </div>
   );
 }

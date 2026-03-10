@@ -43,6 +43,7 @@ export interface Event {
   prayer_offset_minutes: number | null;
   is_recurring: boolean;
   recurrence_pattern: string | null;
+  recurrence_days: number[] | null;
   recurrence_end_date: string | null;
   flyer_image_url: string | null;
   submitter_contact: string | null;
@@ -83,6 +84,7 @@ export interface ParsedEventData {
   gender: Gender | null;
   is_recurring: boolean;
   recurrence_pattern: string | null;
+  recurrence_days: number[] | null;
   recurrence_end_date: string | null;
   description: string | null;
   venue_address: string | null;
