@@ -144,20 +144,20 @@ export default async function TahajjudPage() {
                       const stripe = rowIndex++ % 2 === 0 ? 'bg-white' : 'bg-sand/30';
                       const href = `/events/${event.id}`;
                       return (
-                        <tr key={event.id} className={`${stripe} hover:bg-primary/[0.04] transition-colors`}>
-                          <td className="pl-3 sm:pl-5 pr-2 sm:pr-3 py-1.5 sm:py-2">
-                            <Link href={href}>
+                        <tr key={event.id} className={`${stripe} hover:bg-primary/[0.04] transition-colors cursor-pointer`}>
+                          <td className="p-0">
+                            <Link href={href} className="block pl-3 sm:pl-5 pr-2 sm:pr-3 py-1.5 sm:py-2">
                               <span className="text-[11px] sm:text-[13px] font-semibold text-charcoal">{mosqueName}</span>
                               {details && (
                                 <span className="block text-[9px] sm:text-[11px] text-secondary leading-tight mt-0.5">{details}</span>
                               )}
                             </Link>
                           </td>
-                          <td className="px-2 sm:px-3 py-1.5 sm:py-2 text-[11px] sm:text-[13px] text-warm-gray whitespace-nowrap">
-                            <Link href={href}>{suburb}</Link>
+                          <td className="p-0">
+                            <Link href={href} className="block px-2 sm:px-3 py-1.5 sm:py-2 text-[11px] sm:text-[13px] text-warm-gray whitespace-nowrap">{suburb}</Link>
                           </td>
-                          <td className="pl-2 sm:pl-3 pr-3 sm:pr-5 py-1.5 sm:py-2 text-[11px] sm:text-[13px] font-bold text-primary text-right whitespace-nowrap">
-                            <Link href={href}>{getTimeDisplay(event)}</Link>
+                          <td className="p-0">
+                            <Link href={href} className="block pl-2 sm:pl-3 pr-3 sm:pr-5 py-1.5 sm:py-2 text-[11px] sm:text-[13px] font-bold text-primary text-right whitespace-nowrap">{getTimeDisplay(event)}</Link>
                           </td>
                         </tr>
                       );
