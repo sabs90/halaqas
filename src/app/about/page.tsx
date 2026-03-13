@@ -3,7 +3,7 @@ import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
   title: 'About',
-  description: 'About Halaqas — a free community project for the Sydney Muslim community.',
+  description: 'About Halaqas — a free community project for the Australian Muslim community.',
 };
 
 export default function AboutPage() {
@@ -14,7 +14,7 @@ export default function AboutPage() {
       <section className="space-y-4 text-[15px] text-warm-gray leading-relaxed">
         <p>
           <strong className="text-charcoal">Halaqas</strong> (حلقات — &quot;circles&quot; or &quot;gatherings&quot;) is a free,
-          community-powered website that collates Islamic events and programs across Sydney mosques
+          community-powered website that collates Islamic events and programs across Australian mosques
           into a single searchable directory with subscribable calendars.
         </p>
       </section>
@@ -22,10 +22,10 @@ export default function AboutPage() {
       <section className="bg-sand rounded-card p-6 space-y-3">
         <h2 className="text-xl font-bold text-charcoal">The Problem</h2>
         <p className="text-sm text-warm-gray leading-relaxed">
-          Event information across Sydney&apos;s mosques is fragmented. Talks, classes, Quran circles,
+          Event information across Australia&apos;s mosques is fragmented. Talks, classes, Quran circles,
           and community programs are announced through mosque-specific WhatsApp groups, occasional
           Facebook posts, and physical flyers. There is no single place to discover what&apos;s happening
-          across the city.
+          across the country.
         </p>
       </section>
 
@@ -64,7 +64,7 @@ export default function AboutPage() {
         <p className="text-sm text-warm-gray leading-relaxed">
           Halaqas is a not-for-profit community project. It costs essentially nothing to run
           (all infrastructure is on free tiers), has no ads, no user accounts, and no revenue model.
-          It exists purely to help Sydney&apos;s Muslim community connect with Islamic events and programs.
+          It exists purely to help Australia&apos;s Muslim community connect with Islamic events and programs.
         </p>
         <p className="text-sm text-warm-gray leading-relaxed">
           Anyone can submit events. If you spot an error, use the report button on any event to flag it.

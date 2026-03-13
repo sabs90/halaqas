@@ -4,6 +4,32 @@ This file is the persistent memory between Claude Code sessions. Each entry summ
 
 ---
 
+## Session 43 — Tahajjud Map + Sydney→Australia Rebranding (2026-03-14)
+
+### Completed
+- **Tahajjud page map** — added interactive Leaflet map section to `/tahajjud` showing all tahajjud locations with custom teal label markers displaying start times, pointed at mosque coordinates
+- **Section navigation** — added pill-style anchor links (Summary / Map / Details) below the hero for quick navigation between the three page sections
+- **New components** — `TahajjudMap.tsx` (custom divIcon labels with CSS arrow) and `TahajjudMapWrapper.tsx` (dynamic import, no SSR)
+- **Sydney→Australia rebranding** — updated about page, layout metadata/OpenGraph, footer, and Groq AI prompt to reference Australia instead of Sydney
+
+### Decisions Made
+- Used `L.divIcon` with CSS transform for map labels instead of Leaflet tooltips — cleaner appearance, label serves as the marker itself
+- Map defaults to Sydney zoom (not auto-fit-bounds) since most mosques are in Sydney
+- Kept popup on tap for full details (mosque name, suburb, link to event)
+
+### Issues / Bugs
+- None
+
+### Next Session
+1. Continue with remaining MVP tasks
+2. Consider Eid prayer times for Eid al-Fitr (approx 2026-03-20)
+3. Continue Facebook outreach for Ramadan events
+
+### Open Questions
+- None
+
+---
+
 ## Session 42 — Auto-fill Ramadan End Date for Daily Ramadan Events (2026-03-10)
 
 ### Completed

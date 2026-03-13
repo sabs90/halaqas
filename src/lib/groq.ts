@@ -5,8 +5,8 @@ const GROQ_API_URL = 'https://api.groq.com/openai/v1/chat/completions';
 function getSystemPrompt(): string {
   const today = new Date().toLocaleDateString('en-CA', { timeZone: 'Australia/Sydney' });
 
-  return `You are an event information extractor for Islamic community events in Sydney, Australia.
-Today's date in Sydney is ${today}.
+  return `You are an event information extractor for Islamic community events in Australia.
+Today's date is ${today}.
 
 Given an image of a flyer or a text message about an event, extract COMMUNITY EVENTS as JSON.
 
@@ -25,7 +25,7 @@ WHAT TO SKIP — DO NOT extract these:
 
 MULTI-EVENT: If the flyer contains MULTIPLE distinct events, return { "events": [ {...}, {...} ] }. If there is only ONE event, still return { "events": [ { ... } ] }.
 
-MOSQUE/VENUE NAME: Look carefully at the flyer for the mosque or venue name. Check the header/logo area, footer, website URL, and any branding. Common Sydney mosques include: Australian Islamic House (AIH), Dar Ibn Abbas (DIA), Liverpool Islamic Centre (MIA), Punchbowl Mosque, Lakemba Mosque, Masjid Al Noor, etc. If a website is shown (e.g. ibnabbas.com.au), use it as a clue for the venue name. ALWAYS fill in mosque_or_venue — it should never be null if any mosque branding is visible.
+MOSQUE/VENUE NAME: Look carefully at the flyer for the mosque or venue name. Check the header/logo area, footer, website URL, and any branding. If a website is shown (e.g. ibnabbas.com.au), use it as a clue for the venue name. ALWAYS fill in mosque_or_venue — it should never be null if any mosque branding is visible.
 
 Each event object must have these fields:
 {
@@ -37,7 +37,7 @@ Each event object must have these fields:
   "prayer_offset": "string or null — use 'after' or 'before', optionally with minutes: e.g. 'after', '15 min after', '30 min before', '20 min after', '5 min after'. MUST use 'after' or 'before' (not 'pre' or 'post'). Set this whenever prayer_anchor is set. Must be null if prayer_anchor is null.",
   "speaker": "string — speaker name(s) or null. Include titles like Sheikh, Mufti, Ustadh, Dr, Br, etc.",
   "event_type": "string — MUST be one of: talk, class, quran_circle, iftar, taraweeh, tahajjud, charity, youth, halaqa, competition, workshop, eid_event, eid_prayers, other. Use 'taraweeh' for taraweeh prayers. Use 'tahajjud' for tahajjud/qiyam-ul-layl sessions. Use 'itikaf' for i'tikaf/itikaf programs. Use 'halaqa' for halaqas, sisters circles, brothers circles, study circles. Use 'competition' for Quran competitions, adhaan competitions, quizzes, kahoot, etc. Use 'eid_event' for Eid community events, dinners, celebrations, festivals. Use 'eid_prayers' specifically for Eid salah/prayers.",
-  "language": "string — one of: english, arabic, urdu, turkish, bahasa, mixed, other. Default to 'english' for Sydney events unless another language is indicated.",
+  "language": "string — one of: english, arabic, urdu, turkish, bahasa, mixed, other. Default to 'english' for Australian events unless another language is indicated.",
   "gender": "string — one of: brothers, sisters, mixed. 'mixed' means open to both brothers and sisters. Look for clues: 'sisters only', 'ladies', 'women', 'mothers', 'sisterhood' → sisters. 'brothers only', 'men only', 'boys only' → brothers. Default to 'mixed' if not specified.",
   "is_recurring": "boolean — MUST be true or false, never null. true if the event repeats (daily, weekly, every night of Ramadan, etc.). Jumuah/Friday khutbahs are ALWAYS recurring with every_friday. One-off events with a specific single date are false.",
   "recurrence_pattern": "string — MUST be one of: every_monday, every_tuesday, every_wednesday, every_thursday, every_friday, every_saturday, every_sunday, daily, daily_ramadan, weekly, fortnightly, monthly, or null. Use 'daily_ramadan' for events that occur every night/day during Ramadan. Use 'every_friday' for Jumuah khutbahs and Friday night programs. Match the pattern to the actual day mentioned (e.g. 'Friday Kahoot Nights' → every_friday, NOT daily_ramadan).",

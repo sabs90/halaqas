@@ -9,7 +9,7 @@ export function Footer() {
           <span className="text-base font-light text-sage">حلقات</span>
         </div>
         <p className="text-sm mb-4">
-          A free community project for the Sydney Muslim community.
+          A free community project for the Australian Muslim community.
         </p>
         <div className="flex justify-center gap-6 text-sm">
           <Link href="/about" className="hover:text-white transition-colors">About</Link>

@@ -13,14 +13,14 @@ const jakarta = Plus_Jakarta_Sans({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Halaqas — Mosque Events in Sydney',
+    default: 'Halaqas — Mosque Events Across Australia',
     template: '%s | Halaqas',
   },
-  description: 'Discover talks, classes, and events at mosques across Sydney. A free community directory with subscribable calendars.',
+  description: 'Discover talks, classes, and events at mosques across Australia. A free community directory with subscribable calendars.',
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || 'https://halaqas.com'),
   openGraph: {
-    title: 'Halaqas — Mosque Events in Sydney',
-    description: 'Discover talks, classes, and events at mosques across Sydney',
+    title: 'Halaqas — Mosque Events Across Australia',
+    description: 'Discover talks, classes, and events at mosques across Australia',
     type: 'website',
     siteName: 'Halaqas',
   },
