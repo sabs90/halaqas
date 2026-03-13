@@ -140,17 +140,17 @@ export default async function TahajjudPage() {
       {/* Section navigation */}
       {events.length > 0 && (
         <nav className="flex items-center justify-center gap-2 sm:gap-3">
-          <a href="#summary" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-primary bg-primary/[0.07] px-3 sm:px-4 py-2 rounded-pill hover:bg-primary/[0.14] transition-colors">
-            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/>
-            </svg>
-            Summary
-          </a>
           <a href="#map" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-primary bg-primary/[0.07] px-3 sm:px-4 py-2 rounded-pill hover:bg-primary/[0.14] transition-colors">
             <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
             </svg>
             Map
+          </a>
+          <a href="#summary" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-primary bg-primary/[0.07] px-3 sm:px-4 py-2 rounded-pill hover:bg-primary/[0.14] transition-colors">
+            <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/>
+            </svg>
+            Summary
           </a>
           <a href="#details" className="inline-flex items-center gap-1.5 text-xs sm:text-sm font-semibold text-primary bg-primary/[0.07] px-3 sm:px-4 py-2 rounded-pill hover:bg-primary/[0.14] transition-colors">
             <svg className="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -159,6 +159,14 @@ export default async function TahajjudPage() {
             Details
           </a>
         </nav>
+      )}
+
+      {/* Map */}
+      {pins.length > 0 && (
+        <section id="map" className="scroll-mt-4">
+          <h2 className="text-lg font-bold text-charcoal mb-3">Map</h2>
+          <TahajjudMapWrapper pins={pins} />
+        </section>
       )}
 
       {/* Compact shareable table */}
@@ -212,14 +220,6 @@ export default async function TahajjudPage() {
           <div className="bg-sand/40 px-3 sm:px-5 py-2 border-t border-sand-dark text-center">
             <p className="text-[11px] text-stone">Visit <span className="font-semibold text-primary">halaqas.au/tahajjud</span> for details &amp; more</p>
           </div>
-        </section>
-      )}
-
-      {/* Map */}
-      {pins.length > 0 && (
-        <section id="map" className="scroll-mt-4">
-          <h2 className="text-lg font-bold text-charcoal mb-3">Map</h2>
-          <TahajjudMapWrapper pins={pins} />
         </section>
       )}
 
