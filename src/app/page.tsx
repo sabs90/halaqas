@@ -44,14 +44,35 @@ async function getEvents(params: {
   return (data || []) as unknown as Event[];
 }
 
+async function getTahajjudCount() {
+  const supabase = getServiceClient();
+  const today = new Date().toISOString().split('T')[0];
+  const { count } = await supabase
+    .from('events')
+    .select('id', { count: 'exact', head: true })
+    .eq('status', 'active')
+    .eq('event_type', 'tahajjud')
+    .or(`is_recurring.eq.true,fixed_date.is.null,fixed_date.gte.${today}`);
+  return count ?? 0;
+}
+
 export default async function HomePage({ searchParams }: Props) {
   const params = await searchParams;
   const hasFilters = !!(params.type || params.gender || params.mosque || params.kids || params.family);
-  const events = await getEvents(params);
+  const [events, tahajjudCount] = await Promise.all([
+    getEvents(params),
+    getTahajjudCount(),
+  ]);
 
   return (
     <div className="space-y-6">
-      <Hero />
+      <Hero
+        specialEvent={tahajjudCount > 0 ? {
+          label: `Tahajjud Prayers (${tahajjudCount})`,
+          href: '/tahajjud',
+          count: tahajjudCount,
+        } : undefined}
+      />
 
       <Suspense fallback={<div className="h-24 bg-sand rounded-card animate-pulse" />}>
         <EventFilters events={events} hasFilters={hasFilters} />

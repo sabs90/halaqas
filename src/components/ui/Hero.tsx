@@ -1,7 +1,15 @@
 import { IslamicPattern } from './IslamicPattern';
 import { Button } from './Button';
 
-export function Hero() {
+interface HeroProps {
+  specialEvent?: {
+    label: string;
+    href: string;
+    count: number;
+  };
+}
+
+export function Hero({ specialEvent }: HeroProps) {
   return (
     <section className="relative bg-primary rounded-2xl overflow-hidden px-6 py-12 sm:px-12 sm:py-16">
       <IslamicPattern />
@@ -16,10 +24,15 @@ export function Hero() {
         <p className="mt-2 text-sm text-white/60">
           Know what&apos;s happening at your local mosque? Help the community by adding it.
         </p>
-        <div className="mt-6 flex justify-center">
+        <div className="mt-6 flex flex-col sm:flex-row items-center justify-center gap-3">
           <Button variant="secondary" href="/submit">
             Submit an Event
           </Button>
+          {specialEvent && specialEvent.count > 0 && (
+            <Button variant="outline" href={specialEvent.href} className="!bg-white/10 !text-white !border-white/30 hover:!bg-white/20">
+              🌙 {specialEvent.label}
+            </Button>
+          )}
         </div>
       </div>
     </section>
