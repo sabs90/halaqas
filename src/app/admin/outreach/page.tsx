@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import Link from 'next/link';
 
 interface MosqueOutreach {
@@ -33,6 +33,9 @@ export default function OutreachPage() {
   const [checking, setChecking] = useState<string | null>(null);
   const [stateFilter, setStateFilter] = useState<string>('all');
   const [showUncheckedOnly, setShowUncheckedOnly] = useState(false);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [bulkChecking, setBulkChecking] = useState(false);
+  const lastSelectedIndex = useRef<number | null>(null);
 
   useEffect(() => {
     fetch('/api/admin/mosques/outreach')
@@ -40,6 +43,50 @@ export default function OutreachPage() {
       .then(setMosques)
       .finally(() => setLoading(false));
   }, []);
+
+  function handleCheckboxClick(e: React.MouseEvent, mosqueId: string) {
+    const currentIndex = flatRows.findIndex(m => m.id === mosqueId);
+
+    if (e.shiftKey && lastSelectedIndex.current !== null) {
+      const start = Math.min(lastSelectedIndex.current, currentIndex);
+      const end = Math.max(lastSelectedIndex.current, currentIndex);
+      const rangeIds = flatRows.slice(start, end + 1).map(m => m.id);
+      const adding = !selectedIds.has(mosqueId);
+      setSelectedIds(prev => {
+        const next = new Set(prev);
+        rangeIds.forEach(id => adding ? next.add(id) : next.delete(id));
+        return next;
+      });
+    } else {
+      setSelectedIds(prev => {
+        const next = new Set(prev);
+        if (next.has(mosqueId)) next.delete(mosqueId);
+        else next.add(mosqueId);
+        return next;
+      });
+    }
+
+    lastSelectedIndex.current = currentIndex;
+  }
+
+  async function markCheckedBulk() {
+    setBulkChecking(true);
+    const ids = Array.from(selectedIds);
+    await Promise.all(ids.map(id =>
+      fetch('/api/admin/mosques/outreach', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ id }),
+      })
+    ));
+    const now = new Date().toISOString();
+    setMosques(prev => prev.map(m =>
+      selectedIds.has(m.id) ? { ...m, last_checked_at: now } : m
+    ));
+    setSelectedIds(new Set());
+    lastSelectedIndex.current = null;
+    setBulkChecking(false);
+  }
 
   async function markChecked(id: string) {
     setChecking(id);
@@ -92,6 +139,8 @@ export default function OutreachPage() {
       .map(s => ({ state: s, mosques: groups[s] }));
   }, [mosques, stateFilter, showUncheckedOnly]);
 
+  const flatRows = useMemo(() => grouped.flatMap(g => g.mosques), [grouped]);
+
   const totalWithFb = mosques.filter(m => m.facebook_url).length;
   const totalUnchecked = mosques.filter(m => !m.last_checked_at).length;
   const states = [...new Set(mosques.map(m => m.state))].sort(
@@ -112,6 +161,26 @@ export default function OutreachPage() {
       <p className="text-sm text-warm-gray">
         {mosques.length} mosques &middot; {totalWithFb} with Facebook &middot; {totalUnchecked} never checked
       </p>
+
+      {/* Bulk action bar */}
+      {selectedIds.size > 0 && (
+        <div className="flex items-center gap-4 bg-primary/10 border border-primary/20 rounded-card px-4 py-3">
+          <span className="text-sm text-primary font-medium">{selectedIds.size} selected</span>
+          <button
+            onClick={markCheckedBulk}
+            disabled={bulkChecking}
+            className="text-sm bg-primary text-white rounded-button px-4 py-1.5 font-medium hover:bg-primary-dark disabled:opacity-50"
+          >
+            {bulkChecking ? 'Marking...' : `Mark ${selectedIds.size} checked`}
+          </button>
+          <button
+            onClick={() => { setSelectedIds(new Set()); lastSelectedIndex.current = null; }}
+            className="text-sm text-warm-gray hover:text-charcoal"
+          >
+            Clear selection
+          </button>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex flex-wrap gap-3 items-center">
@@ -146,6 +215,7 @@ export default function OutreachPage() {
             <table className="w-full text-sm border border-sand-dark rounded-card overflow-hidden">
               <thead>
                 <tr className="bg-sand text-left">
+                  <th className="p-3 w-8"></th>
                   <th className="p-3 font-semibold text-charcoal">Mosque</th>
                   <th className="p-3 font-semibold text-charcoal">Suburb</th>
                   <th className="p-3 font-semibold text-charcoal text-center">Events</th>
@@ -163,8 +233,17 @@ export default function OutreachPage() {
                   return (
                     <tr
                       key={m.id}
-                      className={`border-t border-sand-dark ${isStale ? 'bg-amber-50/50' : 'bg-white'}`}
+                      className={`border-t border-sand-dark ${selectedIds.has(m.id) ? 'bg-primary/5' : isStale ? 'bg-amber-50/50' : 'bg-white'}`}
                     >
+                      <td className="p-3">
+                        <input
+                          type="checkbox"
+                          checked={selectedIds.has(m.id)}
+                          onClick={e => handleCheckboxClick(e, m.id)}
+                          onChange={() => {}}
+                          className="rounded border-sand-dark cursor-pointer"
+                        />
+                      </td>
                       <td className="p-3 font-medium text-charcoal">
                         <Link href={`/mosques/${m.id}`} className="hover:text-primary transition-colors">
                           {m.name}

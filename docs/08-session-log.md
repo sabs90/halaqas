@@ -4,6 +4,32 @@ This file is the persistent memory between Claude Code sessions. Each entry summ
 
 ---
 
+## Session 44 — Post-Ramadan Cleanup, Outreach Bulk Select & Process-Flyers Skill (2026-03-24)
+
+### Completed
+- **DB post-Ramadan archive** — archived 108 Ramadan/Tahajjud/Iftar/Taraweeh/Itikaf events; kept 7 active (4 Eid events, Sisters Friday Halaqa, Jumuah Khutbah, A Journey Through A Living Miracle) + 1 pending (Eid-ul-Fitr prayer)
+- **Outreach bulk select** — added shift-click multi-select checkboxes to `/admin/outreach` table; selected rows highlighted in teal; bulk action bar appears with "Mark X checked" button and "Clear selection"; fires parallel API calls, updates local state on completion; individual "Mark checked" button retained
+- **`/process-flyers` skill** — created `~/.claude/skills/process-flyers/SKILL.md` documenting the full 9-step bulk flyer ingestion workflow: ingest → run harness → resolve mosque IDs → review/correct LLM quirks → post summary table for skim review → await approval → import to DB → save baselines → sync prompts
+
+### Decisions Made
+- Ramadan archive kept all eid_prayers/eid_event types active; also kept 3 genuinely ongoing non-Ramadan events (halaqa, Jumuah, talk with no end date)
+- "Ramadan Quest Prize Distribution Ceremony" (Mar 27) archived even though post-Ramadan — it's Ramadan-program-related
+- Shift-click range uses flat display order across all state groups; deselection mirrors selection intent (if clicked item was selected, range deselects)
+- Process-flyers skill Step 5 posts a markdown summary table (8 columns incl. Notes flags) and explicitly waits for user approval before importing
+
+### Issues / Bugs
+- None
+
+### Next Session
+1. Post-Ramadan: assess community submissions, respond to any feedback
+2. Milestone 2.2 tasks: auto-archive sweep, sustainability review
+3. Consider refreshing mosque coverage for non-Ramadan events
+
+### Open Questions
+- None
+
+---
+
 ## Session 43 — Tahajjud Map + Sydney→Australia Rebranding (2026-03-14)
 
 ### Completed

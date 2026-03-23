@@ -115,7 +115,7 @@ The roadmap is split into three phases. Only Phase 1 needs to be complete before
 - [ ] Assess: are community submissions continuing without prompting?
 - [ ] Identify top contributors and invite them as volunteer admins if needed
 - [ ] Add volunteer admin access to the admin panel (multi-user, still simple)
-- [ ] Run auto-archive sweep on Ramadan-specific events
+- [x] Run auto-archive sweep on Ramadan-specific events — *108 events archived manually in Session 44 (taraweeh, tahajjud, iftar, itikaf, Ramadan classes/competitions); Eid events kept active*
 - [ ] Refresh suburb/mosque coverage based on usage data
 
 ### Milestone 2.3 — Feedback-Driven Improvements
