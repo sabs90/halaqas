@@ -115,10 +115,10 @@ export async function GET() {
     }
   }
 
-  // 4. Stale recurring events: no end date or end date has passed
+  // 4. Stale recurring events: active, and no end date or end date has passed
   const today = new Date().toISOString().split('T')[0];
   const stale_recurring = events
-    .filter(e => e.is_recurring && (!e.recurrence_end_date || e.recurrence_end_date < today))
+    .filter(e => e.status === 'active' && e.is_recurring && (!e.recurrence_end_date || e.recurrence_end_date < today))
     .map(e => ({
       id: e.id,
       title: e.title,
@@ -152,7 +152,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ success: true });
   }
 
-  // Merge duplicate mosques (move events from source → target, delete source)
+  // Merge duplicate mosques (move events and analytics from source → target, delete source)
   if (action === 'merge_mosques') {
     const { source_id, target_id } = params;
 
@@ -163,11 +163,12 @@ export async function POST(request: NextRequest) {
       .eq('mosque_id', source_id);
     if (eventsError) return NextResponse.json({ error: eventsError.message }, { status: 500 });
 
-    // Reassign amendments
-    await supabase
-      .from('amendments')
+    // Reassign analytics
+    const { error: analyticsError } = await supabase
+      .from('analytics_events')
       .update({ mosque_id: target_id })
       .eq('mosque_id', source_id);
+    if (analyticsError) return NextResponse.json({ error: analyticsError.message }, { status: 500 });
 
     // Delete source mosque
     const { error: deleteError } = await supabase.from('mosques').delete().eq('id', source_id);
